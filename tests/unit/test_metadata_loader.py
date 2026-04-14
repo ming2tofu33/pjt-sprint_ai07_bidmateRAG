@@ -170,3 +170,78 @@ def test_load_metadata_frame_keeps_only_canonical_row_enabled_when_both_rows_exi
     assert kiom_row["ingest_file"] == "KIOM_doc.hwp"
     assert kiom_row["resolved_agency"] == "한국한의학연구원"
     assert kiom_row["original_agency"] == "한국한의학연구원"
+
+
+def test_load_metadata_frame_disables_docx_when_pdf_is_canonical_for_same_project(
+    tmp_path: Path,
+) -> None:
+    metadata_path = _write_metadata_csv(
+        tmp_path / "data_list.csv",
+        [
+            {
+                "공고 번호": "20240003",
+                "공고 차수": 0,
+                "사업명": "차세대 포털·학사 정보시스템 구축사업",
+                "사업 금액": 11270000000,
+                "발주 기관": "고려대학교",
+                "공개 일자": "2024-04-01",
+                "입찰 참여 시작일": "",
+                "입찰 참여 마감일": "",
+                "사업 요약": "요약",
+                "파일형식": "docx",
+                "파일명": "고려대학교_차세대 포털·학사 정보시스템 구축사업.docx",
+            },
+            {
+                "공고 번호": "20240003",
+                "공고 차수": 0,
+                "사업명": "차세대 포털·학사 정보시스템 구축사업",
+                "사업 금액": 11270000000,
+                "발주 기관": "고려대학교",
+                "공개 일자": "2024-04-01",
+                "입찰 참여 시작일": "",
+                "입찰 참여 마감일": "",
+                "사업 요약": "요약",
+                "파일형식": "pdf",
+                "파일명": "고려대학교_차세대 포털·학사 정보시스템 구축사업.pdf",
+            },
+        ],
+    )
+    duplicates_map_path = _write_duplicates_map(
+        tmp_path / "duplicates_map.csv",
+        [
+            {
+                "duplicate_group_id": "DUP-003",
+                "source_file": "고려대학교_차세대 포털·학사 정보시스템 구축사업.docx",
+                "canonical_file": "고려대학교_차세대 포털·학사 정보시스템 구축사업.pdf",
+                "is_duplicate": True,
+                "resolved_agency": "고려대학교",
+                "status": "confirmed",
+                "reason": "same project different format",
+                "metadata_merge_note": "docx duplicate",
+            },
+            {
+                "duplicate_group_id": "DUP-003",
+                "source_file": "고려대학교_차세대 포털·학사 정보시스템 구축사업.pdf",
+                "canonical_file": "고려대학교_차세대 포털·학사 정보시스템 구축사업.pdf",
+                "is_duplicate": False,
+                "resolved_agency": "고려대학교",
+                "status": "confirmed",
+                "reason": "canonical pdf",
+                "metadata_merge_note": "pdf canonical",
+            },
+        ],
+    )
+
+    frame = load_metadata_frame(metadata_path, duplicates_map_path=duplicates_map_path)
+    docx_row = frame[frame["파일명"] == "고려대학교_차세대 포털·학사 정보시스템 구축사업.docx"].iloc[0]
+    pdf_row = frame[frame["파일명"] == "고려대학교_차세대 포털·학사 정보시스템 구축사업.pdf"].iloc[0]
+
+    assert bool(docx_row["is_duplicate"]) is True
+    assert bool(docx_row["ingest_enabled"]) is False
+    assert docx_row["ingest_file"] == "고려대학교_차세대 포털·학사 정보시스템 구축사업.pdf"
+    assert docx_row["resolved_agency"] == "고려대학교"
+
+    assert bool(pdf_row["is_duplicate"]) is False
+    assert bool(pdf_row["ingest_enabled"]) is True
+    assert pdf_row["ingest_file"] == "고려대학교_차세대 포털·학사 정보시스템 구축사업.pdf"
+    assert pdf_row["resolved_agency"] == "고려대학교"

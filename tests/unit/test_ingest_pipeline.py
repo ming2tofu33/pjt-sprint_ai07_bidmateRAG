@@ -317,3 +317,99 @@ def test_run_ingest_pipeline_reuses_cached_parsed_output_with_dedup_targets(
     assert parsed_df.loc[0, "파일명"] == "BioIN_doc.hwp"
     assert parsed_df.loc[0, "ingest_file"] == "KHIDI_doc.hwp"
     assert parsed_df.loc[0, "본문_마크다운"] == "# 개요\n캐시된 파싱 결과"
+
+
+def test_run_ingest_pipeline_prefers_pdf_when_docx_is_marked_as_duplicate(
+    tmp_path: Path,
+) -> None:
+    raw_dir = tmp_path / "raw" / "rfp"
+    metadata_dir = tmp_path / "raw" / "metadata"
+    output_dir = tmp_path / "processed"
+    raw_dir.mkdir(parents=True)
+    metadata_dir.mkdir(parents=True)
+
+    canonical_file = raw_dir / "고려대학교_차세대 포털·학사 정보시스템 구축사업.pdf"
+    canonical_file.write_text("dummy", encoding="utf-8")
+
+    pd.DataFrame(
+        [
+            {
+                "공고 번호": "20240003",
+                "공고 차수": 0,
+                "사업명": "차세대 포털·학사 정보시스템 구축사업",
+                "사업 금액": 11270000000,
+                "발주 기관": "고려대학교",
+                "공개 일자": "2024-04-01",
+                "입찰 참여 시작일": "",
+                "입찰 참여 마감일": "",
+                "사업 요약": "요약",
+                "파일형식": "docx",
+                "파일명": "고려대학교_차세대 포털·학사 정보시스템 구축사업.docx",
+            },
+            {
+                "공고 번호": "20240003",
+                "공고 차수": 0,
+                "사업명": "차세대 포털·학사 정보시스템 구축사업",
+                "사업 금액": 11270000000,
+                "발주 기관": "고려대학교",
+                "공개 일자": "2024-04-01",
+                "입찰 참여 시작일": "",
+                "입찰 참여 마감일": "",
+                "사업 요약": "요약",
+                "파일형식": "pdf",
+                "파일명": "고려대학교_차세대 포털·학사 정보시스템 구축사업.pdf",
+            },
+        ]
+    ).to_csv(metadata_dir / "data_list.csv", index=False)
+
+    duplicates_map_path = _write_duplicates_map(
+        metadata_dir / "duplicates_map.csv",
+        [
+            {
+                "duplicate_group_id": "DUP-003",
+                "source_file": "고려대학교_차세대 포털·학사 정보시스템 구축사업.docx",
+                "canonical_file": "고려대학교_차세대 포털·학사 정보시스템 구축사업.pdf",
+                "is_duplicate": True,
+                "resolved_agency": "고려대학교",
+                "status": "confirmed",
+                "reason": "same project different format",
+                "metadata_merge_note": "docx duplicate",
+            },
+            {
+                "duplicate_group_id": "DUP-003",
+                "source_file": "고려대학교_차세대 포털·학사 정보시스템 구축사업.pdf",
+                "canonical_file": "고려대학교_차세대 포털·학사 정보시스템 구축사업.pdf",
+                "is_duplicate": False,
+                "resolved_agency": "고려대학교",
+                "status": "confirmed",
+                "reason": "canonical pdf",
+                "metadata_merge_note": "pdf canonical",
+            },
+        ],
+    )
+
+    parsed_paths: list[str] = []
+
+    def fake_parse(file_path: Path) -> dict:
+        parsed_paths.append(file_path.name)
+        return {
+            "파일명": file_path.name,
+            "텍스트": "# 개요\n포털 구축",
+            "글자수": 10,
+            "성공": True,
+            "파서": "fake",
+            "에러": None,
+        }
+
+    outputs = run_ingest_pipeline(
+        metadata_path=metadata_dir / "data_list.csv",
+        raw_dir=raw_dir,
+        output_dir=output_dir,
+        parse_fn=fake_parse,
+        duplicates_map_path=duplicates_map_path,
+    )
+
+    parsed_df = pd.read_parquet(outputs["parsed"])
+
+    assert parsed_paths == ["고려대학교_차세대 포털·학사 정보시스템 구축사업.pdf"]
+    assert parsed_df["파일명"].to_list() == ["고려대학교_차세대 포털·학사 정보시스템 구축사업.pdf"]

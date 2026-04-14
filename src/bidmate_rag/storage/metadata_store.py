@@ -7,9 +7,71 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 from pathlib import Path
 
 import pandas as pd
+
+_SEARCH_TEXT_PATTERN = re.compile(r"[^0-9A-Za-z가-힣]+")
+_TOKEN_SUFFIXES = (
+    "으로부터",
+    "들에게",
+    "에서도",
+    "으로는",
+    "으로",
+    "에서",
+    "에는",
+    "에게",
+    "까지",
+    "부터",
+    "처럼",
+    "보다",
+    "이며",
+    "하고",
+    "와의",
+    "과의",
+    "이다",
+    "하는",
+    "한",
+    "은",
+    "는",
+    "이",
+    "가",
+    "을",
+    "를",
+    "과",
+    "와",
+    "의",
+    "에",
+    "로",
+)
+
+
+def _normalize_search_text(value: str) -> str:
+    normalized = unicodedata.normalize("NFKC", str(value or ""))
+    normalized = _SEARCH_TEXT_PATTERN.sub(" ", normalized).lower()
+    return re.sub(r"\s+", " ", normalized).strip()
+
+
+def _strip_token_suffix(token: str) -> str:
+    for suffix in _TOKEN_SUFFIXES:
+        if len(token) > len(suffix) + 1 and token.endswith(suffix):
+            return token[: -len(suffix)]
+    return token
+
+
+def _extract_query_tokens(query: str) -> list[str]:
+    tokens: list[str] = []
+    seen: set[str] = set()
+    for raw in _normalize_search_text(query).split():
+        if len(raw) < 2:
+            continue
+        for candidate in (raw, _strip_token_suffix(raw)):
+            if len(candidate) < 2 or candidate in seen:
+                continue
+            tokens.append(candidate)
+            seen.add(candidate)
+    return tokens
 
 
 class MetadataStore:
@@ -29,6 +91,18 @@ class MetadataStore:
             if "발주 기관" in self.frame.columns
             else []
         )
+        self._search_rows: list[dict[str, str]] = []
+        for _, row in self.frame.iterrows():
+            self._search_rows.append(
+                {
+                    "file_name": str(row.get("파일명", "") or ""),
+                    "title": _normalize_search_text(row.get("사업명", "")),
+                    "summary": _normalize_search_text(row.get("사업 요약", "")),
+                    "body": _normalize_search_text(
+                        f"{row.get('텍스트', '')} {row.get('본문_마크다운', '')}"
+                    ),
+                }
+            )
 
     @classmethod
     def from_parquet(cls, path: str | Path) -> "MetadataStore":
@@ -52,18 +126,47 @@ class MetadataStore:
         Returns:
             관련도 높은 순으로 정렬된 파일명 리스트.
         """
-        # 질문을 공백으로 분리, 2글자 이상 토큰만 사용
-        tokens = [token for token in re.split(r"\s+", query) if len(token) >= 2]
+        tokens = _extract_query_tokens(query)
         if not tokens:
             return []
 
-        scored = self.frame.copy()
-        # 사업 요약 + 사업명을 합쳐서 검색 대상 텍스트 생성
-        haystack = (
-            scored.get("사업 요약", "").astype(str) + " " + scored.get("사업명", "").astype(str)
-        )
-        # 각 문서에 대해 매칭되는 토큰 수를 점수로 계산
-        scored["_score"] = [sum(token in text for token in tokens) for text in haystack]
-        # 점수 높은 순으로 정렬 후 상위 top_n개 반환
-        top = scored.sort_values("_score", ascending=False).head(top_n)
-        return [filename for filename in top.get("파일명", []).tolist() if filename]
+        normalized_query = _normalize_search_text(query)
+        scored: list[tuple[int, str]] = []
+
+        for row in self._search_rows:
+            title = row["title"]
+            summary = row["summary"]
+            body = row["body"]
+            score = 0
+
+            if normalized_query and len(normalized_query) >= 4:
+                if normalized_query in title:
+                    score += 12
+                if normalized_query in summary:
+                    score += 8
+                if normalized_query in body:
+                    score += 5
+
+            for token in tokens:
+                if token in title:
+                    score += 4
+                if token in summary:
+                    score += 2
+                if token in body:
+                    score += 1
+
+            if score > 0 and row["file_name"]:
+                scored.append((score, row["file_name"]))
+
+        scored.sort(key=lambda item: item[0], reverse=True)
+
+        ordered_docs: list[str] = []
+        seen: set[str] = set()
+        for _, file_name in scored:
+            if file_name in seen:
+                continue
+            ordered_docs.append(file_name)
+            seen.add(file_name)
+            if len(ordered_docs) >= top_n:
+                break
+        return ordered_docs

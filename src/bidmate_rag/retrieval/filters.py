@@ -4,6 +4,32 @@ from __future__ import annotations
 
 import re
 
+from bidmate_rag.retrieval.agency_matching import extract_agencies_from_text
+
+PROJECT_CLUE_KEYWORDS = (
+    "시스템",
+    "사업",
+    "구축",
+    "용역",
+    "고도화",
+    "개발",
+    "운영",
+    "개선",
+    "재구축",
+    "컨설팅",
+    "도입",
+    "모듈",
+    "플랫폼",
+    "포털",
+    "홈페이지",
+    "ERP",
+    "LMS",
+    "BIS",
+    "ISP",
+)
+
+QUOTED_PROJECT_PATTERN = re.compile(r"[\"'“”‘’]([^\"'“”‘’]{4,120})[\"'“”‘’]")
+
 DOMAIN_KEYWORDS = {
     "교육/학습": ["교육", "학습", "이러닝", "학사", "LMS", "연수", "대학"],
     "안전/재난": ["안전", "재난", "방재", "관제", "선량", "방사선"],
@@ -33,7 +59,7 @@ SECTION_KEYWORDS = {
     "평가": ["평가", "배점", "선정", "심사", "기준"],
     "인력": ["인력", "투입", "PM", "기술자", "조직"],
     "요구사항": ["요구사항", "기능", "성능", "요건", "조건"],
-    "사업개요": ["목적", "배경", "왜", "개요", "일반", "기간", "규모"],
+    "사업개요": ["목적", "배경", "왜", "개요", "기간", "규모"],
 }
 
 TABLE_KEYWORDS = ["요구사항", "정리", "목록", "예산", "금액", "일정", "배점", "기준", "표"]
@@ -61,19 +87,22 @@ MULTI_SOURCE_HINT_KEYWORDS = [
     "두 사업",
     "양 사업",
 ]
+FANOUT_INTENT_KEYWORDS = [
+    "각각",
+    "순서대로",
+    "나열",
+    "정리",
+    "요약",
+    "설명",
+    "알려",
+    "말해",
+    "작성",
+]
 
 
 def extract_matched_agencies(query: str, agency_list: list[str]) -> list[str]:
     """쿼리에 명시적으로 언급된 발주기관 목록을 추출."""
-    matched_agencies: list[str] = []
-    for agency in agency_list:
-        short = agency.replace("(주)", "").replace("㈜", "").strip()
-        for part in [short, short[:6], short[:4]]:
-            if len(part) >= 3 and part in query:
-                if agency not in matched_agencies:
-                    matched_agencies.append(agency)
-                break
-    return matched_agencies
+    return extract_agencies_from_text(query, agency_list)
 
 
 def extract_metadata_filters(
@@ -178,3 +207,29 @@ def is_comparison_query(query: str) -> bool:
     return any(keyword in query for keyword in PER_SOURCE_KEYWORDS) and any(
         hint in query for hint in MULTI_SOURCE_HINT_KEYWORDS
     )
+
+
+def should_fan_out_multi_source_query(query: str) -> bool:
+    """다기관 질문을 기관별 scoped query로 나눠야 하는지 판단한다."""
+    if is_comparison_query(query):
+        return True
+    if any(keyword in query for keyword in ("각각", "순서대로")):
+        return True
+    return any(hint in query for hint in MULTI_SOURCE_HINT_KEYWORDS) and any(
+        keyword in query for keyword in FANOUT_INTENT_KEYWORDS
+    )
+
+
+def extract_project_clues(query: str) -> list[str]:
+    """따옴표로 감싼 사업명/시스템명 단서를 추출한다."""
+    clues: list[str] = []
+    seen: set[str] = set()
+    for raw in QUOTED_PROJECT_PATTERN.findall(query):
+        clue = re.sub(r"\s+", " ", raw).strip()
+        if len(clue) < 4 or clue in seen:
+            continue
+        if not any(keyword.lower() in clue.lower() for keyword in PROJECT_CLUE_KEYWORDS):
+            continue
+        clues.append(clue)
+        seen.add(clue)
+    return clues
