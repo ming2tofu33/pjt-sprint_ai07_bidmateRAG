@@ -44,6 +44,7 @@ def _make_cleaned_documents(tmp_path: Path) -> Path:
 
 def _make_sample(
     qid: str,
+    question: str = "dummy",
     metadata_filter: dict | None = None,
     expected_doc_titles: list[str] | None = None,
     history: object = None,
@@ -55,7 +56,7 @@ def _make_sample(
         metadata["history"] = history
     return EvalSample(
         question_id=qid,
-        question="dummy",
+        question=question,
         expected_doc_titles=expected_doc_titles or [],
         metadata=metadata,
     )
@@ -152,6 +153,41 @@ def test_ground_truth_doc_matches_사업명(tmp_path):
     samples = [_make_sample("Q1", expected_doc_titles=["차세대 ERP 구축"])]
     report = validate_eval_samples(samples, cleaned_documents_path=cleaned)
     assert report.warnings == []
+
+
+def test_multidoc_question_without_anchors_warns(tmp_path):
+    cleaned = _make_cleaned_documents(tmp_path)
+    samples = [
+        _make_sample(
+            "Q1",
+            question="세 사업 중 문서 내에 법제도 준수 여부 점검표를 포함한 사업은 무엇입니까?",
+            expected_doc_titles=[
+                "한국가스공사_차세대 ERP 구축.hwp",
+                "고려대학교_차세대 포털·학사 정보시스템.pdf",
+            ],
+        )
+    ]
+    report = validate_eval_samples(samples, cleaned_documents_path=cleaned)
+    assert any(
+        issue.field == "question" and "underspecified" in issue.message
+        for issue in report.warnings
+    )
+
+
+def test_multidoc_question_with_visible_anchors_does_not_warn(tmp_path):
+    cleaned = _make_cleaned_documents(tmp_path)
+    samples = [
+        _make_sample(
+            "Q1",
+            question="한국가스공사와 고려대학교 사업을 비교할 때 예산 규모가 큰 곳은 어디입니까?",
+            expected_doc_titles=[
+                "한국가스공사_차세대 ERP 구축.hwp",
+                "고려대학교_차세대 포털·학사 정보시스템.pdf",
+            ],
+        )
+    ]
+    report = validate_eval_samples(samples, cleaned_documents_path=cleaned)
+    assert not any(issue.field == "question" for issue in report.warnings)
 
 
 # ---------------------------------------------------------------------------

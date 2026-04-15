@@ -32,7 +32,14 @@ def test_extract_range_and_section_filters() -> None:
 
     assert range_filters == {"사업 금액": {"$gte": 500000000}, "공개연도": 2024}
     assert extract_section_hint("보안 요구사항 알려줘") == "보안"
-    assert extract_section_hint("개인 소유 일반 PC 반입이 가능한가요?") is None
+    assert (
+        extract_section_hint(
+            "그 외의 개인 소유 일반 PC나 보조기억장치(USB 등)를 반입하거나 반출해도 되나요?"
+    )
+        == "보안"
+    )
+    assert extract_section_hint("이 사업 개요 알려줘") is None
+    assert extract_section_hint("이 사업의 추진 배경이 뭐야?") == "사업개요"
     assert should_boost_tables("예산과 일정 표로 정리해줘") is True
 
 
