@@ -1,0 +1,4 @@
+embedding_model: BAAI/bge-m3
+embedding_provider: huggingface
+dimension: 1024
+description: "HuggingFace BAAI/bge-m3 다국어 임베딩 모델"

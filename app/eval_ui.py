@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-
+from app.api.routes import run_benchmark_experiment, load_metadata_options, list_scenario_a_embeddings, list_scenario_a_llms
 import pandas as pd
 import yaml as _yaml
 
-from app.api.routes import run_benchmark_experiment
+from app.api.routes import run_benchmark_experiment, load_metadata_options
 from bidmate_rag.evaluation.dataset import (
     find_latest_eval_dir,
     normalize_metadata_filter,
@@ -49,7 +49,7 @@ def _sort_providers(configs):
     )
 
 
-def _render_scenario_provider_selector(st, list_provider_configs, key_prefix=""):
+def _render_scenario_provider_selector(st, list_provider_configs, list_scenario_a_embeddings=None, list_scenario_a_llms=None, key_prefix=""):
     """시나리오 체크박스 + Provider selectbox. 평가실행/디버깅 공통."""
     provider_configs = list_provider_configs()
     col_s1, col_s2 = st.columns(2)
@@ -61,19 +61,44 @@ def _render_scenario_provider_selector(st, list_provider_configs, key_prefix="")
     filtered = []
     for p in provider_configs:
         scenario, _ = _get_provider_info(p)
-        if scenario == "scenario_a" and show_a:
+        if scenario == "scenario_a" and show_a and not (show_a and not show_b):
             filtered.append(p)
         elif scenario == "scenario_b" and show_b:
             filtered.append(p)
     filtered = _sort_providers(filtered)
 
-    if not filtered:
-        st.warning("선택한 시나리오에 Provider가 없습니다.")
-        return None
-    return st.selectbox(
-        "Provider", filtered, format_func=_format_provider, key=f"{key_prefix}_provider"
-    )
+    provider = None
+    # 시나리오 B만 선택 시 Provider selectbox 표시
+    if show_b:
+        if not filtered:
+            st.warning("선택한 시나리오에 Provider가 없습니다.")
+            return None, None, None
+        provider = st.selectbox(
+            "Provider", filtered, format_func=_format_provider, key=f"{key_prefix}_provider"
+        )
 
+    # 시나리오 A 전용 설정 (Provider 숨김)
+    selected_embedding = None
+    selected_llm = None
+    if show_a and not show_b and list_scenario_a_embeddings and list_scenario_a_llms:
+        embedding_configs = list_scenario_a_embeddings()
+        if embedding_configs:
+            selected_embedding = st.selectbox(
+                "임베딩 모델",
+                embedding_configs,
+                format_func=lambda p: p.stem,
+                key=f"{key_prefix}_embedding",
+            )
+        llm_configs = list_scenario_a_llms()
+        if llm_configs:
+            selected_llm = st.selectbox(
+                "LLM 모델",
+                llm_configs,
+                format_func=lambda p: p.stem,
+                key=f"{key_prefix}_llm",
+            )
+
+    return provider, selected_embedding, selected_llm
 
 EVAL_SET_PATH = EVAL_DIR / "eval_set.json"
 RUNS_DIR = Path("artifacts/logs/runs")
@@ -176,6 +201,8 @@ def render_eval_tabs(
     run_live_query,
     list_provider_configs,
     list_chunking_configs,
+    list_scenario_a_embeddings, # 시나리오 A 임베딩 옵션 로딩 함수
+    list_scenario_a_llms, # 시나리오 A LLM 옵션 로딩 함수
     load_benchmark_frames,
     load_run_records,
 ):
@@ -216,12 +243,12 @@ def render_eval_tabs(
 
     # ── 서브탭 1: 평가 실행 ──
     with run_tab:
-        _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_chunking_configs)
+        _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_chunking_configs, list_scenario_a_embeddings, list_scenario_a_llms, ) # 시나리오 A 옵션 전달 추가
 
     # ── 서브탭 2: 질문 디버깅 ──
     with debug_tab:
         _render_debug_tab(
-            st, eval_set, run_live_query, list_provider_configs, list_chunking_configs
+            st, eval_set, run_live_query, list_provider_configs, list_chunking_configs, list_scenario_a_embeddings, list_scenario_a_llms   # 시나리오 A 옵션 전달 추가
         )
 
     # ── 서브탭 3: 결과 비교 ──
@@ -233,7 +260,7 @@ def render_eval_tabs(
         _render_edit_tab(st, eval_set)
 
 
-def _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_chunking_configs):
+def _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_chunking_configs, list_scenario_a_embeddings, list_scenario_a_llms): # 시나리오 A 옵션 인자 추가
     """평가셋 일괄 실행 탭. CLI(``bidmate-eval``)와 정확히 같은 코드 경로를 호출한다.
 
     UX 단순화 원칙:
@@ -258,8 +285,9 @@ def _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_ch
         "'평가셋 편집' 탭에서 저장 후 다시 로딩하세요)"
     )
 
-    provider = _render_scenario_provider_selector(st, list_provider_configs, key_prefix="run")
-    if provider is None:
+    provider, selected_embedding, selected_llm = _render_scenario_provider_selector( 
+    st, list_provider_configs, list_scenario_a_embeddings, list_scenario_a_llms, key_prefix="run") # 시나리오 A 임베딩/LLM 선택 추가
+    if provider is None and selected_embedding is None:
         return
     chunking = _render_chunking_selector(
         st, list_chunking_configs, key_prefix="run"
@@ -297,6 +325,8 @@ def _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_ch
             skip_judge=skip_judge,
             judge_model=judge_model,
             progress_callback=_on_progress,
+            embedding_config_path=selected_embedding,  # 시나리오 A 임베딩 전달,
+            llm_config_path=selected_llm,  # 시나리오 A LLM 전달
         )
     except Exception as exc:
         progress_bar.empty()
@@ -423,7 +453,8 @@ def _fmt_metric(value) -> str:
         return "N/A"
 
 
-def _render_debug_tab(st, eval_set, run_live_query, list_provider_configs, list_chunking_configs):
+def _render_debug_tab(st, eval_set, run_live_query, list_provider_configs, list_chunking_configs, list_scenario_a_embeddings, list_scenario_a_llms): # 시나리오 A 옵션 인자 추가
+    """질문별 디버깅 탭. 평가셋에서 질문 하나를 선택해 검색/생성 결과와 메트릭을 상세히 보여준다."""
     st.subheader("질문별 디버깅")
 
     if not eval_set:
@@ -466,8 +497,9 @@ def _render_debug_tab(st, eval_set, run_live_query, list_provider_configs, list_
         return
 
     # 설정
-    provider = _render_scenario_provider_selector(st, list_provider_configs, key_prefix="debug")
-    if provider is None:
+    provider, selected_embedding, selected_llm = _render_scenario_provider_selector(
+    st, list_provider_configs, list_scenario_a_embeddings, list_scenario_a_llms, key_prefix="debug") # 시나리오 A 임베딩/LLM 선택 추가
+    if provider is None and selected_embedding is None:
         return
     top_k = st.slider("Top-K", 1, 20, 5, key="debug_topk")
     chunking = _render_chunking_selector(
@@ -482,7 +514,9 @@ def _render_debug_tab(st, eval_set, run_live_query, list_provider_configs, list_
                 # (cli/eval.py가 사용하는 normalize_metadata_filter와 동일 로직)
                 raw_filter = selected_q.get("metadata_filter")
                 normalized_filter = normalize_metadata_filter(
-                    raw_filter if isinstance(raw_filter, dict) else None
+                    raw_filter if isinstance(raw_filter, dict) else None,
+                    question=selected_q["question"],
+                    agency_list=load_metadata_options().get("agencies", [])
                 )
                 # history는 list[{role, content}] 형식이면 그대로 전달
                 history = selected_q.get("history") or None
@@ -496,6 +530,8 @@ def _render_debug_tab(st, eval_set, run_live_query, list_provider_configs, list_
                     top_k=top_k,
                     metadata_filter=normalized_filter,
                     chat_history=history,
+                    embedding_config_path=selected_embedding,  # 시나리오 A 임베딩 전달,
+                    llm_config_path=selected_llm,  # 시나리오 A LLM 전달
                 )
                 status.update(label="완료", state="complete")
 

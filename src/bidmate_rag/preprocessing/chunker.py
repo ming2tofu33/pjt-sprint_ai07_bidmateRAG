@@ -11,7 +11,7 @@ from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharac
 from langchain_experimental.text_splitter import SemanticChunker
 from langchain_openai import OpenAIEmbeddings
 
-
+import pandas as pd
 from bidmate_rag.schema import Chunk
 
 HEADERS_TO_SPLIT = [("#", "h1")]
@@ -358,20 +358,16 @@ def split_table_with_headers(text: str, max_size: int) -> list[str]:
 
 def _chunk_doc_id(doc_metadata: dict) -> str:
     """메타데이터에서 문서 ID를 추출
-
     Args:
         doc_metadata: 문서 메타데이터.
-
     Returns:
         문서 ID 문자열.
     """
-    return str(
-        doc_metadata.get("doc_id")
-        or doc_metadata.get("공고 번호")
-        or doc_metadata.get("파일명")
-        or "unknown-doc"
-    )
-
+    for key in ("doc_id", "공고 번호", "파일명"):
+        val = doc_metadata.get(key)
+        if val is not None and pd.notna(val) and str(val).strip():
+            return str(val).strip()
+    return "unknown-doc"
 
 def _meta_prefix(doc_metadata: dict) -> str:
     """청크에 붙일 메타데이터 접두어를 생성

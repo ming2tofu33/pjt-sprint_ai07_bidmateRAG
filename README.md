@@ -59,7 +59,35 @@ uv sync --group dev --group ml   # PEFT/transformers 등 ML 학습용
 | 마크다운 리포트 재생성 | `uv run bidmate-report --run-id bench-XXXXXXXX` |
 | 여러 run 비교 | `uv run bidmate-compare --experiment <name>` 또는 `--run-ids bench-A bench-B ...` |
 | 인덱스만 빌드 | `uv run python scripts/build_index.py --provider-config ... --chunks-path ...` |
-| Streamlit UI | `PYTHONPATH=. uv run streamlit run app/main.py --server.port 8501 --server.address 0.0.0.0` |
+| Streamlit UI (팀 디버깅) | `PYTHONPATH=. uv run streamlit run app/main.py --server.port 8501 --server.address 0.0.0.0` |
+| 사용자용 웹 UI (Next.js) | `./scripts/run_web.sh` → http://localhost:3000 |
+
+### 사용자용 웹 UI (Next.js + FastAPI)
+
+실제 컨설턴트가 사용하는 채팅 인터페이스. 팀 디버깅용 Streamlit과 별도로 실행되며 같은 `bidmate_rag` 파이프라인을 그대로 재사용합니다.
+
+**기능**: `@` 문서 멘션 + `/` 슬래시 커맨드 12개(`/요약` `/요구사항` `/일정` `/예산` `/비교` `/자격요건` `/평가기준` `/리스크` `/기본정보` `/제출서류` `/도움말` `/초기화`) · 좌측 답변 + 우측 sticky 근거 패널 · 접히는 사이드바(`⌘B`) · 문서 검색(`⌘K`) · **문서 미리보기 모달**(보관 문서 카드 클릭 시 좌측 메타데이터·요약 패널 + 우측 PDF 뷰어 2단 레이아웃, "질문 시작" 버튼 한 번으로 채팅 질의로 전환) · sessionStorage 기반 세션(F5는 유지, 탭 닫으면 사라짐)
+
+```bash
+# 최초 1회 — 프론트엔드 의존성 설치
+cd web && npm install && cd ..
+
+# 실행 (FastAPI 8100 + Next.js 3000 동시)
+./scripts/run_web.sh
+# → http://localhost:3000 (사용자 UI)
+# → http://localhost:8100/docs (FastAPI 자동 문서)
+```
+
+포트를 바꾸려면:
+```bash
+API_PORT=8200 WEB_PORT=3100 ./scripts/run_web.sh
+```
+
+프로덕션 빌드:
+```bash
+./scripts/run_web.sh prod
+```
+
 
 ### `bidmate-eval` 자주 쓰는 옵션
 

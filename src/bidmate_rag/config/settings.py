@@ -16,6 +16,11 @@ class ProjectConfig(BaseModel):
     default_chunk_overlap: int = 150
 
 
+class RetrievalConfig(BaseModel):
+    reranker_model: str | None = None
+    enable_multiturn: bool = True
+
+
 class ProviderConfig(BaseModel):
     provider: str
     model: str
@@ -47,6 +52,7 @@ class RuntimeConfig(BaseModel):
     project: ProjectConfig
     provider: ProviderConfig
     experiment: ExperimentConfig
+    retrieval: RetrievalConfig = Field(default_factory=RetrievalConfig)
 
 
 def _load_yaml(path: str | Path | None) -> dict[str, Any]:
@@ -60,12 +66,15 @@ def load_runtime_config(
     base_config_path: str | Path,
     provider_config_path: str | Path,
     experiment_config_path: str | Path | None = None,
+    retrieval_config_path: str | Path | None = None,
 ) -> RuntimeConfig:
     base_data = _load_yaml(base_config_path)
     provider_data = _load_yaml(provider_config_path)
     experiment_data = _load_yaml(experiment_config_path)
+    retrieval_data = _load_yaml(retrieval_config_path)
 
     project = ProjectConfig.model_validate(base_data)
+    retrieval = RetrievalConfig.model_validate(retrieval_data or {})
     experiment = ExperimentConfig.model_validate(experiment_data or {"name": "ad-hoc"})
     if experiment.retrieval_top_k is None:
         experiment.retrieval_top_k = project.default_retrieval_top_k
@@ -87,4 +96,6 @@ def load_runtime_config(
     }
     provider = ProviderConfig.model_validate({**provider_data, "extra": provider_extra})
 
-    return RuntimeConfig(project=project, provider=provider, experiment=experiment)
+    return RuntimeConfig(
+        project=project, provider=provider, experiment=experiment, retrieval=retrieval
+    )

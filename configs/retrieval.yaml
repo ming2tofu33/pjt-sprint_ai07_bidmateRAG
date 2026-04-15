@@ -1,0 +1,7 @@
+# Cross-Encoder 리랭킹 모델 (null이면 비활성화)
+# 한국어 특화: dragonkue/bge-reranker-v2-m3-ko
+# 다국어:      BAAI/bge-reranker-v2-m3 / Qwen3-Reranker-0.6B
+reranker_model: dragonkue/bge-reranker-v2-m3-ko
+
+# 멀티턴 검색 보강 (이전 대화 기반 질의 재작성 + 기관 필터 계승) 아직 미적용
+enable_multiturn: false

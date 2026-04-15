@@ -6,6 +6,7 @@ CLI 스크립트와 Streamlit UI가 공유하는 파이프라인 조립 로직.
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 import pandas as pd
@@ -16,6 +17,31 @@ from bidmate_rag.providers.llm.registry import build_embedding_provider, build_l
 from bidmate_rag.retrieval.retriever import RAGRetriever
 from bidmate_rag.retrieval.vector_store import ChromaVectorStore
 from bidmate_rag.storage.metadata_store import MetadataStore
+
+logger = logging.getLogger(__name__)
+
+
+def _load_reranker(model_name: str | None):
+    """Cross-Encoder 리랭킹 모델을 로드한다.
+
+    Args:
+        model_name: HuggingFace 모델명. None이면 리랭커를 사용하지 않는다.
+
+    Returns:
+        CrossEncoder 모델 인스턴스. model_name이 None이거나 로드 실패 시 None.
+    """
+    if not model_name:
+        return None
+    try:
+        from sentence_transformers import CrossEncoder
+
+        logger.info("Cross-Encoder 리랭킹 모델 로딩: %s", model_name)
+        model = CrossEncoder(model_name)
+        logger.info("Cross-Encoder 로딩 완료")
+        return model
+    except Exception as e:
+        logger.warning("Cross-Encoder 로딩 실패 (부스팅만 사용): %s", e)
+        return None
 
 
 def collection_name_for_config(runtime: RuntimeConfig) -> str:
@@ -82,6 +108,7 @@ def build_runtime_pipeline(
     base_config_path: str | Path,
     provider_config_path: str | Path,
     experiment_config_path: str | Path | None = None,
+    retrieval_config_path: str | Path | None = "configs/retrieval.yaml",
     persist_dir: str | Path = "artifacts/chroma_db",
     metadata_path: str | Path | None = None,
 ):
@@ -91,6 +118,7 @@ def build_runtime_pipeline(
         base_config_path: 기본 설정 YAML 경로.
         provider_config_path: 프로바이더 설정 YAML 경로.
         experiment_config_path: 실험 설정 YAML 경로 (선택).
+        retrieval_config_path: 리트리벌 전략 YAML 경로 (기본: configs/retrieval.yaml).
         persist_dir: ChromaDB 저장 디렉터리.
         metadata_path: 정제된 문서 메타데이터 parquet 경로. None이면
             실험별 sub-dir → 공용 순서로 자동 탐지.
@@ -98,21 +126,45 @@ def build_runtime_pipeline(
     Returns:
         (pipeline, runtime, embedder, llm) 튜플.
     """
-    runtime = load_runtime_config(base_config_path, provider_config_path, experiment_config_path)
+    runtime = load_runtime_config(
+        base_config_path,
+        provider_config_path,
+        experiment_config_path,
+        retrieval_config_path,
+    )
     embedder = build_embedding_provider(runtime.provider)
     llm = build_llm_provider(runtime.provider)
     vector_store = ChromaVectorStore(
         persist_dir=persist_dir,
         collection_name=collection_name_for_config(runtime),
     )
+    # collection이 비어있으면 자동으로 DB 생성
+    if vector_store.count() == 0:
+        from bidmate_rag.pipelines.build_index import build_index_from_parquet
+        chunks_path = Path("data/processed/chunks.parquet")
+        if chunks_path.exists():
+            print(f"[자동 빌드] {collection_name_for_config(runtime)}")
+            build_index_from_parquet(
+                str(chunks_path),
+                embedder=embedder,
+                vector_store=vector_store,
+            )
+        else:
+            print(f"[경고] chunks 파일을 찾을 수 없습니다.")
     resolved_path = _resolve_metadata_path(runtime, metadata_path)
     metadata_store = (
         MetadataStore.from_parquet(resolved_path)
         if resolved_path.exists()
         else MetadataStore(pd.DataFrame())
     )
+    reranker = _load_reranker(runtime.retrieval.reranker_model)
     retriever = RAGRetriever(
-        vector_store=vector_store, embedder=embedder, metadata_store=metadata_store
+        vector_store=vector_store,
+        embedder=embedder,
+        metadata_store=metadata_store,
+        reranker_model=reranker,
+        enable_multiturn=runtime.retrieval.enable_multiturn,
     )
     pipeline = RAGChatPipeline(retriever=retriever, llm=llm)
+    
     return pipeline, runtime, embedder, llm

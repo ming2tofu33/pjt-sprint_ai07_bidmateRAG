@@ -31,6 +31,47 @@ def list_provider_configs(config_dir: str | Path = "configs/providers") -> list[
 def list_chunking_configs(config_dir: str | Path = "configs/chunking") -> list[Path]:
     return sorted(Path(config_dir).glob("*.yaml"))
 
+# 시나리오 A 임베딩 모델 목록
+def list_scenario_a_embeddings(
+    config_dir: str | Path = "configs/providers/scenario_a/embeddings"
+) -> list[Path]:
+    return sorted(Path(config_dir).glob("*.yaml"))
+
+# 시나리오 A LLM 모델 목록
+def list_scenario_a_llms(
+    config_dir: str | Path = "configs/providers/scenario_a/llms"
+) -> list[Path]:
+    return sorted(Path(config_dir).glob("*.yaml"))
+
+# 시나리오 A용 프로바이더 설정 YAML 동적 생성 함수
+def build_scenario_a_provider_config(
+    embedding_config_path: str | Path,
+    llm_config_path: str | Path,
+    tmp_dir: str | Path = "/tmp",
+) -> Path:
+    """시나리오 A용 임베딩 + LLM yaml을 합쳐서 임시 provider yaml 생성."""
+    import yaml
+    import tempfile
+
+    embedding_config = yaml.safe_load(Path(embedding_config_path).read_text())
+    llm_config = yaml.safe_load(Path(llm_config_path).read_text())
+
+    # 두 yaml 합쳐서 provider yaml 동적 생성
+    provider_config = {
+        "provider": llm_config.get("provider", "huggingface"),
+        "scenario": "scenario_a",
+        "model": llm_config.get("model", ""),
+        "embedding_model": embedding_config.get("embedding_model", ""),
+    }
+
+    if llm_config.get("api_base"):
+        provider_config["api_base"] = llm_config["api_base"]
+
+    # 임시 파일로 저장
+    tmp_path = Path(tmp_dir) / f"scenario_a_{Path(embedding_config_path).stem}_{Path(llm_config_path).stem}.yaml"
+    tmp_path.write_text(yaml.dump(provider_config, allow_unicode=True))
+    return tmp_path
+
 
 def load_benchmark_frames(benchmarks_dir: str | Path = "artifacts/logs/benchmarks") -> pd.DataFrame:
     """벤치마크 결과 parquet 파일들을 하나의 DataFrame으로 합친다.
@@ -168,6 +209,8 @@ def run_live_query(
     chat_history: list[dict] | None = None,
     system_prompt: str | None = None,
     max_context_chars: int = 8000,
+    embedding_config_path: str | Path | None = None, # 시나리오 A 임베딩 설정 경로 (선택)
+    llm_config_path: str | Path | None = None, # 시나리오 A LLM 설정 경로 (선택)
 ):
     """단일 RAG 쿼리를 실행한다 (라이브 데모 + 디버그 탭 공용).
 
@@ -186,14 +229,17 @@ def run_live_query(
     Returns:
         GenerationResult (답변, 검색 청크, 토큰 사용량 등).
     """
+  # 시나리오 A: 임베딩 + LLM yaml로 provider yaml 동적 생성
+    if embedding_config_path and llm_config_path:
+        provider_config_path = build_scenario_a_provider_config(
+            embedding_config_path, llm_config_path
+        )
     # 1. 런타임 파이프라인 조립
     pipeline, runtime, embedder, _ = build_runtime_pipeline(
         base_config_path=base_config_path,
         provider_config_path=provider_config_path,
         experiment_config_path=experiment_config_path,
     )
-    run_id = f"live-{uuid4().hex[:8]}"
-
     # 2. 시스템 프롬프트 오버라이드 적용
     if system_prompt:
         pipeline.system_prompt = system_prompt
@@ -213,6 +259,8 @@ def run_live_query(
             resolved_filter = {}
         else:
             resolved_filter = dict(manual_filters)
+        
+    run_id = f"live-{uuid4().hex[:8]}"
 
     # 5. RAG 파이프라인 실행 (검색 → LLM 생성)
     return pipeline.answer(
@@ -239,7 +287,10 @@ def run_benchmark_experiment(
     run_id: str | None = None,
     skip_judge: bool = False,
     judge_model: str = "gpt-4o-mini",
+    judge_v2: bool = False,
     progress_callback=None,
+    embedding_config_path: str | Path | None = None, # 시나리오 A 임베딩 설정 경로 (선택)
+    llm_config_path: str | Path | None = None, # 시나리오
 ) -> EvaluationArtifacts:
     """런타임 파이프라인을 조립하고 전체 평가를 실행한다.
 
@@ -258,6 +309,12 @@ def run_benchmark_experiment(
     Returns:
         EvaluationArtifacts (실행 결과, 산출물 경로, 지표 등).
     """
+    # 시나리오 A: 임베딩 + LLM yaml로 provider yaml 동적 생성
+    if embedding_config_path and llm_config_path:
+        provider_config_path = build_scenario_a_provider_config(
+            embedding_config_path, llm_config_path
+        )
+
     # 1. 런타임 파이프라인 조립
     pipeline, runtime, embedder, _ = build_runtime_pipeline(
         base_config_path=base_config_path,
@@ -285,5 +342,6 @@ def run_benchmark_experiment(
         run_id=run_id,
         skip_judge=skip_judge,
         judge_model=judge_model,
+        judge_v2=judge_v2,
         progress_callback=progress_callback,
     )

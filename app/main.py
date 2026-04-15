@@ -11,6 +11,8 @@ load_dotenv()
 from app.api.routes import (
     list_provider_configs,
     list_chunking_configs,
+    list_scenario_a_embeddings,
+    list_scenario_a_llms,
     load_benchmark_frames,
     load_metadata_options,
     load_run_records,
@@ -223,6 +225,34 @@ def _render_streamlit_app() -> None:
                 prompt_changed = custom_prompt.strip() != DEFAULT_PROMPT.strip()
                 if prompt_changed:
                     st.caption("✏️ 수정됨")
+        if show_a and not show_b:
+            st.subheader("🅰️ 시나리오 A 설정")
+            
+            # 임베딩 모델 선택
+            embedding_configs = list_scenario_a_embeddings()
+            if embedding_configs:
+                selected_embedding = st.selectbox(
+                    "임베딩 모델",
+                    embedding_configs,
+                    format_func=lambda p: p.stem,
+                    key="scenario_a_embedding",
+                )
+            else:
+                st.warning("임베딩 모델 설정이 없습니다.")
+                selected_embedding = None
+
+            # LLM 모델 선택
+            llm_configs = list_scenario_a_llms()
+            if llm_configs:
+                selected_llm = st.selectbox(
+                    "LLM 모델",
+                    llm_configs,
+                    format_func=lambda p: p.stem,
+                    key="scenario_a_llm",
+                )
+            else:
+                st.warning("LLM 모델 설정이 없습니다.")
+                selected_llm = None
         # 청킹 전략 선택    
         st.subheader("📦 청킹 전략")
         chunking_configs = list_chunking_configs()
@@ -556,7 +586,7 @@ def _render_streamlit_app() -> None:
 
     # ── 탭 3: 평가 ──
     with eval_tab:
-        render_eval_tabs(st, run_live_query, list_provider_configs, list_chunking_configs, load_benchmark_frames, load_run_records)
+        render_eval_tabs(st, run_live_query, list_provider_configs, list_chunking_configs, list_scenario_a_embeddings, list_scenario_a_llms, load_benchmark_frames, load_run_records)
 
 
 def _render_debug_panel(st_module, meta: dict) -> None:

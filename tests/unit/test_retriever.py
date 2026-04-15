@@ -1,4 +1,4 @@
-from bidmate_rag.retrieval.filters import extract_matched_agencies
+from bidmate_rag.retrieval.filters import extract_matched_agencies, extract_project_clues
 from bidmate_rag.retrieval.retriever import RAGRetriever
 from bidmate_rag.schema import Chunk, RetrievedChunk
 
@@ -7,7 +7,11 @@ class FakeEmbedder:
     provider_name = "fake-embedder"
     model_name = "fake-embedding-model"
 
+    def __init__(self) -> None:
+        self.queries: list[str] = []
+
     def embed_query(self, query: str) -> list[float]:
+        self.queries.append(query)
         return [0.1, 0.2, 0.3]
 
 
@@ -59,6 +63,23 @@ class ProjectAwareFakeMetadataStore(FakeMetadataStore):
         return super().find_relevant_docs(query, top_n=top_n)
 
 
+class EmptyShortlistMetadataStore:
+    agency_list = ["국민연금공단", "기초과학연구원"]
+
+    def find_relevant_docs(self, query: str, top_n: int = 3):
+        return []
+
+
+class FakeReranker:
+    def __init__(self, scores_by_text: dict[str, float]):
+        self.scores_by_text = scores_by_text
+        self.calls: list[list[list[str]]] = []
+
+    def predict(self, pairs: list[list[str]]) -> list[float]:
+        self.calls.append(pairs)
+        return [self.scores_by_text[text] for _, text in pairs]
+
+
 def _retrieved_chunk(
     chunk_id: str,
     score: float,
@@ -99,6 +120,18 @@ class ScopedFakeVectorStore:
         self.calls.append(kwargs)
         agency = kwargs["where"]["발주 기관"]
         return self.results_by_agency[agency][: kwargs["top_k"]]
+
+
+class SequenceFakeVectorStore:
+    def __init__(self, responses: list[list[RetrievedChunk]]):
+        self.responses = responses
+        self.calls: list[dict] = []
+
+    def query(self, **kwargs):
+        self.calls.append(kwargs)
+        if self.responses:
+            return self.responses.pop(0)
+        return []
 
 
 def test_retriever_merges_metadata_range_and_section_filters() -> None:
@@ -404,6 +437,70 @@ def test_retriever_adds_project_doc_shortlist_for_quoted_multi_project_query() -
     }
 
 
+def test_retriever_applies_cross_encoder_after_multi_agency_fan_out_merge() -> None:
+    vector_store = ScopedFakeVectorStore(
+        {
+            "국민연금공단": [
+                _retrieved_chunk("nps-1", 0.99, agency="국민연금공단"),
+                _retrieved_chunk("nps-2", 0.98, agency="국민연금공단"),
+            ],
+            "기초과학연구원": [
+                _retrieved_chunk("ibs-1", 0.97, agency="기초과학연구원"),
+                _retrieved_chunk("ibs-2", 0.96, agency="기초과학연구원"),
+            ],
+        }
+    )
+    reranker = FakeReranker(
+        {
+            "[발주기관: 국민연금공단 | 사업명: nps-1-사업]\nnps-1": 0.20,
+            "[발주기관: 기초과학연구원 | 사업명: ibs-1-사업]\nibs-1": 0.95,
+            "[발주기관: 국민연금공단 | 사업명: nps-2-사업]\nnps-2": 0.90,
+            "[발주기관: 기초과학연구원 | 사업명: ibs-2-사업]\nibs-2": 0.10,
+        }
+    )
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=FakeEmbedder(),
+        metadata_store=FakeMetadataStore(),
+        reranker_model=reranker,
+    )
+
+    results = retriever.retrieve(
+        "국민연금공단과 기초과학연구원 사업을 비교해줘",
+        top_k=2,
+        metadata_filter={"발주 기관": {"$in": ["국민연금공단", "기초과학연구원"]}},
+    )
+
+    assert [call["where"]["발주 기관"] for call in vector_store.calls] == [
+        "국민연금공단",
+        "기초과학연구원",
+    ]
+    assert [call["top_k"] for call in vector_store.calls] == [8, 8]
+    assert reranker.calls == [
+        [
+            [
+                "국민연금공단과 기초과학연구원 사업을 비교해줘",
+                "[발주기관: 국민연금공단 | 사업명: nps-1-사업]\nnps-1",
+            ],
+            [
+                "국민연금공단과 기초과학연구원 사업을 비교해줘",
+                "[발주기관: 기초과학연구원 | 사업명: ibs-1-사업]\nibs-1",
+            ],
+            [
+                "국민연금공단과 기초과학연구원 사업을 비교해줘",
+                "[발주기관: 국민연금공단 | 사업명: nps-2-사업]\nnps-2",
+            ],
+            [
+                "국민연금공단과 기초과학연구원 사업을 비교해줘",
+                "[발주기관: 기초과학연구원 | 사업명: ibs-2-사업]\nibs-2",
+            ],
+        ]
+    ]
+    assert [result.chunk.chunk_id for result in results] == ["ibs-1", "nps-2"]
+    assert [result.rank for result in results] == [1, 2]
+    assert [result.score for result in results] == [0.95, 0.9]
+
+
 def test_retriever_reranks_table_and_section_matches_over_higher_raw_score_text() -> None:
     vector_store = FakeVectorStore(
         query_results=[
@@ -448,16 +545,44 @@ def test_retriever_preserves_original_order_when_no_rerank_hints_present() -> No
     assert [result.rank for result in results] == [1, 2]
 
 
-class SequenceFakeVectorStore:
-    def __init__(self, responses: list[list[RetrievedChunk]]):
-        self.responses = responses
-        self.calls: list[dict] = []
+def test_retriever_rewrites_follow_up_query_and_inherits_recent_agency_filter() -> None:
+    vector_store = FakeVectorStore()
+    embedder = FakeEmbedder()
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=embedder,
+        metadata_store=FakeMetadataStore(),
+    )
 
-    def query(self, **kwargs):
-        self.calls.append(kwargs)
-        if self.responses:
-            return self.responses.pop(0)
-        return []
+    retriever.retrieve(
+        "그 사업 예산은?",
+        top_k=2,
+        chat_history=[{"role": "user", "content": "국민연금공단 차세대 ERP 사업 알려줘"}],
+    )
+
+    assert embedder.queries == ["국민연금공단 차세대 ERP 사업 예산은?"]
+    assert vector_store.last_kwargs["where"]["발주 기관"] == "국민연금공단"
+    assert vector_store.last_kwargs["where"]["파일명"] == {"$in": ["doc-1.hwp", "doc-2.hwp"]}
+
+
+def test_retriever_can_disable_multiturn_rewrite_and_history_filter() -> None:
+    vector_store = FakeVectorStore()
+    embedder = FakeEmbedder()
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=embedder,
+        metadata_store=EmptyShortlistMetadataStore(),
+        enable_multiturn=False,
+    )
+
+    retriever.retrieve(
+        "그 사업 예산은?",
+        top_k=2,
+        chat_history=[{"role": "user", "content": "국민연금공단 차세대 ERP 사업 알려줘"}],
+    )
+
+    assert embedder.queries == ["그 사업 예산은?"]
+    assert vector_store.last_kwargs["where"] is None
 
 
 def test_retriever_history_aware_query_supports_user_assistant_shape() -> None:
@@ -476,8 +601,6 @@ def test_retriever_history_aware_query_supports_user_assistant_shape() -> None:
 
 
 def test_extract_project_clues_ignores_generic_quoted_phrases() -> None:
-    from bidmate_rag.retrieval.filters import extract_project_clues
-
     clues = extract_project_clues(
         '"오류 메시지 처리 시간"과 "참여인력 개별 보안서약서 징구" 절차를 설명해줘'
     )

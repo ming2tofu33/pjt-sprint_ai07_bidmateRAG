@@ -19,6 +19,7 @@ from zoneinfo import ZoneInfo
 
 from bidmate_rag.config.settings import RuntimeConfig
 from bidmate_rag.evaluation.judge import LLMJudge
+from bidmate_rag.evaluation.judge_v2 import LLMJudgeV2
 from bidmate_rag.evaluation.metrics import calc_hit_rate, calc_map, calc_mrr, calc_ndcg
 from bidmate_rag.evaluation.runner import (
     BenchmarkRunner,
@@ -59,6 +60,7 @@ def execute_evaluation(
     run_id: str | None = None,
     skip_judge: bool = False,
     judge_model: str = "gpt-4o-mini",
+    judge_v2: bool = False,
     progress_callback: ProgressCallback | None = None,
 ) -> EvaluationArtifacts:
     """Run an evaluation end-to-end and write all artifacts to disk.
@@ -132,11 +134,12 @@ def execute_evaluation(
     judge_cost = 0.0
     judge_tokens = 0
     if not skip_judge:
-        judge_cost, judge_tokens = _run_judge(samples, benchmark, judge_model)
+        judge_cost, judge_tokens = _run_judge(samples, benchmark, judge_model, judge_v2=judge_v2)
         _update_run_meta(
             meta_path,
             judge_total_cost_usd=judge_cost,
             judge_total_tokens=judge_tokens,
+            judge_mode="v2" if judge_v2 else "v1",
         )
 
     run_path = persist_run_results(benchmark.results, runs_dir=runs_path, run_id=resolved_run_id)
@@ -192,10 +195,12 @@ def _run_judge(
     samples: list[EvalSample],
     benchmark: BenchmarkRunResult,
     judge_model: str,
+    *,
+    judge_v2: bool = False,
 ) -> tuple[float, int]:
     """Run LLM judge on each sample, mutate result.judge_scores, return cost/tokens."""
-    judge = LLMJudge(model=judge_model)
-    totals = {key: 0.0 for key in LLMJudge.METRIC_KEYS}
+    judge = LLMJudgeV2(model=judge_model) if judge_v2 else LLMJudge(model=judge_model)
+    totals = {key: 0.0 for key in judge.METRIC_KEYS}
     judged = 0
     for sample, result in zip(samples, benchmark.results, strict=False):
         contexts = [chunk.chunk.text for chunk in result.retrieved_chunks]
@@ -208,7 +213,7 @@ def _run_judge(
         result.judge_scores = scores.to_dict()
         if scores.error:
             continue
-        for key in LLMJudge.METRIC_KEYS:
+        for key in judge.METRIC_KEYS:
             totals[key] += getattr(scores, key)
         judged += 1
     if judged:
