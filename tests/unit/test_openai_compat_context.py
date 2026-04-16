@@ -81,4 +81,5 @@ def test_openai_provider_builds_metadata_aware_context_block() -> None:
     assert "[출처: 차세대 ERP 구축 | 한국가스공사 | 한국가스공사_erp.hwp]" in prompt
     assert "사업 금액=약 3억원" in prompt
     assert "핵심 요구사항" in prompt
-    assert result.context.startswith("[출처: 차세대 ERP 구축 | 한국가스공사 | 한국가스공사_erp.hwp]")
+    # 청크 앞에 인용 번호 prefix가 붙는다 — LLM이 답변에서 [1], [2]로 인용할 수 있도록.
+    assert result.context.startswith("[1] [출처: 차세대 ERP 구축 | 한국가스공사 | 한국가스공사_erp.hwp]")

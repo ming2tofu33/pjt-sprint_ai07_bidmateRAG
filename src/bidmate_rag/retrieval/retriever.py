@@ -4,9 +4,10 @@
   1. 질문에서 메타데이터 필터 자동 추출
   2. 필요하면 멀티턴 rewrite / history agency 상속
   3. 비교/나열형 질문이면 기관별 fan-out 검색
-  4. Cross-Encoder 리랭킹
-  5. 섹션/테이블 부스팅
-  6. shortlist / where_document 과적용 시 fallback
+  4. Dense 또는 Hybrid 검색으로 후보 청크 조회
+  5. Cross-Encoder 리랭킹
+  6. 섹션/테이블 부스팅
+  7. shortlist / where_document 과적용 시 fallback
 """
 
 from __future__ import annotations
@@ -17,9 +18,9 @@ from bidmate_rag.retrieval.filters import (
     extract_project_clues,
     extract_range_filters,
     extract_section_hint,
-    is_comparison_query,
     should_fan_out_multi_source_query,
 )
+from bidmate_rag.retrieval.hybrid import hybrid_query, resolve_hybrid_pool_sizes
 from bidmate_rag.retrieval.multiturn import (
     extract_recent_agency_filter,
     rewrite_query_with_history,
@@ -39,14 +40,21 @@ class RAGRetriever:
         vector_store,
         embedder,
         metadata_store=None,
+        sparse_store=None,
         reranker_model=None,
         enable_multiturn: bool = True,
+        boost_config: dict | None = None,
+        hybrid_config: dict | None = None,
     ) -> None:
+        """RAGRetriever를 초기화한다."""
         self.vector_store = vector_store
         self.embedder = embedder
         self.metadata_store = metadata_store
+        self.sparse_store = sparse_store
         self.reranker = reranker_model
         self.enable_multiturn = enable_multiturn
+        self.boost_config = boost_config
+        self.hybrid_config = hybrid_config
 
     def _extract_scope_key(self, where: dict | None) -> tuple[str, list[str]] | None:
         if not where:
@@ -184,8 +192,6 @@ class RAGRetriever:
     ) -> dict | None:
         if not section_hint:
             return None
-        # 비교/다기관 fan-out에서는 섹션 hard filter를 걸면
-        # 한 기관 문서가 통째로 탈락할 수 있어 부스팅에만 맡긴다.
         if self._should_run_scoped_queries(query, where):
             return None
         return {"$contains": section_hint}
@@ -196,28 +202,47 @@ class RAGRetriever:
         query_embedding: list[float],
         query: str,
         top_k: int,
-        rerank_pool_k: int,
+        dense_pool_k: int,
+        sparse_pool_k: int,
         where: dict | None,
         where_document: dict | None,
     ) -> list:
         if self._should_run_scoped_queries(query, where):
-            scoped_top_k = max(rerank_pool_k, top_k * 2)
+            scoped_dense_top_k = max(top_k * 2, dense_pool_k if self.reranker is not None else 0)
+            scoped_sparse_top_k = (
+                max(top_k * 2, sparse_pool_k if self.reranker is not None else 0)
+                if sparse_pool_k
+                else 0
+            )
             grouped_results = [
-                self.vector_store.query(
+                hybrid_query(
+                    query=query,
                     query_embedding=query_embedding,
-                    top_k=scoped_top_k,
+                    vector_store=self.vector_store,
+                    sparse_store=self.sparse_store,
+                    dense_top_k=scoped_dense_top_k,
+                    sparse_top_k=scoped_sparse_top_k,
                     where=scoped_where,
                     where_document=where_document,
+                    hybrid_config=self.hybrid_config,
                 )
                 for scoped_where in self._build_scoped_filters(where)
             ]
-            return self._merge_round_robin(grouped_results, rerank_pool_k)
+            return self._merge_round_robin(
+                grouped_results,
+                max(scoped_dense_top_k, scoped_sparse_top_k or 0),
+            )
 
-        return self.vector_store.query(
+        return hybrid_query(
+            query=query,
             query_embedding=query_embedding,
-            top_k=rerank_pool_k,
+            vector_store=self.vector_store,
+            sparse_store=self.sparse_store,
+            dense_top_k=dense_pool_k,
+            sparse_top_k=sparse_pool_k,
             where=where,
             where_document=where_document,
+            hybrid_config=self.hybrid_config,
         )
 
     def retrieve(
@@ -283,16 +308,26 @@ class RAGRetriever:
                 base_where = None
 
         final_top_k = top_k
-        rerank_pool_k = final_top_k * 4 if self.reranker else final_top_k
+        dense_pool_k, sparse_pool_k = resolve_hybrid_pool_sizes(
+            final_top_k,
+            reranker_present=self.reranker is not None,
+            sparse_store=self.sparse_store,
+            hybrid_config=self.hybrid_config,
+        )
         section_hint = extract_section_hint(resolved_query)
-        where_document = self._build_where_document(resolved_query, where, section_hint)
+        where_document = (
+            self._build_where_document(resolved_query, where, section_hint)
+            if metadata_filter is not None
+            else None
+        )
         query_embedding = self.embedder.embed_query(resolved_query)
 
         results = self._query_vector_store(
             query_embedding=query_embedding,
             query=resolved_query,
             top_k=final_top_k,
-            rerank_pool_k=rerank_pool_k,
+            dense_pool_k=dense_pool_k,
+            sparse_pool_k=sparse_pool_k,
             where=where,
             where_document=where_document,
         )
@@ -302,7 +337,8 @@ class RAGRetriever:
                 query_embedding=query_embedding,
                 query=resolved_query,
                 top_k=final_top_k,
-                rerank_pool_k=rerank_pool_k,
+                dense_pool_k=dense_pool_k,
+                sparse_pool_k=sparse_pool_k,
                 where=where,
                 where_document=None,
             )
@@ -314,14 +350,26 @@ class RAGRetriever:
             and self._has_doc_level_constraint(where)
             and not self._has_doc_level_constraint(base_where)
         ):
+            base_where_document = (
+                self._build_where_document(resolved_query, base_where, section_hint)
+                if metadata_filter is not None
+                else None
+            )
             results = self._query_vector_store(
                 query_embedding=query_embedding,
                 query=resolved_query,
                 top_k=final_top_k,
-                rerank_pool_k=rerank_pool_k,
+                dense_pool_k=dense_pool_k,
+                sparse_pool_k=sparse_pool_k,
                 where=base_where,
-                where_document=self._build_where_document(resolved_query, base_where, section_hint),
+                where_document=base_where_document,
             )
 
         results = cross_encoder_rerank(self.reranker, resolved_query, results, final_top_k)
-        return rerank_with_boost(results, query=resolved_query, section_hint=section_hint)
+        reranked = rerank_with_boost(
+            results,
+            query=resolved_query,
+            section_hint=section_hint,
+            boost_config=self.boost_config,
+        )
+        return _assign_ranks(reranked[:final_top_k])

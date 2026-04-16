@@ -91,6 +91,9 @@ def execute_evaluation(
     runs_path = Path(runs_dir)
     benchmarks_path = Path(benchmarks_dir)
     resolved_run_id = run_id or f"bench-{uuid4().hex[:8]}"
+    
+    # ExperimentConfig.retrieval_top_k가 비어있으면 ProjectConfig 기본값 5.
+    top_k = top_k or runtime.experiment.retrieval_top_k or runtime.project.default_retrieval_top_k or 5
 
     meta_path = _write_run_meta(
         runs_dir=runs_path,
@@ -101,10 +104,10 @@ def execute_evaluation(
         eval_path=eval_path,
         config_paths=config_paths or {},
         judge_skipped=skip_judge,
+        top_k = top_k
     )
 
-    # ExperimentConfig.retrieval_top_k가 비어있으면 ProjectConfig 기본값 5.
-    top_k = top_k or runtime.experiment.retrieval_top_k or runtime.project.default_retrieval_top_k or 5
+    
 
     def answer_fn(sample: EvalSample) -> GenerationResult:
         # 평가셋의 metadata_filter / history를 retrieval에 실제로 적용
@@ -130,7 +133,7 @@ def execute_evaluation(
         progress_callback=progress_callback,
     )
 
-    _aggregate_retrieval_metrics(samples, benchmark)
+    _aggregate_retrieval_metrics(samples, benchmark, top_k=top_k)
 
     judge_cost = 0.0
     judge_tokens = 0
@@ -168,9 +171,9 @@ def execute_evaluation(
 # ---------------------------------------------------------------------------
 
 
-def _aggregate_retrieval_metrics(samples: list[EvalSample], benchmark: BenchmarkRunResult) -> None:
+def _aggregate_retrieval_metrics(samples: list[EvalSample], benchmark: BenchmarkRunResult, top_k: int = 5) -> None:
     """Compute Hit Rate@5 / MRR / nDCG@5 / MAP@5 and merge into ``benchmark.metrics``."""
-    totals = {"hit_rate@5": 0.0, "mrr": 0.0, "ndcg@5": 0.0, "map@5": 0.0}
+    totals = {f"hit_rate@{top_k}": 0.0, "mrr": 0.0, f"ndcg@{top_k}": 0.0, f"map@{top_k}": 0.0}
     scored = 0
     for sample, result in zip(samples, benchmark.results, strict=False):
         # Eval CSVs put 파일명 in `ground_truth_docs`, which dataset.py maps to
@@ -178,15 +181,15 @@ def _aggregate_retrieval_metrics(samples: list[EvalSample], benchmark: Benchmark
         expected = sample.expected_doc_ids or sample.expected_doc_titles
         if not expected:
             continue
-        hit = calc_hit_rate(result.retrieved_chunks, expected, k=5)
+        hit = calc_hit_rate(result.retrieved_chunks, expected, k=top_k)
         mrr = calc_mrr(result.retrieved_chunks, expected)
-        ndcg = calc_ndcg(result.retrieved_chunks, expected, k=5)
-        map_score = calc_map(result.retrieved_chunks, expected, k=5)
+        ndcg = calc_ndcg(result.retrieved_chunks, expected, k=top_k)
+        map_score = calc_map(result.retrieved_chunks, expected, k=top_k)
         if hit is not None:
-            totals["hit_rate@5"] += hit
+            totals[f"hit_rate@{top_k}"] += hit
             totals["mrr"] += mrr or 0.0
-            totals["ndcg@5"] += ndcg or 0.0
-            totals["map@5"] += map_score or 0.0
+            totals[f"ndcg@{top_k}"] += ndcg or 0.0
+            totals[f"map@{top_k}"] += map_score or 0.0
             scored += 1
     if scored:
         benchmark.metrics.update({key: round(value / scored, 4) for key, value in totals.items()})
@@ -231,6 +234,7 @@ def _write_run_meta(
     eval_path: str,
     config_paths: dict[str, str | None],
     judge_skipped: bool = False,
+    top_k: int = 5,
 ) -> Path:
     runs_dir.mkdir(parents=True, exist_ok=True)
     now_utc = datetime.now(UTC)
@@ -246,6 +250,7 @@ def _write_run_meta(
         "eval_path": eval_path,
         "collection_name": collection_name,
         "judge_skipped": judge_skipped,
+        "actual_top_k": top_k,
         "judge_total_cost_usd": 0.0,
         "judge_total_tokens": 0,
     }

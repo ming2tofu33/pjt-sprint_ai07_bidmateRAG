@@ -107,23 +107,60 @@ def _build_chunk_block(chunk: RetrievedChunk) -> str:
 
 
 def build_context_block(chunks: list[RetrievedChunk], max_chars: int = 8000) -> str:
-    """Render retrieved chunks into a metadata-aware context block."""
+    """Render retrieved chunks into a metadata-aware context block.
 
+    백워드 호환용. LLM 경로에서는 `build_numbered_context_block`을 사용해
+    `[n]` 인용 번호와 LLM이 실제로 본 청크 인덱스를 함께 받는 것을 권장.
+    """
+    context, _used = build_numbered_context_block(
+        chunks, max_chars=max_chars, with_citation_numbers=False
+    )
+    return context
+
+
+def build_numbered_context_block(
+    chunks: list[RetrievedChunk],
+    max_chars: int = 8000,
+    *,
+    with_citation_numbers: bool = True,
+) -> tuple[str, list[int]]:
+    """번호가 붙은 컨텍스트 블록과 LLM이 실제로 본 청크 인덱스를 반환한다.
+
+    Args:
+        chunks: 검색된 청크 (이미 score desc 정렬 가정).
+        max_chars: 컨텍스트 총 글자 수 상한. 초과 시 뒤쪽 청크는 **통째로** 탈락한다.
+        with_citation_numbers: True면 각 청크 앞에 `[1]`, `[2]`... prefix를 붙인다.
+            프론트/LLM 인용 번호와 1:1 매칭시키기 위한 것. 평가/로그 경로에서는
+            번호가 불필요하면 False로 끈다.
+
+    Returns:
+        (context_str, used_indices):
+          - context_str: 최종 프롬프트에 들어갈 문자열
+          - used_indices: 실제로 컨텍스트에 포함된 청크의 원본 인덱스 (0-based)
+            예) 5개 청크 중 첫 3개만 포함 → [0, 1, 2]. Citation 생성 시 이
+            인덱스를 기준으로 필터해야 본문 `[n]`과 카드가 일치한다.
+    """
     if max_chars <= 0:
-        return ""
+        return "", []
 
     parts: list[str] = []
+    used_indices: list[int] = []
     total_chars = 0
     separator = "\n\n---\n\n"
 
-    for chunk in chunks:
+    for idx, chunk in enumerate(chunks):
         block = _build_chunk_block(chunk)
         if not block:
             continue
+        if with_citation_numbers:
+            # 1-indexed 인용 번호를 청크 앞에 박는다. LLM이 답변에서 동일 번호로 참조.
+            citation_idx = len(used_indices) + 1
+            block = f"[{citation_idx}] {block}"
         candidate = block if not parts else f"{separator}{block}"
         if total_chars + len(candidate) > max_chars:
             break
         parts.append(block)
+        used_indices.append(idx)
         total_chars += len(candidate)
 
-    return separator.join(parts)
+    return separator.join(parts), used_indices

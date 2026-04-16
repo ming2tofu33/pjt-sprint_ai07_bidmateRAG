@@ -1,7 +1,7 @@
 """런타임 조립 헬퍼.
 
 CLI 스크립트와 Streamlit UI가 공유하는 파이프라인 조립 로직.
-설정 파일 → 프로바이더/리트리버/LLM 생성 → RAGChatPipeline 반환.
+설정 파일 -> 프로바이더/리트리버/LLM 생성 -> RAGChatPipeline 반환.
 """
 
 from __future__ import annotations
@@ -15,6 +15,7 @@ from bidmate_rag.config.settings import RuntimeConfig, load_runtime_config
 from bidmate_rag.pipelines.chat import RAGChatPipeline
 from bidmate_rag.providers.llm.registry import build_embedding_provider, build_llm_provider
 from bidmate_rag.retrieval.retriever import RAGRetriever
+from bidmate_rag.retrieval.sparse_store import BM25SparseStore
 from bidmate_rag.retrieval.vector_store import ChromaVectorStore
 from bidmate_rag.storage.metadata_store import MetadataStore
 
@@ -49,9 +50,9 @@ def collection_name_for_config(runtime: RuntimeConfig) -> str:
 
     격리 규칙:
       - ``experiment.mode == "full_rag"`` (default): chunking을 바꿔가며 실험할
-        가능성이 있으므로 ``실험명-…`` prefix로 격리.
+        가능성이 있으므로 ``실험명-...`` prefix로 격리.
       - ``experiment.mode == "generation_only"``: 동일 인덱스에 다른 LLM만
-        붙이는 실험이므로 collection을 **공유** (재빌드 비용 절약).
+        붙이는 실험이므로 collection을 공유한다.
       - 실험 config가 없는 경우 (``ad-hoc``): legacy 동작 보존.
 
     ``provider.collection_name``이 명시된 경우:
@@ -79,16 +80,12 @@ def collection_name_for_config(runtime: RuntimeConfig) -> str:
 
 
 def _resolve_metadata_path(runtime: RuntimeConfig, explicit: str | Path | None) -> Path:
-    """실험별 metadata parquet 경로를 자동 결정.
+    """실험별 metadata parquet 경로를 자동 결정한다.
 
     우선순위:
-      1. ``explicit``가 명시되어 있고 파일이 존재 → 그것 사용
+      1. ``explicit``가 명시되어 있고 파일이 존재 -> 그것 사용
       2. 실험별 sub-dir ``data/processed/{exp_name}/cleaned_documents.parquet``
       3. 공용 ``data/processed/cleaned_documents.parquet`` (legacy fallback)
-
-    full-RAG 실험이 ``data/processed/{exp_name}/``에 산출물을 만들지만 기존
-    ``build_runtime_pipeline``은 항상 공용 경로만 봤기 때문에 MetadataStore
-    (agency_list / find_relevant_docs)가 stale 데이터를 사용하던 문제를 해결.
     """
     if explicit:
         path = Path(explicit)
@@ -104,6 +101,30 @@ def _resolve_metadata_path(runtime: RuntimeConfig, explicit: str | Path | None) 
     return Path("data/processed/cleaned_documents.parquet")
 
 
+def _resolve_chunks_path(runtime: RuntimeConfig, explicit: str | Path | None = None) -> Path:
+    """실험별 chunks parquet 경로를 자동 결정한다.
+
+    Args:
+        runtime: 런타임 설정.
+        explicit: 명시 경로. None이면 자동 탐지.
+
+    Returns:
+        chunks.parquet 경로.
+    """
+    if explicit:
+        path = Path(explicit)
+        if path.exists():
+            return path
+
+    exp_name = runtime.experiment.name or "ad-hoc"
+    if exp_name not in ("ad-hoc", "default", ""):
+        sub = Path(f"data/processed/{exp_name}/chunks.parquet")
+        if sub.exists():
+            return sub
+
+    return Path("data/processed/chunks.parquet")
+
+
 def build_runtime_pipeline(
     base_config_path: str | Path,
     provider_config_path: str | Path,
@@ -111,7 +132,8 @@ def build_runtime_pipeline(
     retrieval_config_path: str | Path | None = "configs/retrieval.yaml",
     persist_dir: str | Path = "artifacts/chroma_db",
     metadata_path: str | Path | None = None,
-    adapter_path: str | Path | None = None, # 어댑터 경로 추가
+    chunks_path: str | Path | None = None,
+    adapter_path: str | Path | None = None,
 ):
     """설정 파일들로부터 RAGChatPipeline을 조립한다.
 
@@ -122,7 +144,9 @@ def build_runtime_pipeline(
         retrieval_config_path: 리트리벌 전략 YAML 경로 (기본: configs/retrieval.yaml).
         persist_dir: ChromaDB 저장 디렉터리.
         metadata_path: 정제된 문서 메타데이터 parquet 경로. None이면
-            실험별 sub-dir → 공용 순서로 자동 탐지.
+            실험별 sub-dir -> 공용 순서로 자동 탐지.
+        chunks_path: chunks parquet 경로. None이면 실험 설정 기준으로 자동 탐지.
+        adapter_path: 로컬 LLM 어댑터 경로. 지정 시 LLM 생성에 함께 전달.
 
     Returns:
         (pipeline, runtime, embedder, llm) 튜플.
@@ -134,8 +158,8 @@ def build_runtime_pipeline(
         retrieval_config_path,
     )
     embedder = build_embedding_provider(runtime.provider)
-    
-    if adapter_path:# 어댑터 경로가 명시된 경우 LLM 생성 시 어댑터 적용
+
+    if adapter_path:
         llm = build_llm_provider(runtime.provider, adapter_path=adapter_path)
     else:
         llm = build_llm_provider(runtime.provider)
@@ -144,33 +168,44 @@ def build_runtime_pipeline(
         persist_dir=persist_dir,
         collection_name=collection_name_for_config(runtime),
     )
+    resolved_chunks_path = _resolve_chunks_path(runtime, chunks_path)
+
     # collection이 비어있으면 자동으로 DB 생성
-    if hasattr(vector_store, 'count') and vector_store.count() == 0:
+    if hasattr(vector_store, "count") and vector_store.count() == 0:
         from bidmate_rag.pipelines.build_index import build_index_from_parquet
-        chunks_path = Path("data/processed/chunks.parquet")
-        if chunks_path.exists():
+
+        if resolved_chunks_path.exists():
             print(f"[자동 빌드] {collection_name_for_config(runtime)}")
             build_index_from_parquet(
-                str(chunks_path),
+                str(resolved_chunks_path),
                 embedder=embedder,
                 vector_store=vector_store,
             )
         else:
-            print(f"[경고] chunks 파일을 찾을 수 없습니다.")
+            print("[경고] chunks 파일을 찾을 수 없습니다.")
+
     resolved_path = _resolve_metadata_path(runtime, metadata_path)
     metadata_store = (
         MetadataStore.from_parquet(resolved_path)
         if resolved_path.exists()
         else MetadataStore(pd.DataFrame())
     )
+
+    sparse_store = None
+    if runtime.retrieval.hybrid.enabled and resolved_chunks_path.exists():
+        sparse_store = BM25SparseStore.from_parquet(resolved_chunks_path)
+
     reranker = _load_reranker(runtime.retrieval.reranker_model)
     retriever = RAGRetriever(
         vector_store=vector_store,
         embedder=embedder,
         metadata_store=metadata_store,
+        sparse_store=sparse_store,
         reranker_model=reranker,
         enable_multiturn=runtime.retrieval.enable_multiturn,
+        boost_config=runtime.retrieval.boost.model_dump(),
+        hybrid_config=runtime.retrieval.hybrid.model_dump(),
     )
     pipeline = RAGChatPipeline(retriever=retriever, llm=llm)
-    
+
     return pipeline, runtime, embedder, llm

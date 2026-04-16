@@ -573,10 +573,10 @@ def test_retriever_none_filter_falls_back_to_auto_extraction():
     assert where.get("발주 기관") == "한국가스공사"
 
 
-def test_retriever_top_k_passed_through():
+def test_retriever_without_reranker_expands_query_pool():
     retriever, vector_store = _make_retriever_with_mock_store()
     retriever.retrieve("질문", top_k=12)
-    assert vector_store.query.call_args.kwargs["top_k"] == 12
+    assert vector_store.query.call_args.kwargs["top_k"] == 36
 
 
 # ---------------------------------------------------------------------------

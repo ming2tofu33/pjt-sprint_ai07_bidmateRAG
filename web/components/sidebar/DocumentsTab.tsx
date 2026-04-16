@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { Search } from "lucide-react";
+import { Search, LayoutGrid } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { listDocuments } from "@/lib/api";
 import { searchDocuments, filterDocuments } from "@/lib/fuse-search";
@@ -16,6 +16,7 @@ export function DocumentsTab() {
   const setSearchQuery = useStore((s) => s.setDocumentSearchQuery);
   const filters = useStore((s) => s.documentFilters);
   const searchFocusToken = useStore((s) => s.searchFocusToken);
+  const openCatalog = useStore((s) => s.openCatalog);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -50,16 +51,27 @@ export function DocumentsTab() {
   return (
     <div className="flex h-full flex-col">
       <div className="p-4 pb-2">
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            ref={searchInputRef}
-            type="search"
-            placeholder="문서 검색 (⌘K)"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8"
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              ref={searchInputRef}
+              type="search"
+              placeholder="문서 검색 (⌘K)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={openCatalog}
+            title="전체 카탈로그 (⌘D)"
+            aria-label="전체 카탈로그 보기"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <LayoutGrid className="size-4" />
+          </button>
         </div>
       </div>
       <DocumentFilters documents={documents} />

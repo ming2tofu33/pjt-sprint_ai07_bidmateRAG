@@ -26,9 +26,9 @@ REPORT_TEMPLATE = """\
 | Chunk Size | {chunk_size} |
 | Top-k | {top_k} |
 | Git Commit | {git_commit_short} |
-| Hit Rate@5 | {hit_rate} |
+| Hit Rate@{top_k} | {hit_rate} |
 | MRR | {mrr} |
-| MAP@5 | {map} |
+| MAP@{top_k} | {map} |
 | Faithfulness | {faithfulness} |
 | Latency Avg (s) | {latency_avg_s} |
 | Total Tokens | {total_tokens} |
@@ -61,10 +61,10 @@ REPORT_TEMPLATE = """\
 
 | 지표 | 값 |
 | --- | --- |
-| Hit Rate@5 | {hit_rate} |
+| Hit Rate@{top_k} | {hit_rate} |
 | MRR | {mrr} |
-| nDCG@5 | {ndcg} |
-| MAP@5 | {map} |
+| nDCG@{top_k} | {ndcg} |
+| MAP@{top_k} | {map} |
 | Faithfulness | {faithfulness} |
 | Answer Relevance | {answer_relevance} |
 | Context Precision | {context_precision} |

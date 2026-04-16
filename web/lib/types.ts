@@ -53,13 +53,21 @@ export interface QueryResponse {
 
 export interface QueryRequest {
   question: string;
-  provider_config: string;
-  chunking_config: string | null;
   mentioned_doc_ids: string[];
   command: string | null;
-  top_k: number;
-  max_context_chars: number;
+  // provider_config, chunking_config, top_k, max_context_chars 은
+  // 서버의 configs/web.yaml 기본값을 사용 — 프론트에서 보내지 않는다.
 }
+
+export type QueryStreamEvent =
+  | {
+      type: "retrieval";
+      citations: Citation[];
+      retrieval_strategy: "single" | "per_doc_split" | "static";
+    }
+  | { type: "token"; delta: string }
+  | { type: "done"; metadata: QueryMetadata }
+  | { type: "error"; message: string };
 
 export type MessageRole = "user" | "assistant";
 

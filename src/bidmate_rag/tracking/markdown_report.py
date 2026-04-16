@@ -288,7 +288,7 @@ def _build_context(data: ReportData) -> dict[str, Any]:
     chunk_overlap = experiment_cfg.get("chunk_overlap") or project_cfg.get(
         "default_chunk_overlap", "?"
     )
-    top_k = experiment_cfg.get("retrieval_top_k") or project_cfg.get("default_retrieval_top_k", "?")
+    top_k = meta.get("actual_top_k") or experiment_cfg.get("retrieval_top_k") or project_cfg.get("default_retrieval_top_k", 5)
     collection_name = meta.get("collection_name") or provider_cfg.get("collection_name") or "?"
     scenario = summary.get("scenario") or provider_cfg.get("scenario") or "?"
     provider_label = summary.get("provider_label", "?")
@@ -393,10 +393,10 @@ def _build_context(data: ReportData) -> dict[str, Any]:
         "git_branch": git.get("branch", "unknown"),
         "dirty_marker": "(dirty)" if git.get("dirty") else "",
         # metrics
-        "hit_rate": _fmt_num(_get_metric("hit_rate@5")),
+        "hit_rate": _fmt_num(_get_metric(f"hit_rate@{top_k}")),
         "mrr": _fmt_num(_get_metric("mrr")),
-        "ndcg": _fmt_num(_get_metric("ndcg@5")),
-        "map": _fmt_num(_get_metric("map@5")),
+        "ndcg": _fmt_num(_get_metric(f"ndcg@{top_k}")),
+        "map": _fmt_num(_get_metric(f"map@{top_k}")),
         "faithfulness": _fmt_num(_get_metric("faithfulness")),
         "answer_relevance": _fmt_num(_get_metric("answer_relevance")),
         "context_precision": _fmt_num(_get_metric("context_precision")),

@@ -80,6 +80,16 @@ class FakeReranker:
         return [self.scores_by_text[text] for _, text in pairs]
 
 
+class FakeSparseStore:
+    def __init__(self, query_results: list[RetrievedChunk] | None = None):
+        self.calls: list[dict] = []
+        self.query_results = query_results or []
+
+    def query(self, *, query: str, top_k: int = 5, where: dict | None = None):
+        self.calls.append({"query": query, "top_k": top_k, "where": where})
+        return self.query_results[:top_k]
+
+
 def _retrieved_chunk(
     chunk_id: str,
     score: float,
@@ -149,7 +159,78 @@ def test_retriever_merges_metadata_range_and_section_filters() -> None:
         "사업 금액": {"$gte": 500000000},
         "공개연도": 2024,
     }
-    assert vector_store.last_kwargs["where_document"] == {"$contains": "보안"}
+    assert vector_store.last_kwargs["where_document"] is None
+    assert vector_store.last_kwargs["top_k"] == 9
+
+
+def test_retriever_expands_candidate_pool_without_reranker() -> None:
+    vector_store = FakeVectorStore()
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=FakeEmbedder(),
+        metadata_store=FakeMetadataStore(),
+        reranker_model=None,
+    )
+
+    retriever.retrieve("국민연금공단 보안 요구사항 알려줘", top_k=4)
+
+    assert vector_store.last_kwargs["top_k"] == 12
+    assert vector_store.last_kwargs["where_document"] is None
+
+
+def test_retriever_trims_back_to_requested_top_k_without_reranker() -> None:
+    vector_store = FakeVectorStore(
+        [
+            _retrieved_chunk("chunk-1", 0.95, agency="국민연금공단"),
+            _retrieved_chunk("chunk-2", 0.94, agency="국민연금공단"),
+            _retrieved_chunk("chunk-3", 0.93, agency="국민연금공단"),
+        ]
+    )
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=FakeEmbedder(),
+        metadata_store=FakeMetadataStore(),
+        reranker_model=None,
+    )
+
+    results = retriever.retrieve("국민연금공단 요구사항 알려줘", top_k=2)
+
+    assert [result.chunk.chunk_id for result in results] == ["chunk-1", "chunk-2"]
+    assert [result.rank for result in results] == [1, 2]
+
+
+def test_retriever_uses_hybrid_rrf_when_sparse_store_enabled() -> None:
+    vector_store = FakeVectorStore(
+        [
+            _retrieved_chunk("dense-a", 0.99, agency="국민연금공단"),
+            _retrieved_chunk("shared", 0.97, agency="국민연금공단"),
+        ]
+    )
+    sparse_store = FakeSparseStore(
+        [
+            _retrieved_chunk("shared", 1.0, agency="국민연금공단"),
+            _retrieved_chunk("sparse-b", 0.9, agency="국민연금공단"),
+        ]
+    )
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=FakeEmbedder(),
+        metadata_store=FakeMetadataStore(),
+        sparse_store=sparse_store,
+        hybrid_config={
+            "enabled": True,
+            "dense_pool_multiplier": 3,
+            "sparse_pool_multiplier": 3,
+            "rrf_k": 60,
+        },
+    )
+
+    results = retriever.retrieve("국민연금공단 shared", top_k=3)
+
+    assert vector_store.last_kwargs["top_k"] == 9
+    assert sparse_store.calls[0]["top_k"] == 9
+    assert [result.chunk.chunk_id for result in results] == ["shared", "dense-a", "sparse-b"]
+    assert results[0].chunk.metadata["retrieval_source"] == "hybrid"
 
 
 def test_retriever_uses_metadata_store_shortlist_when_no_explicit_filter() -> None:
@@ -498,7 +579,8 @@ def test_retriever_applies_cross_encoder_after_multi_agency_fan_out_merge() -> N
     ]
     assert [result.chunk.chunk_id for result in results] == ["ibs-1", "nps-2"]
     assert [result.rank for result in results] == [1, 2]
-    assert [result.score for result in results] == [0.95, 0.9]
+    assert [result.score for result in results] == [0.97, 0.98]
+    assert [result.rerank_score for result in results] == [0.95, 0.9]
 
 
 def test_retriever_reranks_table_and_section_matches_over_higher_raw_score_text() -> None:

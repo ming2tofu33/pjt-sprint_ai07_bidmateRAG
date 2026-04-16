@@ -78,5 +78,6 @@ def test_hf_local_provider_uses_metadata_aware_context_and_honors_context_limit(
     assert "핵심 요구사항" in full_input
     assert "두번째 문맥" not in full_input
     assert generator.last_call["max_new_tokens"] == 64
-    assert result.context.startswith("[출처: 차세대 ERP 구축 | 한국가스공사 | 한국가스공사_erp.hwp]")
+    # 청크 앞에 인용 번호 prefix가 붙는다 — LLM이 답변에서 [1], [2]로 인용할 수 있도록.
+    assert result.context.startswith("[1] [출처: 차세대 ERP 구축 | 한국가스공사 | 한국가스공사_erp.hwp]")
     assert "두번째 문맥" not in result.context

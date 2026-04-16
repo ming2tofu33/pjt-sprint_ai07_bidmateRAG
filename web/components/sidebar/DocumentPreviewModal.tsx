@@ -81,7 +81,7 @@ export function DocumentPreviewModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={closePreview}
       role="dialog"
       aria-modal="true"

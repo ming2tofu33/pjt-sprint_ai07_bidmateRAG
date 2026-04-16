@@ -42,3 +42,28 @@ export function useCmdBShortcut(): void {
     return () => window.removeEventListener("keydown", handler);
   }, [toggleSidebar]);
 }
+
+/** ⌘D / Ctrl+D 단축키: 전체 문서 카탈로그 모달 토글
+ *
+ * Sidebar 에서 호출한다 (탭과 무관하게 항상 마운트돼 있어야 하므로).
+ * 브라우저의 북마크 추가(⌘D) 동작을 preventDefault로 덮어쓴다. */
+export function useCmdDShortcut(): void {
+  const catalogOpen = useStore((s) => s.catalogOpen);
+  const openCatalog = useStore((s) => s.openCatalog);
+  const closeCatalog = useStore((s) => s.closeCatalog);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "d") {
+        e.preventDefault();
+        if (catalogOpen) {
+          closeCatalog();
+        } else {
+          openCatalog();
+        }
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [catalogOpen, openCatalog, closeCatalog]);
+}

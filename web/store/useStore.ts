@@ -4,9 +4,19 @@ import type {
   DocumentSummary,
   SlashCommandMeta,
   Message,
-  QueryResponse,
+  QueryMetadata,
 } from "@/lib/types";
-import { postQuery } from "@/lib/api";
+import { postQueryStream } from "@/lib/api";
+
+function newId(prefix: string): string {
+  // crypto.randomUUID는 secure context(https/localhost)에서만 동작.
+  // fallback으로 타임스탬프 + random을 사용.
+  try {
+    return `${prefix}-${crypto.randomUUID()}`;
+  } catch {
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+}
 
 interface DocumentFilters {
   domain?: string;
@@ -27,16 +37,14 @@ interface Store {
 
   previewDocId: string | null;
 
+  catalogOpen: boolean;
+
   searchFocusToken: number;
   inputFocusToken: number;
 
   messages: Message[];
   isLoading: boolean;
   lastError: string | null;
-
-  providerConfig: string;
-  chunkingConfig: string | null;
-  topK: number;
 
   setSidebarCollapsed: (v: boolean) => void;
   toggleSidebar: () => void;
@@ -53,6 +61,9 @@ interface Store {
 
   openPreview: (docId: string) => void;
   closePreview: () => void;
+
+  openCatalog: () => void;
+  closeCatalog: () => void;
 
   requestSearchFocus: () => void;
   requestInputFocus: () => void;
@@ -76,16 +87,14 @@ export const useStore = create<Store>()(
 
       previewDocId: null,
 
+      catalogOpen: false,
+
       searchFocusToken: 0,
       inputFocusToken: 0,
 
       messages: [],
       isLoading: false,
       lastError: null,
-
-      providerConfig: "openai_gpt5mini",
-      chunkingConfig: null,
-      topK: 5,
 
       setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
       toggleSidebar: () =>
@@ -111,6 +120,9 @@ export const useStore = create<Store>()(
       openPreview: (docId) => set({ previewDocId: docId }),
       closePreview: () => set({ previewDocId: null }),
 
+      openCatalog: () => set({ catalogOpen: true }),
+      closeCatalog: () => set({ catalogOpen: false }),
+
       requestSearchFocus: () =>
         set((s) => ({ searchFocusToken: s.searchFocusToken + 1 })),
 
@@ -128,60 +140,84 @@ export const useStore = create<Store>()(
       sendMessage: async (text) => {
         const state = get();
         const userMessage: Message = {
-          id: `user-${Date.now()}`,
+          id: newId("user"),
           role: "user",
           content: text,
           createdAt: Date.now(),
         };
+        const assistantId = newId("assistant");
+        const assistantMessage: Message = {
+          id: assistantId,
+          role: "assistant",
+          content: "",
+          createdAt: Date.now(),
+          citations: [],
+        };
         set({
-          messages: [...state.messages, userMessage],
+          messages: [...state.messages, userMessage, assistantMessage],
           isLoading: true,
           lastError: null,
         });
 
-        try {
-          const response: QueryResponse = await postQuery({
-            question: text,
-            provider_config: state.providerConfig,
-            chunking_config: state.chunkingConfig,
-            mentioned_doc_ids: state.pinnedDocs.map((d) => d.id),
-            command: state.activeCommand?.id ?? null,
-            top_k: state.topK,
-            max_context_chars: 8000,
-          });
+        // eslint-disable-next-line prefer-const
+        let finalMetadata = null as QueryMetadata | null;
 
-          const assistantMessage: Message = {
-            id: `assistant-${Date.now()}`,
-            role: "assistant",
-            content: response.answer,
-            createdAt: Date.now(),
-            citations: response.citations,
-            metadata: response.metadata,
-          };
+        const updateAssistant = (patch: Partial<Message>) =>
           set((s) => ({
-            messages: [...s.messages, assistantMessage],
-            isLoading: false,
+            messages: s.messages.map((m) =>
+              m.id === assistantId ? { ...m, ...patch } : m
+            ),
           }));
 
-          if (response.metadata.command_applied === "초기화") {
+        const appendDelta = (delta: string) =>
+          set((s) => ({
+            messages: s.messages.map((m) =>
+              m.id === assistantId ? { ...m, content: m.content + delta } : m
+            ),
+          }));
+
+        try {
+          await postQueryStream(
+            {
+              question: text,
+              mentioned_doc_ids: state.pinnedDocs.map((d) => d.id),
+              command: state.activeCommand?.id ?? null,
+            },
+            (event) => {
+              switch (event.type) {
+                case "retrieval":
+                  updateAssistant({ citations: event.citations });
+                  break;
+                case "token":
+                  appendDelta(event.delta);
+                  break;
+                case "done":
+                  finalMetadata = event.metadata;
+                  updateAssistant({ metadata: event.metadata });
+                  break;
+                case "error":
+                  updateAssistant({
+                    content: `오류: ${event.message}`,
+                    error: event.message,
+                  });
+                  set({ lastError: event.message });
+                  break;
+              }
+            }
+          );
+
+          set({ isLoading: false });
+
+          if (finalMetadata?.command_applied === "초기화") {
             set({ pinnedDocs: [], activeCommand: null });
           }
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
-          set((s) => ({
-            messages: [
-              ...s.messages,
-              {
-                id: `error-${Date.now()}`,
-                role: "assistant",
-                content: `오류: ${message}`,
-                createdAt: Date.now(),
-                error: message,
-              },
-            ],
-            isLoading: false,
-            lastError: message,
-          }));
+          updateAssistant({
+            content: `오류: ${message}`,
+            error: message,
+          });
+          set({ isLoading: false, lastError: message });
         }
       },
     }),

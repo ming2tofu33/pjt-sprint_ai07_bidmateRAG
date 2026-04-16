@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 
 
 class Document(BaseModel):
-    """Normalized document record created during ingestion."""
+    """인제스트 과정에서 생성되는 정규화된 문서 레코드."""
 
     doc_id: str
     source_path: str
@@ -24,7 +24,7 @@ class Document(BaseModel):
 
 
 class Chunk(BaseModel):
-    """Chunk generated from a parsed and cleaned document."""
+    """파싱·정제된 문서에서 생성된 청크."""
 
     chunk_id: str
     doc_id: str
@@ -51,10 +51,11 @@ class Chunk(BaseModel):
 
 
 class RetrievedChunk(BaseModel):
-    """Chunk and retrieval score returned from a retriever."""
+    """리트리버가 반환하는 청크와 검색 점수."""
 
     rank: int
     score: float
+    rerank_score: float | None = None
     chunk: Chunk
 
     def to_record(self) -> dict[str, Any]:
@@ -71,7 +72,7 @@ class RetrievedChunk(BaseModel):
 
 
 class GenerationResult(BaseModel):
-    """One answer generated for one evaluation or live query."""
+    """평가 또는 라이브 질의에 대해 생성된 하나의 답변."""
 
     question_id: str
     question: str
@@ -118,7 +119,7 @@ class GenerationResult(BaseModel):
 
 
 class EvalSample(BaseModel):
-    """One evaluation-set question."""
+    """평가셋의 질문 하나."""
 
     question_id: str
     question: str
@@ -128,7 +129,7 @@ class EvalSample(BaseModel):
 
 
 class BenchmarkRunResult(BaseModel):
-    """Benchmark run summary and raw per-question results."""
+    """벤치마크 실행 요약 및 질문별 원시 결과."""
 
     experiment_name: str
     run_id: str

@@ -5,7 +5,7 @@ import { useStore } from "@/store/useStore";
 import { TabBar } from "./TabBar";
 import { ChatTab } from "./ChatTab";
 import { DocumentsTab } from "./DocumentsTab";
-import { useCmdBShortcut, useCmdKShortcut } from "@/lib/keyboard";
+import { useCmdBShortcut, useCmdKShortcut, useCmdDShortcut } from "@/lib/keyboard";
 import { Button } from "@/components/ui/button";
 
 export function Sidebar() {
@@ -14,6 +14,7 @@ export function Sidebar() {
   const activeTab = useStore((s) => s.activeTab);
   useCmdBShortcut();
   useCmdKShortcut();
+  useCmdDShortcut();
 
   if (collapsed) {
     return (

@@ -51,6 +51,12 @@ def client(sample_frame):
     @asynccontextmanager
     async def test_lifespan(app: FastAPI):
         app.state.metadata_store = MetadataStore(sample_frame)
+        app.state.web_config = {
+            "provider_config": "openai_gpt5mini",
+            "chunking_config": None,
+            "top_k": 5,
+            "max_context_chars": 8000,
+        }
         yield
 
     test_app = FastAPI(title="BidMate Web API (Test)", version="0.1.0", lifespan=test_lifespan)

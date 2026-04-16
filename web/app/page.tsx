@@ -2,6 +2,7 @@
 
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { DocumentPreviewModal } from "@/components/sidebar/DocumentPreviewModal";
+import { DocumentCatalogModal } from "@/components/sidebar/DocumentCatalogModal";
 import { ContextHeader } from "@/components/header/ContextHeader";
 import { ChatLayout } from "@/components/chat/ChatLayout";
 import { InputBar } from "@/components/input/InputBar";
@@ -18,6 +19,7 @@ export default function Page() {
         <InputBar />
       </main>
       <DocumentPreviewModal />
+      <DocumentCatalogModal />
     </div>
   );
 }

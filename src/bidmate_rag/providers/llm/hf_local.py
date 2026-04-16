@@ -6,7 +6,7 @@ import time
 from uuid import uuid4
 from pathlib import Path
 from bidmate_rag.config.prompts import build_rag_user_prompt
-from bidmate_rag.generation.context_builder import build_context_block
+from bidmate_rag.generation.context_builder import build_numbered_context_block
 from bidmate_rag.providers.llm.base import BaseLLMProvider
 from bidmate_rag.schema import GenerationResult, RetrievedChunk
 
@@ -71,9 +71,11 @@ class HFLocalLLM(BaseLLMProvider):
         generation_config: dict,
         system_prompt: str,
     ) -> GenerationResult:
-        context = build_context_block(
+        context, used_indices = build_numbered_context_block(
             context_chunks, max_chars=generation_config.get("max_context_chars", 8000)
         )
+        # LLM이 실제로 본 청크만 유지 — 본문 [n]과 Citation 카드 매칭 일치.
+        visible_chunks = [context_chunks[i] for i in used_indices]
         prompt = build_rag_user_prompt(question, context)
         generator = self._get_generator()
         tokenizer = generator.tokenizer
@@ -107,9 +109,9 @@ class HFLocalLLM(BaseLLMProvider):
             llm_provider=self.provider_name,
             llm_model=self.model_name,
             answer=generated_text,
-            retrieved_chunk_ids=[chunk.chunk.chunk_id for chunk in context_chunks],
-            retrieved_doc_ids=[chunk.chunk.doc_id for chunk in context_chunks],
-            retrieved_chunks=context_chunks,
+            retrieved_chunk_ids=[chunk.chunk.chunk_id for chunk in visible_chunks],
+            retrieved_doc_ids=[chunk.chunk.doc_id for chunk in visible_chunks],
+            retrieved_chunks=visible_chunks,
             latency_ms=latency_ms,
             token_usage={
                 "prompt": input_tokens,

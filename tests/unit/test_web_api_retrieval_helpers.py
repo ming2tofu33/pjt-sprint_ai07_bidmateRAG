@@ -36,7 +36,7 @@ class _FakeRetriever:
         self.calls.append(
             {"query": query, "top_k": top_k, "metadata_filter": dict(metadata_filter or {})}
         )
-        doc_id = metadata_filter["doc_id"]
+        doc_id = metadata_filter["$or"][0]["doc_id"]
         return [_make_chunk(doc_id, i + 1, 0.9 - 0.1 * i) for i in range(top_k)]
 
 
@@ -50,7 +50,9 @@ def test_per_doc_split_retrieves_each_doc_separately() -> None:
     )
 
     assert len(retriever.calls) == 3
-    per_doc_ks = {call["metadata_filter"]["doc_id"]: call["top_k"] for call in retriever.calls}
+    per_doc_ks = {
+        call["metadata_filter"]["$or"][0]["doc_id"]: call["top_k"] for call in retriever.calls
+    }
     # 9 // 3 + 2 = 5
     assert per_doc_ks == {"A": 5, "B": 5, "C": 5}
 

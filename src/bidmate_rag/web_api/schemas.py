@@ -49,15 +49,20 @@ class SlashCommandMeta(BaseModel):
 
 
 class QueryRequest(BaseModel):
-    """POST /api/query 요청 바디."""
+    """POST /api/query 요청 바디.
+
+    `provider_config`/`chunking_config`/`top_k`/`max_context_chars`를
+    생략하면 서버의 `configs/web.yaml` 기본값으로 폴백된다. 웹 UI 배포 조합
+    변경 시 그 파일만 수정하면 전체 클라이언트에 반영된다.
+    """
 
     question: str
-    provider_config: str = "openai_gpt5mini"
+    provider_config: str | None = None
     chunking_config: str | None = None
     mentioned_doc_ids: list[str] = Field(default_factory=list)
     command: str | None = None
-    top_k: int = 5
-    max_context_chars: int = 8000
+    top_k: int | None = None
+    max_context_chars: int | None = None
 
 
 class Citation(BaseModel):
