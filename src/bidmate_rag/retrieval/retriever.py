@@ -59,15 +59,25 @@ class RAGRetriever:
     def _extract_scope_key(self, where: dict | None) -> tuple[str, list[str]] | None:
         if not where:
             return None
-        value = where.get("발주 기관")
-        if isinstance(value, dict):
+        for key in ("발주 기관", "파일명", "사업명"):
+            value = where.get(key)
+            if not isinstance(value, dict):
+                continue
             scoped_values = value.get("$in")
             if isinstance(scoped_values, list) and len(scoped_values) >= 2:
-                return "발주 기관", scoped_values
+                return key, scoped_values
         return None
 
-    def _should_run_scoped_queries(self, query: str, where: dict | None) -> bool:
-        return should_fan_out_multi_source_query(query) and self._extract_scope_key(where) is not None
+    def _should_run_scoped_queries(
+        self,
+        query: str,
+        where: dict | None,
+        *,
+        force_scoped: bool = False,
+    ) -> bool:
+        if self._extract_scope_key(where) is None:
+            return False
+        return force_scoped or should_fan_out_multi_source_query(query)
 
     def _build_scoped_filters(self, where: dict) -> list[dict]:
         scoped_target = self._extract_scope_key(where)
@@ -175,7 +185,7 @@ class RAGRetriever:
         candidate_docs: list[str] = []
         seen_docs: set[str] = set()
         for clue in project_clues[:5]:
-            for doc in self.metadata_store.find_relevant_docs(clue, top_n=1):
+            for doc in self.metadata_store.find_relevant_docs(clue, top_n=2):
                 if doc and doc not in seen_docs:
                     candidate_docs.append(doc)
                     seen_docs.add(doc)
@@ -189,10 +199,12 @@ class RAGRetriever:
         query: str,
         where: dict | None,
         section_hint: str | None,
+        *,
+        force_scoped: bool = False,
     ) -> dict | None:
         if not section_hint:
             return None
-        if self._should_run_scoped_queries(query, where):
+        if self._should_run_scoped_queries(query, where, force_scoped=force_scoped):
             return None
         return {"$contains": section_hint}
 
@@ -206,8 +218,9 @@ class RAGRetriever:
         sparse_pool_k: int,
         where: dict | None,
         where_document: dict | None,
+        force_scoped: bool = False,
     ) -> list:
-        if self._should_run_scoped_queries(query, where):
+        if self._should_run_scoped_queries(query, where, force_scoped=force_scoped):
             scoped_dense_top_k = max(top_k * 2, dense_pool_k if self.reranker is not None else 0)
             scoped_sparse_top_k = (
                 max(top_k * 2, sparse_pool_k if self.reranker is not None else 0)
@@ -260,12 +273,15 @@ class RAGRetriever:
             if self.enable_multiturn
             else query
         )
+        matched_agencies = extract_matched_agencies(resolved_query, agency_list)
+        project_clues = extract_project_clues(resolved_query)
+        force_scoped = len(matched_agencies) >= 2 or len(project_clues) >= 2
 
         base_where: dict | None = None
         if metadata_filter is not None:
             base_where = dict(metadata_filter) if metadata_filter else None
             where = dict(base_where) if base_where else None
-            where = self._augment_where_with_project_docs(query, where)
+            where = self._augment_where_with_project_docs(resolved_query, where)
             where = self._augment_where_with_history_docs(query, where, chat_history)
         else:
             base_where = extract_metadata_filters(
@@ -275,13 +291,8 @@ class RAGRetriever:
             )
             where = dict(base_where) if base_where else None
 
-            matched_agencies = extract_matched_agencies(resolved_query, agency_list)
-            if (
-                where is None
-                and len(matched_agencies) >= 2
-                and should_fan_out_multi_source_query(resolved_query)
-            ):
-                where = {"발주 기관": {"$in": matched_agencies}}
+            if len(matched_agencies) >= 2:
+                where = {**(where or {}), "발주 기관": {"$in": matched_agencies}}
                 base_where = dict(where)
 
             if self.enable_multiturn and (where is None or "발주 기관" not in where):
@@ -296,7 +307,7 @@ class RAGRetriever:
                 where = {**(where or {}), **range_filter}
                 base_where = {**(base_where or {}), **range_filter}
 
-            where = self._augment_where_with_project_docs(query, where)
+            where = self._augment_where_with_project_docs(resolved_query, where)
             where = self._augment_where_with_history_docs(query, where, chat_history)
 
             if where is None and self.metadata_store is not None:
@@ -316,7 +327,12 @@ class RAGRetriever:
         )
         section_hint = extract_section_hint(resolved_query)
         where_document = (
-            self._build_where_document(resolved_query, where, section_hint)
+            self._build_where_document(
+                resolved_query,
+                where,
+                section_hint,
+                force_scoped=force_scoped,
+            )
             if metadata_filter is not None
             else None
         )
@@ -330,6 +346,7 @@ class RAGRetriever:
             sparse_pool_k=sparse_pool_k,
             where=where,
             where_document=where_document,
+            force_scoped=force_scoped,
         )
 
         if not results and where_document is not None:
@@ -351,7 +368,12 @@ class RAGRetriever:
             and not self._has_doc_level_constraint(base_where)
         ):
             base_where_document = (
-                self._build_where_document(resolved_query, base_where, section_hint)
+                self._build_where_document(
+                    resolved_query,
+                    base_where,
+                    section_hint,
+                    force_scoped=force_scoped,
+                )
                 if metadata_filter is not None
                 else None
             )
@@ -363,6 +385,7 @@ class RAGRetriever:
                 sparse_pool_k=sparse_pool_k,
                 where=base_where,
                 where_document=base_where_document,
+                force_scoped=force_scoped,
             )
 
         results = cross_encoder_rerank(self.reranker, resolved_query, results, final_top_k)

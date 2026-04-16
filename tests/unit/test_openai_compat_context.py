@@ -78,8 +78,12 @@ def test_openai_provider_builds_metadata_aware_context_block() -> None:
 
     prompt = client.chat.completions.last_call["messages"][-1]["content"]
 
-    assert "[출처: 차세대 ERP 구축 | 한국가스공사 | 한국가스공사_erp.hwp]" in prompt
+    assert "[문서: 차세대 ERP 구축 | 한국가스공사 | 한국가스공사_erp.hwp]" in prompt
     assert "사업 금액=약 3억원" in prompt
     assert "핵심 요구사항" in prompt
+    assert "## 작성 절차" in prompt
+    assert "질문을 먼저 해석" in prompt
+    assert "문서에 없는 항목" in prompt
     # 청크 앞에 인용 번호 prefix가 붙는다 — LLM이 답변에서 [1], [2]로 인용할 수 있도록.
-    assert result.context.startswith("[1] [출처: 차세대 ERP 구축 | 한국가스공사 | 한국가스공사_erp.hwp]")
+    assert result.context.startswith("[문서: 차세대 ERP 구축 | 한국가스공사 | 한국가스공사_erp.hwp]")
+    assert "\n\n[1] 섹션=요구사항" in result.context

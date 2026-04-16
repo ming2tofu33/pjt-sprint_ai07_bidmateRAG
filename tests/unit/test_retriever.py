@@ -132,6 +132,18 @@ class ScopedFakeVectorStore:
         return self.results_by_agency[agency][: kwargs["top_k"]]
 
 
+class ScopedFieldFakeVectorStore:
+    def __init__(self, field_name: str, results_by_value: dict[str, list[RetrievedChunk]]):
+        self.field_name = field_name
+        self.results_by_value = results_by_value
+        self.calls: list[dict] = []
+
+    def query(self, **kwargs):
+        self.calls.append(kwargs)
+        value = kwargs["where"][self.field_name]
+        return self.results_by_value[value][: kwargs["top_k"]]
+
+
 class SequenceFakeVectorStore:
     def __init__(self, responses: list[list[RetrievedChunk]]):
         self.responses = responses
@@ -233,7 +245,7 @@ def test_retriever_uses_hybrid_rrf_when_sparse_store_enabled() -> None:
     assert results[0].chunk.metadata["retrieval_source"] == "hybrid"
 
 
-def test_retriever_uses_metadata_store_shortlist_when_no_explicit_filter() -> None:
+def test_retriever_fans_out_metadata_store_shortlist_when_query_has_comparison_intent() -> None:
     vector_store = FakeVectorStore()
     retriever = RAGRetriever(
         vector_store=vector_store,
@@ -243,12 +255,15 @@ def test_retriever_uses_metadata_store_shortlist_when_no_explicit_filter() -> No
 
     results = retriever.retrieve("비슷한 사업 비교해줘", top_k=2)
 
-    assert len(vector_store.calls) == 1
-    assert vector_store.last_kwargs["where"] == {"파일명": {"$in": ["doc-1.hwp", "doc-2.hwp"]}}
+    assert len(vector_store.calls) == 2
+    assert [call["where"]["파일명"] for call in vector_store.calls] == [
+        "doc-1.hwp",
+        "doc-2.hwp",
+    ]
     assert results[0].score > 0
 
 
-def test_retriever_does_not_fan_out_generic_shortlist_each_query() -> None:
+def test_retriever_fans_out_generic_shortlist_when_query_requests_per_source_summary() -> None:
     vector_store = FakeVectorStore()
     retriever = RAGRetriever(
         vector_store=vector_store,
@@ -258,8 +273,11 @@ def test_retriever_does_not_fan_out_generic_shortlist_each_query() -> None:
 
     retriever.retrieve("요구사항을 각각 정리해줘", top_k=2)
 
-    assert len(vector_store.calls) == 1
-    assert vector_store.last_kwargs["where"] == {"파일명": {"$in": ["doc-1.hwp", "doc-2.hwp"]}}
+    assert len(vector_store.calls) == 2
+    assert [call["where"]["파일명"] for call in vector_store.calls] == [
+        "doc-1.hwp",
+        "doc-2.hwp",
+    ]
 
 
 def test_retriever_merges_multi_agency_filter_results_round_robin() -> None:
@@ -341,6 +359,113 @@ def test_retriever_fans_out_multi_agency_filter_for_per_source_each_query() -> N
     ]
     assert [call["top_k"] for call in vector_store.calls] == [4, 4]
     assert [result.chunk.chunk_id for result in results] == ["nps-1", "ibs-1"]
+
+
+def test_retriever_auto_fans_out_when_query_mentions_two_agencies() -> None:
+    class LocalComparisonMetadataStore:
+        agency_list = ["경기도 안양시", "경기도사회서비스원"]
+
+        def find_relevant_docs(self, query: str, top_n: int = 3):
+            return []
+
+    vector_store = ScopedFakeVectorStore(
+        {
+            "경기도 안양시": [_retrieved_chunk("anyang-1", 0.99, agency="경기도 안양시")],
+            "경기도사회서비스원": [
+                _retrieved_chunk("ggsw-1", 0.97, agency="경기도사회서비스원")
+            ],
+        }
+    )
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=FakeEmbedder(),
+        metadata_store=LocalComparisonMetadataStore(),
+    )
+
+    results = retriever.retrieve(
+        "안양시 사업이랑 경기도사회서비스원 사업은 규정과 관련된 접근 통제를 명시하고 있습니다. 각각 알려줘",
+        top_k=2,
+    )
+
+    assert [call["where"]["발주 기관"] for call in vector_store.calls] == [
+        "경기도 안양시",
+        "경기도사회서비스원",
+    ]
+    assert [call["top_k"] for call in vector_store.calls] == [4, 4]
+    assert [result.chunk.chunk_id for result in results] == ["anyang-1", "ggsw-1"]
+
+
+def test_retriever_fans_out_file_scopes_for_multi_project_comparison() -> None:
+    vector_store = ScopedFieldFakeVectorStore(
+        "파일명",
+        {
+            "mobile-1.hwp": [
+                _retrieved_chunk(
+                    "mobile-1",
+                    0.99,
+                    agency="한국철도공사 (용역)",
+                    doc_id="mobile-1",
+                    file_name="mobile-1.hwp",
+                )
+            ],
+            "mobile-2.hwp": [
+                _retrieved_chunk(
+                    "mobile-2",
+                    0.98,
+                    agency="한국철도공사 (용역)",
+                    doc_id="mobile-2",
+                    file_name="mobile-2.hwp",
+                )
+            ],
+            "reserve-1.hwp": [
+                _retrieved_chunk(
+                    "reserve-1",
+                    0.97,
+                    agency="한국철도공사 (용역)",
+                    doc_id="reserve-1",
+                    file_name="reserve-1.hwp",
+                )
+            ],
+            "reserve-2.hwp": [
+                _retrieved_chunk(
+                    "reserve-2",
+                    0.96,
+                    agency="한국철도공사 (용역)",
+                    doc_id="reserve-2",
+                    file_name="reserve-2.hwp",
+                )
+            ],
+        },
+    )
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=FakeEmbedder(),
+        metadata_store=ProjectAwareFakeMetadataStore(
+            {
+                "모바일오피스 시스템 고도화 용역": ["mobile-1.hwp", "mobile-2.hwp"],
+                "예약발매시스템 개량 ISMP 용역": ["reserve-1.hwp", "reserve-2.hwp"],
+            }
+        ),
+    )
+
+    results = retriever.retrieve(
+        '"모바일오피스 시스템 고도화 용역"과 "예약발매시스템 개량 ISMP 용역"을 비교해줘',
+        top_k=4,
+        metadata_filter={"발주 기관": "한국철도공사 (용역)"},
+    )
+
+    assert [call["where"]["파일명"] for call in vector_store.calls] == [
+        "mobile-1.hwp",
+        "mobile-2.hwp",
+        "reserve-1.hwp",
+        "reserve-2.hwp",
+    ]
+    assert [result.chunk.chunk_id for result in results] == [
+        "mobile-1",
+        "mobile-2",
+        "reserve-1",
+        "reserve-2",
+    ]
 
 
 def test_retriever_prefers_document_diversity_for_scoped_comparison() -> None:
@@ -512,10 +637,11 @@ def test_retriever_adds_project_doc_shortlist_for_quoted_multi_project_query() -
         metadata_filter={"공개연도": 2024},
     )
 
-    assert vector_store.last_kwargs["where"] == {
-        "공개연도": 2024,
-        "파일명": {"$in": ["anyang.hwp", "pyeongtaek.hwp", "ggsw.hwp"]},
-    }
+    assert [call["where"] for call in vector_store.calls] == [
+        {"공개연도": 2024, "파일명": "anyang.hwp"},
+        {"공개연도": 2024, "파일명": "pyeongtaek.hwp"},
+        {"공개연도": 2024, "파일명": "ggsw.hwp"},
+    ]
 
 
 def test_retriever_applies_cross_encoder_after_multi_agency_fan_out_merge() -> None:
@@ -694,6 +820,7 @@ def test_retriever_retries_without_shortlist_when_augmented_where_returns_no_res
     vector_store = SequenceFakeVectorStore(
         responses=[
             [],
+            [],
             [_retrieved_chunk("fallback-hit", 0.88, agency="한국철도공사 (용역)")],
         ]
     )
@@ -714,12 +841,16 @@ def test_retriever_retries_without_shortlist_when_augmented_where_returns_no_res
         metadata_filter={"발주 기관": "한국철도공사 (용역)"},
     )
 
-    assert len(vector_store.calls) == 2
+    assert len(vector_store.calls) == 3
     assert vector_store.calls[0]["where"] == {
         "발주 기관": "한국철도공사 (용역)",
-        "파일명": {"$in": ["wrong-doc-1.hwp", "wrong-doc-2.hwp"]},
+        "파일명": "wrong-doc-1.hwp",
     }
-    assert vector_store.calls[1]["where"] == {"발주 기관": "한국철도공사 (용역)"}
+    assert vector_store.calls[1]["where"] == {
+        "발주 기관": "한국철도공사 (용역)",
+        "파일명": "wrong-doc-2.hwp",
+    }
+    assert vector_store.calls[2]["where"] == {"발주 기관": "한국철도공사 (용역)"}
     assert [result.chunk.chunk_id for result in results] == ["fallback-hit"]
 
 

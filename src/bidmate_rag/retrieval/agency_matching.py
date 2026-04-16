@@ -11,6 +11,9 @@ _AGENCY_NOISE_PATTERN = re.compile(r"[^0-9A-Za-z가-힣]+")
 _LEADING_YEAR_PATTERN = re.compile(r"^(?:19|20)\d{2}\s+")
 _TRAILING_DESCRIPTOR_PATTERN = re.compile(r"\s*[\(（][^()（）]{1,20}[\)）]\s*$")
 _TRAILING_PORTAL_SUFFIX_PATTERN = re.compile(r"\s+(?:입찰공고|전자조달)$")
+_LOCAL_GOVERNMENT_ALIAS_PATTERN = re.compile(
+    r"^(?P<region>[가-힣]+(?:특별시|광역시|특별자치시|특별자치도|도))\s+(?P<local>[가-힣]+(?:시|군|구))$"
+)
 _KNOWN_ACRONYM_ALIASES = {
     "KOICA": "코이카",
 }
@@ -55,6 +58,10 @@ def _derive_structural_aliases(value: str) -> list[str]:
         portal_stripped = _TRAILING_PORTAL_SUFFIX_PATTERN.sub("", current).strip()
         if portal_stripped and portal_stripped != current:
             queue.append(portal_stripped)
+
+        local_government_match = _LOCAL_GOVERNMENT_ALIAS_PATTERN.match(current)
+        if local_government_match:
+            queue.append(local_government_match.group("local"))
 
     return aliases
 

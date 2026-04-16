@@ -73,11 +73,15 @@ def test_hf_local_provider_uses_metadata_aware_context_and_honors_context_limit(
 
     full_input = generator.last_call["full_input"]
 
-    assert "[출처: 차세대 ERP 구축 | 한국가스공사 | 한국가스공사_erp.hwp]" in full_input
+    assert "[문서: 차세대 ERP 구축 | 한국가스공사 | 한국가스공사_erp.hwp]" in full_input
     assert "사업 금액=약 3억원" in full_input
     assert "핵심 요구사항" in full_input
+    assert "## 작성 절차" in full_input
+    assert "비교형 질문이면 기관/사업별로" in full_input
+    assert "문서에 없는 항목" in full_input
     assert "두번째 문맥" not in full_input
     assert generator.last_call["max_new_tokens"] == 64
-    # 청크 앞에 인용 번호 prefix가 붙는다 — LLM이 답변에서 [1], [2]로 인용할 수 있도록.
-    assert result.context.startswith("[1] [출처: 차세대 ERP 구축 | 한국가스공사 | 한국가스공사_erp.hwp]")
+    # 같은 문서의 청크는 문서 헤더 아래 그룹으로 묶이고, 인용 번호는 청크 본문에 유지된다.
+    assert result.context.startswith("[문서: 차세대 ERP 구축 | 한국가스공사 | 한국가스공사_erp.hwp]")
     assert "두번째 문맥" not in result.context
+    assert "\n\n[1] 섹션=요구사항" in result.context

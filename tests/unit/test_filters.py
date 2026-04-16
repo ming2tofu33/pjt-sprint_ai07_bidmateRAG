@@ -1,5 +1,6 @@
 from bidmate_rag.retrieval.filters import (
     extract_metadata_filters,
+    extract_matched_agencies,
     extract_project_clues,
     extract_range_filters,
     extract_section_hint,
@@ -16,6 +17,15 @@ def test_extract_metadata_filters_prefers_exact_agency_match() -> None:
     )
 
     assert filters == {"발주 기관": "국민연금공단"}
+
+
+def test_extract_matched_agencies_supports_local_government_short_alias() -> None:
+    matched = extract_matched_agencies(
+        query="안양시 사업이랑 경기도사회서비스원 사업의 접근 통제 규정을 비교해줘",
+        agency_list=["경기도 안양시", "경기도사회서비스원"],
+    )
+
+    assert matched == ["경기도 안양시", "경기도사회서비스원"]
 
 
 def test_extract_metadata_filters_uses_domain_when_agency_absent() -> None:

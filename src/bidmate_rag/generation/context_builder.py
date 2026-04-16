@@ -106,16 +106,101 @@ def _build_chunk_block(chunk: RetrievedChunk) -> str:
     return text
 
 
+def _get_group_key(chunk: RetrievedChunk) -> str:
+    metadata = chunk.chunk.metadata
+    for key in ("파일명", "사업명", "doc_id"):
+        value = metadata.get(key) if key != "doc_id" else chunk.chunk.doc_id
+        cleaned = _clean_text(value)
+        if cleaned is not None:
+            return cleaned
+    return chunk.chunk.chunk_id
+
+
+def _build_doc_label(chunk: RetrievedChunk) -> str:
+    metadata = chunk.chunk.metadata
+    parts: list[str] = []
+    for key in _SOURCE_KEYS:
+        value = _clean_text(metadata.get(key))
+        if value is not None:
+            parts.append(value)
+    return " | ".join(parts) if parts else chunk.chunk.doc_id
+
+
+def _build_grouped_chunk_body(chunk: RetrievedChunk) -> str:
+    lines: list[str] = []
+
+    section = _clean_text(chunk.chunk.section)
+    if section:
+        lines.append(f"섹션={section}")
+
+    for key in _DETAIL_KEYS:
+        line = _format_metadata_line(key, chunk.chunk.metadata.get(key))
+        if line is not None:
+            lines.append(line)
+
+    text = chunk.chunk.text
+    if text:
+        lines.append(text)
+
+    return "\n".join(lines)
+
+
+def _render_grouped_context(
+    chunks: list[RetrievedChunk], used_indices: list[int], *, with_citation_numbers: bool
+) -> str:
+    if not used_indices:
+        return ""
+
+    groups: list[tuple[str, RetrievedChunk, list[tuple[int, RetrievedChunk]]]] = []
+    group_lookup: dict[str, int] = {}
+
+    for citation_idx, chunk_idx in enumerate(used_indices, 1):
+        chunk = chunks[chunk_idx]
+        group_key = _get_group_key(chunk)
+        if group_key not in group_lookup:
+            group_lookup[group_key] = len(groups)
+            groups.append((group_key, chunk, []))
+        groups[group_lookup[group_key]][2].append((citation_idx, chunk))
+
+    rendered_groups: list[str] = []
+    for _group_key, first_chunk, grouped_items in groups:
+        header = f"[문서: {_build_doc_label(first_chunk)}]"
+        blocks = [header]
+        for citation_idx, chunk in grouped_items:
+            body = _build_grouped_chunk_body(chunk)
+            if with_citation_numbers:
+                blocks.append(f"[{citation_idx}] {body}")
+            else:
+                blocks.append(body)
+        rendered_groups.append("\n\n".join(blocks))
+
+    return "\n\n---\n\n".join(rendered_groups)
+
+
 def build_context_block(chunks: list[RetrievedChunk], max_chars: int = 8000) -> str:
     """Render retrieved chunks into a metadata-aware context block.
 
     백워드 호환용. LLM 경로에서는 `build_numbered_context_block`을 사용해
     `[n]` 인용 번호와 LLM이 실제로 본 청크 인덱스를 함께 받는 것을 권장.
     """
-    context, _used = build_numbered_context_block(
-        chunks, max_chars=max_chars, with_citation_numbers=False
-    )
-    return context
+    if max_chars <= 0:
+        return ""
+
+    parts: list[str] = []
+    total_chars = 0
+    separator = "\n\n---\n\n"
+
+    for chunk in chunks:
+        block = _build_chunk_block(chunk)
+        if not block:
+            continue
+        candidate = block if not parts else f"{separator}{block}"
+        if total_chars + len(candidate) > max_chars:
+            break
+        parts.append(block)
+        total_chars += len(candidate)
+
+    return separator.join(parts)
 
 
 def build_numbered_context_block(
@@ -143,7 +228,6 @@ def build_numbered_context_block(
     if max_chars <= 0:
         return "", []
 
-    parts: list[str] = []
     used_indices: list[int] = []
     total_chars = 0
     separator = "\n\n---\n\n"
@@ -156,11 +240,12 @@ def build_numbered_context_block(
             # 1-indexed 인용 번호를 청크 앞에 박는다. LLM이 답변에서 동일 번호로 참조.
             citation_idx = len(used_indices) + 1
             block = f"[{citation_idx}] {block}"
-        candidate = block if not parts else f"{separator}{block}"
+        candidate = block if not used_indices else f"{separator}{block}"
         if total_chars + len(candidate) > max_chars:
             break
-        parts.append(block)
         used_indices.append(idx)
         total_chars += len(candidate)
 
-    return separator.join(parts), used_indices
+    return _render_grouped_context(
+        chunks, used_indices, with_citation_numbers=with_citation_numbers
+    ), used_indices

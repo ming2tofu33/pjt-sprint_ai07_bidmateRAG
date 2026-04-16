@@ -1,4 +1,4 @@
-from bidmate_rag.generation.context_builder import build_context_block
+from bidmate_rag.generation.context_builder import build_context_block, build_numbered_context_block
 from bidmate_rag.schema import Chunk, RetrievedChunk
 
 
@@ -127,3 +127,51 @@ def test_build_context_block_respects_max_chars_budget() -> None:
     assert "사업 1" in context
     assert "사업 2" not in context
     assert context == "[출처: 사업 1 | 기관 1]\n짧은 본문"
+
+
+def test_build_numbered_context_block_groups_chunks_by_document() -> None:
+    chunks = [
+        _make_retrieved_chunk(
+            chunk_id="chunk-1",
+            text="첫 번째 문서의 첫 청크",
+            metadata={
+                "사업명": "사업 A",
+                "발주 기관": "기관 A",
+                "파일명": "a.hwp",
+                "사업 금액": 100000000,
+            },
+        ),
+        _make_retrieved_chunk(
+            chunk_id="chunk-2",
+            text="두 번째 문서의 첫 청크",
+            metadata={
+                "사업명": "사업 B",
+                "발주 기관": "기관 B",
+                "파일명": "b.hwp",
+                "사업 금액": 200000000,
+            },
+        ),
+        _make_retrieved_chunk(
+            chunk_id="chunk-3",
+            text="첫 번째 문서의 두 번째 청크",
+            metadata={
+                "사업명": "사업 A",
+                "발주 기관": "기관 A",
+                "파일명": "a.hwp",
+                "사업 금액": 100000000,
+            },
+        ),
+    ]
+
+    context, used_indices = build_numbered_context_block(chunks, max_chars=2000)
+
+    assert used_indices == [0, 1, 2]
+    assert context.count("[문서: 사업 A | 기관 A | a.hwp]") == 1
+    assert context.count("[문서: 사업 B | 기관 B | b.hwp]") == 1
+    assert "[1] 섹션=요구사항" in context
+    assert "[2] 섹션=요구사항" in context
+    assert "[3] 섹션=요구사항" in context
+    first_group_index = context.index("[문서: 사업 A | 기관 A | a.hwp]")
+    second_group_index = context.index("[문서: 사업 B | 기관 B | b.hwp]")
+    first_doc_second_chunk = context.index("첫 번째 문서의 두 번째 청크")
+    assert first_group_index < first_doc_second_chunk < second_group_index
