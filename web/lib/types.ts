@@ -80,3 +80,13 @@ export interface Message {
   metadata?: QueryMetadata;
   error?: string;
 }
+
+export interface Chat {
+  id: string;
+  title: string;
+  createdAt: number;
+  updatedAt: number;
+  messages: Message[];
+  pinnedDocs: DocumentSummary[];
+  activeCommand: SlashCommandMeta | null;
+}

@@ -185,9 +185,24 @@
   animation: bubble-in 200ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
   transform-origin: bottom center;
 }
+
+/* Citation [n] 클릭 시 Evidence 카드 1.8초 펄스 하이라이트 */
+@keyframes citation-flash {
+  0%   { box-shadow: 0 0 0 0 color-mix(in oklab, var(--imessage-blue) 60%, transparent); }
+  40%  { box-shadow: 0 0 0 4px color-mix(in oklab, var(--imessage-blue) 50%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--imessage-blue) 0%, transparent); }
+}
+.citation-flash {
+  animation: citation-flash 1.8s ease-out 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .imessage-bubble-enter,
   .imessage-dot {
     animation: none;
+  }
+  .citation-flash {
+    animation: none;
+    box-shadow: 0 0 0 2px var(--imessage-blue);
   }
 }

@@ -37,15 +37,15 @@ export function InputBar() {
   const activeCommand = useStore((s) => s.activeCommand);
   const isLoading = useStore((s) => s.isLoading);
   const sendMessage = useStore((s) => s.sendMessage);
+  const abortCurrentRequest = useStore((s) => s.abortCurrentRequest);
 
   const requiresDoc = activeCommand?.requires_doc && pinnedDocs.length === 0;
   const requiresMulti =
     activeCommand?.requires_multi_doc && pinnedDocs.length < 2;
+  // 스트리밍 중에는 버튼이 "중지"로 변신하므로 isLoading은 disabled 조건에서 제외.
   const sendDisabled =
-    isLoading ||
-    !text.trim() ||
-    Boolean(requiresDoc) ||
-    Boolean(requiresMulti);
+    !isLoading &&
+    (!text.trim() || Boolean(requiresDoc) || Boolean(requiresMulti));
 
   const disabledReason = requiresMulti
     ? `${activeCommand?.label}는 2개 이상 문서 멘션이 필요합니다`
@@ -59,6 +59,14 @@ export function InputBar() {
     if (!cleaned) return;
     sendMessage(cleaned);
     setText("");
+  };
+
+  const handleButtonClick = () => {
+    if (isLoading) {
+      abortCurrentRequest();
+      return;
+    }
+    handleSend();
   };
 
   return (
@@ -78,26 +86,45 @@ export function InputBar() {
           </div>
           <button
             type="button"
-            onClick={handleSend}
+            onClick={handleButtonClick}
             disabled={sendDisabled}
-            title={disabledReason}
-            aria-label="전송"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--imessage-blue)] text-white transition-all duration-150 ease-out active:scale-90 disabled:opacity-30 disabled:active:scale-100"
+            title={isLoading ? "생성 중지" : disabledReason}
+            aria-label={isLoading ? "생성 중지" : "전송"}
+            className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--imessage-blue)] text-white transition-all duration-150 ease-out before:absolute before:-inset-1.5 before:content-[''] active:scale-90 disabled:opacity-30 disabled:active:scale-100"
           >
-            <svg
-              viewBox="0 0 24 24"
-              width="18"
-              height="18"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M12 19V5" />
-              <path d="M5 12l7-7 7 7" />
-            </svg>
+            {isLoading ? (
+              // 정사각형 stop 아이콘
+              <svg
+                viewBox="0 0 24 24"
+                width="12"
+                height="12"
+                aria-hidden="true"
+              >
+                <rect
+                  x="6"
+                  y="6"
+                  width="12"
+                  height="12"
+                  rx="2"
+                  fill="currentColor"
+                />
+              </svg>
+            ) : (
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 19V5" />
+                <path d="M5 12l7-7 7 7" />
+              </svg>
+            )}
           </button>
         </div>
       </div>

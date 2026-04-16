@@ -13,6 +13,7 @@ const FIVE_MIN_MS = 5 * 60 * 1000;
 export function MessageList() {
   const messages = useStore((s) => s.messages);
   const isLoading = useStore((s) => s.isLoading);
+  const retryLastMessage = useStore((s) => s.retryLastMessage);
 
   if (messages.length === 0) {
     return (
@@ -62,6 +63,11 @@ export function MessageList() {
           ? "mt-[8px]"
           : "mt-[2px]";
 
+        // 마지막 메시지 & assistant & 에러 상태 & 스트리밍 중이 아닐 때만 retry 노출
+        const isLastMessage = i === messages.length - 1;
+        const canRetry =
+          isLastMessage && m.role === "assistant" && !!m.error && !isLoading;
+
         return (
           <Fragment key={m.id}>
             {showDivider && <TimestampDivider ts={m.createdAt} />}
@@ -73,25 +79,13 @@ export function MessageList() {
                   message={m}
                   showTail={isLastInGroup}
                   showMetadata={isLastInGroup}
+                  onRetry={canRetry ? retryLastMessage : undefined}
                 />
               )}
             </div>
           </Fragment>
         );
       })}
-      {isLoading && (
-        <div className="mt-[8px] flex justify-start px-2">
-          <div
-            className="imessage-bubble-assistant imessage-bubble-enter flex items-center gap-1 rounded-[20px_20px_20px_4px] px-4 py-3"
-            aria-label="답변 생성 중"
-            role="status"
-          >
-            <span className="imessage-dot h-2 w-2 rounded-full bg-neutral-500" />
-            <span className="imessage-dot h-2 w-2 rounded-full bg-neutral-500" />
-            <span className="imessage-dot h-2 w-2 rounded-full bg-neutral-500" />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
