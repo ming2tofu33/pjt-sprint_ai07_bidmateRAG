@@ -292,6 +292,7 @@ def _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_ch
     chunking = _render_chunking_selector(
         st, list_chunking_configs, key_prefix="run"
     )  # 청킹 선택 추가
+    top_k = st.slider("Top-K (검색 청크 수)", 1, 20, 5, key="run_topk")
 
     opt_col1, opt_col2 = st.columns(2)
     with opt_col1:
@@ -324,6 +325,7 @@ def _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_ch
             experiment_config_path=chunking,  # 청킹 전략 전달
             skip_judge=skip_judge,
             judge_model=judge_model,
+            top_k=top_k,  # 검색할 top_k 전달
             progress_callback=_on_progress,
             embedding_config_path=selected_embedding,  # 시나리오 A 임베딩 전달,
             llm_config_path=selected_llm,  # 시나리오 A LLM 전달

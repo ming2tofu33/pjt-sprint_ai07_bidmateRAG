@@ -62,6 +62,7 @@ def execute_evaluation(
     judge_model: str = "gpt-4o-mini",
     judge_v2: bool = False,
     progress_callback: ProgressCallback | None = None,
+    top_k: int | None = None,
 ) -> EvaluationArtifacts:
     """Run an evaluation end-to-end and write all artifacts to disk.
 
@@ -103,7 +104,7 @@ def execute_evaluation(
     )
 
     # ExperimentConfig.retrieval_top_k가 비어있으면 ProjectConfig 기본값 5.
-    top_k = runtime.experiment.retrieval_top_k or runtime.project.default_retrieval_top_k or 5
+    top_k = top_k or runtime.experiment.retrieval_top_k or runtime.project.default_retrieval_top_k or 5
 
     def answer_fn(sample: EvalSample) -> GenerationResult:
         # 평가셋의 metadata_filter / history를 retrieval에 실제로 적용

@@ -111,6 +111,7 @@ def build_runtime_pipeline(
     retrieval_config_path: str | Path | None = "configs/retrieval.yaml",
     persist_dir: str | Path = "artifacts/chroma_db",
     metadata_path: str | Path | None = None,
+    adapter_path: str | Path | None = None, # 어댑터 경로 추가
 ):
     """설정 파일들로부터 RAGChatPipeline을 조립한다.
 
@@ -133,13 +134,18 @@ def build_runtime_pipeline(
         retrieval_config_path,
     )
     embedder = build_embedding_provider(runtime.provider)
-    llm = build_llm_provider(runtime.provider)
+    
+    if adapter_path:# 어댑터 경로가 명시된 경우 LLM 생성 시 어댑터 적용
+        llm = build_llm_provider(runtime.provider, adapter_path=adapter_path)
+    else:
+        llm = build_llm_provider(runtime.provider)
+
     vector_store = ChromaVectorStore(
         persist_dir=persist_dir,
         collection_name=collection_name_for_config(runtime),
     )
     # collection이 비어있으면 자동으로 DB 생성
-    if vector_store.count() == 0:
+    if hasattr(vector_store, 'count') and vector_store.count() == 0:
         from bidmate_rag.pipelines.build_index import build_index_from_parquet
         chunks_path = Path("data/processed/chunks.parquet")
         if chunks_path.exists():

@@ -31,6 +31,14 @@ def list_provider_configs(config_dir: str | Path = "configs/providers") -> list[
 def list_chunking_configs(config_dir: str | Path = "configs/chunking") -> list[Path]:
     return sorted(Path(config_dir).glob("*.yaml"))
 
+# 학습된 어댑터 목록
+def list_adapters() -> list[Path]:
+    """artifacts/training/ 폴더에서 학습된 어댑터 목록 반환."""
+    adapter_root = Path("artifacts/training")
+    if not adapter_root.exists():
+        return []
+    return [p for p in sorted(adapter_root.iterdir()) if p.is_dir()]
+
 # 시나리오 A 임베딩 모델 목록
 def list_scenario_a_embeddings(
     config_dir: str | Path = "configs/providers/scenario_a/embeddings"
@@ -211,6 +219,7 @@ def run_live_query(
     max_context_chars: int = 8000,
     embedding_config_path: str | Path | None = None, # 시나리오 A 임베딩 설정 경로 (선택)
     llm_config_path: str | Path | None = None, # 시나리오 A LLM 설정 경로 (선택)
+    adapter_path: str | Path | None = None, # 어댑터 경로 (선택)
 ):
     """단일 RAG 쿼리를 실행한다 (라이브 데모 + 디버그 탭 공용).
 
@@ -229,7 +238,7 @@ def run_live_query(
     Returns:
         GenerationResult (답변, 검색 청크, 토큰 사용량 등).
     """
-  # 시나리오 A: 임베딩 + LLM yaml로 provider yaml 동적 생성
+    # 시나리오 A: 임베딩 + LLM yaml로 provider yaml 동적 생성
     if embedding_config_path and llm_config_path:
         provider_config_path = build_scenario_a_provider_config(
             embedding_config_path, llm_config_path
@@ -239,6 +248,7 @@ def run_live_query(
         base_config_path=base_config_path,
         provider_config_path=provider_config_path,
         experiment_config_path=experiment_config_path,
+        adapter_path=adapter_path, # 어댑터 경로 전달
     )
     # 2. 시스템 프롬프트 오버라이드 적용
     if system_prompt:
@@ -291,6 +301,8 @@ def run_benchmark_experiment(
     progress_callback=None,
     embedding_config_path: str | Path | None = None, # 시나리오 A 임베딩 설정 경로 (선택)
     llm_config_path: str | Path | None = None, # 시나리오
+    adapter_path: str | Path | None = None, # 어댑터 경로 
+    top_k: int = 5, # 검색할 청크 수 (기본값 5, ExperimentConfig.retrieval_top_k로 오버라이드 가능)
 ) -> EvaluationArtifacts:
     """런타임 파이프라인을 조립하고 전체 평가를 실행한다.
 
@@ -320,6 +332,7 @@ def run_benchmark_experiment(
         base_config_path=base_config_path,
         provider_config_path=provider_config_path,
         experiment_config_path=experiment_config_path,
+        adapter_path=adapter_path, # 어댑터 경로 전달
     )
     # 2. 평가셋 로딩 ("다중" 필터 → $in 변환을 위해 기관 목록 전달)
     agency_list = getattr(pipeline.retriever.metadata_store, "agency_list", [])
@@ -344,4 +357,5 @@ def run_benchmark_experiment(
         judge_model=judge_model,
         judge_v2=judge_v2,
         progress_callback=progress_callback,
+        top_k=top_k, # 검색할 청크 수 전달
     )

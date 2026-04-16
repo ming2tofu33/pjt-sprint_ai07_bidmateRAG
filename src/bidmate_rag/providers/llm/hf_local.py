@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 from uuid import uuid4
-
+from pathlib import Path
 from bidmate_rag.config.prompts import build_rag_user_prompt
 from bidmate_rag.generation.context_builder import build_context_block
 from bidmate_rag.providers.llm.base import BaseLLMProvider
@@ -12,10 +12,15 @@ from bidmate_rag.schema import GenerationResult, RetrievedChunk
 
 
 class HFLocalLLM(BaseLLMProvider):
-    def __init__(self, model_name: str, provider_name: str = "huggingface", generator=None) -> None:
+    def __init__(self, model_name: str, 
+                 provider_name: str = "huggingface", 
+                 generator=None,
+                 adapter_path: str | Path | None = None,) -> None:
         self.provider_name = provider_name
         self.model_name = model_name
         self._generator = generator
+        self.adapter_path = Path(adapter_path) if adapter_path else None
+        
 
     def _get_generator(self):
         """transformers pipeline을 생성한다. 4bit 양자화로 VRAM 절약 + 속도 향상."""
@@ -44,6 +49,10 @@ class HFLocalLLM(BaseLLMProvider):
                 device_map="auto",
             )
             tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+            if self.adapter_path and self.adapter_path.exists():
+                from peft import PeftModel
+                model = PeftModel.from_pretrained(model, str(self.adapter_path))
+                model = model.merge_and_unload()
             self._generator = pipeline(
                 "text-generation",
                 model=model,

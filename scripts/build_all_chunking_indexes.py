@@ -26,16 +26,16 @@ CHUNKING_CONFIGS = [
         "config": "configs/chunking/chunking_semantic_percentile.yaml",
         "chunks": "data/processed/semantic-percentile/chunks.parquet",
     },
-    {
-        "name": "chunking_semantic_std",
-        "config": "configs/chunking/chunking_semantic_std.yaml",
-        "chunks": "data/processed/semantic-std/chunks.parquet",
-    },
-    {
-        "name": "chunking_semantic_interquartile",
-        "config": "configs/chunking/chunking_semantic_interquartile.yaml",
-        "chunks": "data/processed/semantic-interquartile/chunks.parquet",
-    },
+    # {
+    #     "name": "chunking_semantic_std",
+    #     "config": "configs/chunking/chunking_semantic_std.yaml",
+    #     "chunks": "data/processed/semantic-std/chunks.parquet",
+    # },
+    # {
+    #     "name": "chunking_semantic_interquartile",
+    #     "config": "configs/chunking/chunking_semantic_interquartile.yaml",
+    #     "chunks": "data/processed/semantic-interquartile/chunks.parquet",
+    # },
 ]
 
 def run(cmd: list[str]) -> None:

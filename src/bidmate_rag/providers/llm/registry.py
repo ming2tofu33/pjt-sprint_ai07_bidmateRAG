@@ -9,7 +9,7 @@ from bidmate_rag.providers.llm.hf_local import HFLocalLLM
 from bidmate_rag.providers.llm.openai_compat import OpenAICompatibleLLM
 
 
-def build_llm_provider(config: ProviderConfig):
+def build_llm_provider(config: ProviderConfig, adapter_path = None):
     if config.provider in {"openai", "local-openai-compat", "openai-compat"}:
         return OpenAICompatibleLLM(
             provider_name=config.provider,
@@ -20,6 +20,7 @@ def build_llm_provider(config: ProviderConfig):
         return HFLocalLLM(
             provider_name=config.provider,
             model_name=config.model,
+            adapter_path=adapter_path,
         )
     raise ValueError(f"Unsupported llm provider: {config.provider}")
 
