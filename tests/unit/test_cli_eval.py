@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
+from bidmate_rag.cli.eval import _print_summary
 from bidmate_rag.config.settings import (
     ExperimentConfig,
     ProjectConfig,
@@ -230,3 +231,78 @@ def test_print_summary_hides_rewrite_sections_when_unused(capsys) -> None:
     assert "rewrite_cost_usd=" not in out
     assert "rewrite_total_tokens=" not in out
     assert " rewrite=" not in out
+
+
+def test_print_summary_renders_per_type_retrieval_section(capsys) -> None:
+    """overall_metrics에 retrieval_by_type가 있으면 CLI가 별도 섹션으로 출력한다."""
+    samples = [
+        EvalSample(
+            question_id="q1",
+            question="q",
+            expected_doc_titles=["q1.hwp"],
+            metadata={"type": "A", "difficulty": "중"},
+        ),
+        EvalSample(
+            question_id="q2",
+            question="q",
+            expected_doc_titles=["q2.hwp"],
+            metadata={"type": "C", "difficulty": "중"},
+        ),
+    ]
+    results = [
+        GenerationResult(
+            question_id="q1",
+            question="q",
+            scenario="scenario_b",
+            run_id="run-1",
+            embedding_provider="openai",
+            embedding_model="text-embedding-3-small",
+            llm_provider="fake",
+            llm_model="fake-model",
+            answer="ans",
+            retrieved_chunk_ids=[],
+            retrieved_doc_ids=[],
+            retrieved_chunks=[],
+            latency_ms=1.0,
+            token_usage={"total": 100},
+            cost_usd=0.001,
+        ),
+        GenerationResult(
+            question_id="q2",
+            question="q",
+            scenario="scenario_b",
+            run_id="run-1",
+            embedding_provider="openai",
+            embedding_model="text-embedding-3-small",
+            llm_provider="fake",
+            llm_model="fake-model",
+            answer="ans",
+            retrieved_chunk_ids=[],
+            retrieved_doc_ids=[],
+            retrieved_chunks=[],
+            latency_ms=1.0,
+            token_usage={"total": 100},
+            cost_usd=0.001,
+        ),
+    ]
+    overall_metrics = {
+        "hit_rate@5": 0.5,
+        "mrr": 0.5,
+        "ndcg@5": 0.5,
+        "map@5": 0.5,
+        "retrieval_by_type": {
+            "A": {"n": 1, "hit_rate@5": 1.0, "mrr": 1.0, "ndcg@5": 1.0, "map@5": 1.0},
+            "C": {"n": 1, "hit_rate@5": 0.0, "mrr": 0.0, "ndcg@5": 0.0, "map@5": 0.0},
+        },
+    }
+
+    _print_summary(samples, results, overall_metrics)
+    output = capsys.readouterr().out
+    assert "by type (retrieval)" in output
+    # Type A row must appear before Type C row (alphabetical order).
+    a_idx = output.find("A  ")
+    c_idx = output.find("C  ")
+    assert 0 <= a_idx < c_idx, f"Expected A before C in output:\n{output}"
+    # hit_rate@5 column should show 1.0 for Type A and 0.0 for Type C.
+    assert "1.0" in output
+    assert "0.0" in output

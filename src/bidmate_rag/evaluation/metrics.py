@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 
-from bidmate_rag.schema import GenerationResult, RetrievedChunk
+from bidmate_rag.schema import EvalSample, GenerationResult, RetrievedChunk
 
 
 def _rewrite_cost_usd(result: GenerationResult) -> float:
@@ -228,3 +228,60 @@ def summarize_run_operations(
         "total_tokens": generation_total_tokens + rewrite_total_tokens,
         "avg_latency_ms": avg_latency_ms,
     }
+
+
+def aggregate_retrieval_metrics_by_type(
+    samples: list[EvalSample],
+    results: list[GenerationResult],
+    k: int = 5,
+) -> dict[str, dict[str, float]]:
+    """Type별(A/B/C/D/E)로 Hit Rate / MRR / nDCG / MAP을 분리 집계한다.
+
+    멀티턴(Type C)이 단일턴(A/B) 대비 얼마나 빠지는지 보려는 용도.
+    expected_doc_titles/expected_doc_ids가 비어 있으면 해당 샘플은 집계에서 제외
+    (기존 `_aggregate_retrieval_metrics`와 동일 정책). type 메타데이터가 없으면
+    '(unknown)' 버킷으로 모은다.
+
+    Returns:
+        {"A": {"n": 16, "hit_rate@5": 0.81, "mrr": 0.72, "ndcg@5": 0.85, "map@5": 0.78},
+         "B": {...}, "C": {...}, ...}
+        — 키 순서는 타입 알파벳 순 정렬.
+    """
+    totals: dict[str, dict[str, float]] = {}
+    counts: dict[str, int] = {}
+
+    for sample, result in zip(samples, results, strict=False):
+        expected = sample.expected_doc_ids or sample.expected_doc_titles
+        if not expected:
+            continue
+        type_key = str(sample.metadata.get("type") or "").strip() or "(unknown)"
+
+        hit = calc_hit_rate(result.retrieved_chunks, expected, k=k)
+        if hit is None:
+            continue
+        mrr = calc_mrr(result.retrieved_chunks, expected) or 0.0
+        ndcg = calc_ndcg(result.retrieved_chunks, expected, k=k) or 0.0
+        map_score = calc_map(result.retrieved_chunks, expected, k=k) or 0.0
+
+        bucket = totals.setdefault(
+            type_key,
+            {f"hit_rate@{k}": 0.0, "mrr": 0.0, f"ndcg@{k}": 0.0, f"map@{k}": 0.0},
+        )
+        bucket[f"hit_rate@{k}"] += hit
+        bucket["mrr"] += mrr
+        bucket[f"ndcg@{k}"] += ndcg
+        bucket[f"map@{k}"] += map_score
+        counts[type_key] = counts.get(type_key, 0) + 1
+
+    out: dict[str, dict[str, float]] = {}
+    for type_key in sorted(totals.keys()):
+        n = counts[type_key]
+        bucket = totals[type_key]
+        out[type_key] = {
+            "n": n,
+            f"hit_rate@{k}": round(bucket[f"hit_rate@{k}"] / n, 4),
+            "mrr": round(bucket["mrr"] / n, 4),
+            f"ndcg@{k}": round(bucket[f"ndcg@{k}"] / n, 4),
+            f"map@{k}": round(bucket[f"map@{k}"] / n, 4),
+        }
+    return out

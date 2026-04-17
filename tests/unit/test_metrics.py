@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from bidmate_rag.evaluation.metrics import (
+    aggregate_retrieval_metrics_by_type,
     calc_hit_rate,
     calc_map,
     calc_mrr,
     calc_ndcg,
     summarize_run_operations,
 )
-from bidmate_rag.schema import Chunk, GenerationResult, RetrievedChunk
+from bidmate_rag.schema import Chunk, EvalSample, GenerationResult, RetrievedChunk
 
 
 def _make_chunk(
@@ -195,3 +196,107 @@ def test_summarize_run_operations_returns_zeroed_defaults_for_empty_results() ->
     assert summary["total_cost_usd"] == 0.0008
     assert summary["total_tokens"] == 0
     assert summary["avg_latency_ms"] == 0.0
+
+
+
+def _make_sample(
+    *, question_id: str, type_value: str, expected: list[str]
+) -> EvalSample:
+    return EvalSample(
+        question_id=question_id,
+        question="q",
+        expected_doc_titles=expected,
+        metadata={"type": type_value},
+    )
+
+
+def _make_chunk_with_title(title: str, *, chunk_id: str = "c-1") -> RetrievedChunk:
+    chunk = Chunk(
+        chunk_id=chunk_id,
+        doc_id=f"{chunk_id}-doc",
+        text="t",
+        text_with_meta="t",
+        char_count=1,
+        section="요구사항",
+        content_type="text",
+        chunk_index=0,
+        metadata={"파일명": title},
+    )
+    return RetrievedChunk(rank=1, score=0.9, chunk=chunk)
+
+
+def _make_result(
+    *, question_id: str, retrieved: list[RetrievedChunk]
+) -> GenerationResult:
+    return GenerationResult(
+        question_id=question_id,
+        question="q",
+        scenario="scenario_b",
+        run_id="run-1",
+        embedding_provider="openai",
+        embedding_model="text-embedding-3-small",
+        llm_provider="fake",
+        llm_model="fake-model",
+        answer="a",
+        retrieved_chunk_ids=[c.chunk.chunk_id for c in retrieved],
+        retrieved_doc_ids=[c.chunk.doc_id for c in retrieved],
+        retrieved_chunks=retrieved,
+        latency_ms=1.0,
+        token_usage={},
+    )
+
+
+def test_aggregate_retrieval_metrics_by_type_groups_by_metadata_type() -> None:
+    """Type A(2 hits), Type C(1 miss) 샘플을 넣고 그룹별 집계 검증."""
+    samples = [
+        _make_sample(question_id="q1", type_value="A", expected=["doc1.hwp"]),
+        _make_sample(question_id="q2", type_value="A", expected=["doc2.hwp"]),
+        _make_sample(question_id="q3", type_value="C", expected=["doc3.hwp"]),
+    ]
+    results = [
+        _make_result(question_id="q1", retrieved=[_make_chunk_with_title("doc1.hwp")]),
+        _make_result(question_id="q2", retrieved=[_make_chunk_with_title("doc2.hwp")]),
+        _make_result(question_id="q3", retrieved=[_make_chunk_with_title("other.hwp")]),
+    ]
+
+    breakdown = aggregate_retrieval_metrics_by_type(samples, results, k=5)
+
+    assert breakdown["A"]["n"] == 2
+    assert breakdown["A"]["hit_rate@5"] == 1.0
+    assert breakdown["A"]["mrr"] == 1.0
+    assert breakdown["C"]["n"] == 1
+    assert breakdown["C"]["hit_rate@5"] == 0.0
+    assert breakdown["C"]["mrr"] == 0.0
+
+
+def test_aggregate_retrieval_metrics_by_type_handles_missing_type_and_expected() -> None:
+    """type 누락 / expected 누락 샘플 처리 — 전자는 '(unknown)'에 들어감, 후자는 집계 제외."""
+    samples = [
+        _make_sample(question_id="q1", type_value="A", expected=["doc1.hwp"]),
+        EvalSample(
+            question_id="q2",
+            question="q",
+            expected_doc_titles=["doc2.hwp"],
+            metadata={},  # type 누락
+        ),
+        EvalSample(
+            question_id="q3",
+            question="q",
+            expected_doc_titles=[],  # expected 없음
+            metadata={"type": "C"},
+        ),
+    ]
+    results = [
+        _make_result(question_id="q1", retrieved=[_make_chunk_with_title("doc1.hwp")]),
+        _make_result(question_id="q2", retrieved=[_make_chunk_with_title("doc2.hwp")]),
+        _make_result(question_id="q3", retrieved=[_make_chunk_with_title("anything.hwp")]),
+    ]
+
+    breakdown = aggregate_retrieval_metrics_by_type(samples, results, k=5)
+
+    assert breakdown["A"]["n"] == 1
+    assert breakdown["A"]["hit_rate@5"] == 1.0
+    assert breakdown["(unknown)"]["n"] == 1
+    assert breakdown["(unknown)"]["hit_rate@5"] == 1.0
+    # Type C는 expected 없어 집계 제외 → 키 자체가 없음
+    assert "C" not in breakdown

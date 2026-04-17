@@ -190,6 +190,53 @@ def test_multidoc_question_with_visible_anchors_does_not_warn(tmp_path):
     assert not any(issue.field == "question" for issue in report.warnings)
 
 
+def test_multidoc_question_anchor_matches_ignoring_fullwidth_parens(tmp_path):
+    """파일명/기관명에 전각 괄호(）, 질문에 반각 괄호()가 섞여도 매칭되어야 함 (Q028 회귀)."""
+    df = pd.DataFrame(
+        [
+            {
+                "발주 기관": "(사)벤처기업협회",
+                "사업명": "벤처확인종합관리시스템",
+                "사업도메인": "경영/행정",
+                "기관유형": "협회",
+                "공개연도": 2024,
+                "사업 금액": 352_000_000,
+                "파일명": "(사)벤처기업협회_2024년 벤처확인종합관리시스템 기능 고도화 용역사업 .hwp",
+            },
+            {
+                "발주 기관": "(사）한국대학스포츠협의회",
+                "사업명": "KUSF 체육특기자 경기기록 관리시스템",
+                "사업도메인": "교육/학습",
+                "기관유형": "협회",
+                "공개연도": 2024,
+                "사업 금액": 150_000_000,
+                "파일명": "(사）한국대학스포츠협의회_KUSF 체육특기자 경기기록 관리시스템 개발.hwp",
+            },
+        ]
+    )
+    cleaned = tmp_path / "cleaned_documents.parquet"
+    df.to_parquet(cleaned, index=False)
+
+    samples = [
+        _make_sample(
+            "Q028",
+            question=(
+                "(사)벤처기업협회와 (사)한국대학스포츠협의회의 사업은 특정 목적을 위한 "
+                "세부 제도 지원 또는 평가 체계 구축을 포함합니다."
+            ),
+            expected_doc_titles=[
+                "(사)벤처기업협회_2024년 벤처확인종합관리시스템 기능 고도화 용역사업 .hwp",
+                "(사）한국대학스포츠협의회_KUSF 체육특기자 경기기록 관리시스템 개발.hwp",
+            ],
+        )
+    ]
+    report = validate_eval_samples(samples, cleaned_documents_path=cleaned)
+    assert not any(
+        issue.field == "question" and "underspecified" in issue.message
+        for issue in report.warnings
+    )
+
+
 # ---------------------------------------------------------------------------
 # history 형식 검증
 # ---------------------------------------------------------------------------

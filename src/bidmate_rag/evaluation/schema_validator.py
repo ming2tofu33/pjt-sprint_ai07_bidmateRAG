@@ -18,6 +18,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from bidmate_rag.retrieval.agency_matching import extract_agencies_from_text
 from bidmate_rag.schema import EvalSample
 
 logger = logging.getLogger(__name__)
@@ -134,7 +135,7 @@ def _warn_if_multidoc_question_is_underspecified(
     agencies.discard("")
 
     question = sample.question or ""
-    mentioned_agencies = {agency for agency in agencies if agency and agency in question}
+    mentioned_agencies = set(extract_agencies_from_text(question, list(agencies)))
     quoted_segments = re.findall(r'"[^"]+"|\'[^\']+\'', question)
 
     if len(mentioned_agencies) >= 2 or len(quoted_segments) >= 2:

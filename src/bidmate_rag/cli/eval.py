@@ -19,6 +19,7 @@ import pandas as pd
 from dotenv import load_dotenv
 
 from bidmate_rag.evaluation.dataset import load_eval_samples
+from bidmate_rag.evaluation.metrics import aggregate_retrieval_metrics_by_type
 from bidmate_rag.evaluation.pipeline import EvaluationArtifacts, execute_evaluation
 from bidmate_rag.evaluation.schema_validator import (
     render_validation_report,
@@ -163,6 +164,22 @@ def _print_summary(
             .round({"avg_tokens": 0, "avg_latency_ms": 0, "avg_cost_usd": 6, "errors": 0})
         )
         print(by_type.to_string())
+
+    # 질문 타입별 retrieval 지표 (Hit Rate, MRR, nDCG, MAP)
+    retrieval_by_type = overall_metrics.get("retrieval_by_type")
+    if isinstance(retrieval_by_type, dict) and retrieval_by_type:
+        print("\n-- by type (retrieval) --")
+        # dict → DataFrame: 행=type, 열=n/hit_rate@5/mrr/ndcg@5/map@5
+        by_type_retrieval = pd.DataFrame.from_dict(retrieval_by_type, orient="index")
+        by_type_retrieval.index.name = "type"
+        # n 컬럼이 있으면 맨 앞으로
+        if "n" in by_type_retrieval.columns:
+            cols = ["n"] + [c for c in by_type_retrieval.columns if c != "n"]
+            by_type_retrieval = by_type_retrieval[cols]
+        # 숫자 컬럼 반올림 (n 제외)
+        round_map = {c: 4 for c in by_type_retrieval.columns if c != "n"}
+        by_type_retrieval = by_type_retrieval.round(round_map)
+        print(by_type_retrieval.to_string())
 
     # 난이도별 통계
     if df["difficulty"].astype(bool).any():
@@ -357,6 +374,9 @@ def main() -> None:
     )
 
     # 6. 결과 요약 및 산출물 경로 출력
+    artifacts.metrics["retrieval_by_type"] = aggregate_retrieval_metrics_by_type(
+        samples, artifacts.benchmark.results, k=5
+    )
     _print_summary(
         samples,
         artifacts.benchmark.results,
