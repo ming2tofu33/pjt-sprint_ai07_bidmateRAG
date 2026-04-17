@@ -60,6 +60,7 @@ class QueryRequest(BaseModel):
     provider_config: str | None = None
     chunking_config: str | None = None
     mentioned_doc_ids: list[str] = Field(default_factory=list)
+    history: list[dict[str, str]] = Field(default_factory=list)
     command: str | None = None
     top_k: int | None = None
     max_context_chars: int | None = None

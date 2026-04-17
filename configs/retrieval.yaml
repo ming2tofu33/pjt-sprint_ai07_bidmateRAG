@@ -17,4 +17,25 @@ hybrid:
   rrf_k: 60                  # RRF 순위 융합 상수
 
 # 멀티턴 검색 보강 (이전 대화 기반 질의 재작성 + 기관 필터 계승)
-enable_multiturn: false
+enable_multiturn: true
+
+# 멀티턴 질의 재작성 설정
+rewrite:
+  mode: llm_with_rule_fallback  # LLM 재작성 우선, 실패 시 규칙 기반으로 폴백
+  # gpt-5 계열은 reasoning 토큰이 completion에 포함되므로 넉넉하게 (CLAUDE.md 참조).
+  # 로컬 HF 모델은 HFLocalLLM.rewrite()가 내부적으로 256 제한을 사용.
+  max_completion_tokens: 16000  # rewrite 단계에서 허용할 최대 출력 토큰 수
+  timeout_seconds: 30           # rewrite LLM 호출 제한 시간(초)
+
+# 대화 메모리 설정
+memory:
+  enabled: true  # 최근 대화 요약/슬롯 기억 사용 여부
+  summary_buffer:
+    max_recent_turns: 4    # 최근 몇 개 turn을 그대로 유지할지
+    max_summary_chars: 400 # 오래된 대화를 요약해 저장할 최대 글자 수
+  slot_memory:
+    enabled: true  # 기관명/사업명 같은 핵심 슬롯 기억 사용 여부
+
+# 디버그 추적 정보 기록 여부
+debug_trace:
+  enabled: true  # rewritten_query, memory_state 등 내부 추적 정보 포함

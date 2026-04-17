@@ -39,7 +39,7 @@ def test_persist_run_results_and_summary(tmp_path: Path) -> None:
 
     assert run_path.exists()
     assert summary_path.exists()
-    assert '"question_id":"q-1"' in run_path.read_text()
+    assert '"question_id":"q-1"' in run_path.read_text(encoding="utf-8")
 
     df = pd.read_parquet(summary_path)
     assert df.iloc[0]["provider_label"] == "openai-gpt5-mini"

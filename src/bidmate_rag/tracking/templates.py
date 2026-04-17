@@ -73,11 +73,11 @@ REPORT_TEMPLATE = """\
 | Latency P95 (s) | {latency_p95_s} |
 | Prompt Tokens (sum) | {prompt_tokens_sum} |
 | Completion Tokens (sum) | {completion_tokens_sum} |
-| Total Tokens | {total_tokens} |
+{rewrite_token_rows}| Total Tokens | {total_tokens} |
 | 생성 비용 (USD) | {generation_cost} |
 | 임베딩 비용 (USD) | {embedding_cost} |
 | Judge 비용 (USD) | {judge_cost} |
-| **Cost (USD)** | **{grand_total_cost}** |
+{rewrite_cost_row}| **Cost (USD)** | **{grand_total_cost}** |
 {cost_warning}{gpt5_warning}
 ## 리소스 링크
 

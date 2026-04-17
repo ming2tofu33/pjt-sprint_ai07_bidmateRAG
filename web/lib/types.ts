@@ -54,6 +54,7 @@ export interface QueryResponse {
 export interface QueryRequest {
   question: string;
   mentioned_doc_ids: string[];
+  history: Array<{ role: MessageRole; content: string }>;
   command: string | null;
   // provider_config, chunking_config, top_k, max_context_chars 은
   // 서버의 configs/web.yaml 기본값을 사용 — 프론트에서 보내지 않는다.

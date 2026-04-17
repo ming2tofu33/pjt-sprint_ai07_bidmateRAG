@@ -254,10 +254,29 @@ def _build_context(data: ReportData) -> dict[str, Any]:
     git = meta.get("git", {}) or {}
 
     # Costs
-    generation_cost = sum(float(r.get("cost_usd") or 0.0) for r in data.results)
+    generation_cost = float(
+        meta.get(
+            "generation_cost_usd",
+            sum(float(r.get("cost_usd") or 0.0) for r in data.results),
+        )
+        or 0.0
+    )
+    rewrite_cost = float(
+        meta.get(
+            "rewrite_cost_usd",
+            sum(
+                float(((r.get("debug") or {}).get("rewrite_cost_usd", 0.0) or 0.0))
+                for r in data.results
+            ),
+        )
+        or 0.0
+    )
     embedding_cost = float((data.embedding_meta or {}).get("total_cost_usd", 0.0) or 0.0)
-    judge_cost = float(meta.get("judge_total_cost_usd", 0.0) or 0.0)
-    grand_total = generation_cost + embedding_cost + judge_cost
+    judge_cost = float(meta.get("judge_cost_usd", meta.get("judge_total_cost_usd", 0.0)) or 0.0)
+    llm_total_cost = float(
+        meta.get("total_cost_usd", generation_cost + rewrite_cost + judge_cost) or 0.0
+    )
+    grand_total = llm_total_cost + embedding_cost
 
     # Tokens
     prompt_tokens_sum = sum(
@@ -266,7 +285,17 @@ def _build_context(data: ReportData) -> dict[str, Any]:
     completion_tokens_sum = sum(
         int((r.get("token_usage") or {}).get("completion", 0) or 0) for r in data.results
     )
-    total_tokens = prompt_tokens_sum + completion_tokens_sum
+    rewrite_prompt_tokens_sum = sum(
+        int((r.get("token_usage") or {}).get("rewrite_prompt", 0) or 0) for r in data.results
+    )
+    rewrite_completion_tokens_sum = sum(
+        int((r.get("token_usage") or {}).get("rewrite_completion", 0) or 0)
+        for r in data.results
+    )
+    rewrite_total_tokens_sum = sum(
+        int((r.get("token_usage") or {}).get("rewrite_total", 0) or 0) for r in data.results
+    )
+    total_tokens = prompt_tokens_sum + completion_tokens_sum + rewrite_total_tokens_sum
 
     # Latency
     latencies_ms = [float(r.get("latency_ms") or 0.0) for r in data.results if r.get("latency_ms")]
@@ -322,6 +351,16 @@ def _build_context(data: ReportData) -> dict[str, Any]:
     # judge 미실행 표시
     judge_skipped = bool(meta.get("judge_skipped"))
     judge_cost_str = "(미실행)" if judge_skipped else _fmt_num(judge_cost, digits=4)
+    has_rewrite_usage = rewrite_total_tokens_sum > 0 or rewrite_cost > 0.0
+    rewrite_token_rows = ""
+    rewrite_cost_row = ""
+    if has_rewrite_usage:
+        rewrite_token_rows = (
+            f"| Rewrite Prompt Tokens | {_fmt_int(rewrite_prompt_tokens_sum)} |\n"
+            f"| Rewrite Completion Tokens | {_fmt_int(rewrite_completion_tokens_sum)} |\n"
+            f"| Rewrite Total Tokens | {_fmt_int(rewrite_total_tokens_sum)} |\n"
+        )
+        rewrite_cost_row = f"| Rewrite Cost (USD) | {_fmt_num(rewrite_cost, digits=4)} |\n"
 
     # Config links
     configs = meta.get("configs", {}) or {}
@@ -407,9 +446,11 @@ def _build_context(data: ReportData) -> dict[str, Any]:
         # tokens
         "prompt_tokens_sum": _fmt_int(prompt_tokens_sum),
         "completion_tokens_sum": _fmt_int(completion_tokens_sum),
+        "rewrite_token_rows": rewrite_token_rows,
         "total_tokens": _fmt_int(total_tokens),
         # costs
         "generation_cost": _fmt_num(generation_cost, digits=4),
+        "rewrite_cost_row": rewrite_cost_row,
         "embedding_cost": (
             _fmt_num(embedding_cost, digits=4) if data.embedding_meta else "N/A (미수집)"
         ),

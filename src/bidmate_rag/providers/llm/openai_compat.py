@@ -11,7 +11,7 @@ from openai import OpenAI
 
 from bidmate_rag.config.prompts import build_rag_user_prompt
 from bidmate_rag.generation.context_builder import build_numbered_context_block
-from bidmate_rag.providers.llm.base import BaseLLMProvider, StreamDelta
+from bidmate_rag.providers.llm.base import BaseLLMProvider, RewriteResponse, StreamDelta
 from bidmate_rag.schema import GenerationResult, RetrievedChunk
 from bidmate_rag.tracking.pricing import calc_llm_cost, load_pricing
 
@@ -69,7 +69,16 @@ class OpenAICompatibleLLM(BaseLLMProvider):
                 if "assistant" in item:
                     messages.append({"role": "assistant", "content": item["assistant"]})
         messages.append(
-            {"role": "user", "content": build_rag_user_prompt(question, context)}
+            {
+                "role": "user",
+                "content": build_rag_user_prompt(
+                    question,
+                    context,
+                    rewritten_query=generation_config.get("rewritten_query"),
+                    memory_summary=generation_config.get("memory_summary"),
+                    memory_slots=generation_config.get("memory_slots"),
+                ),
+            }
         )
         return messages, context, used_indices
 
@@ -221,4 +230,25 @@ class OpenAICompatibleLLM(BaseLLMProvider):
             cached_tokens=cached_tokens,
             total_tokens=total_tokens,
             used_indices=used_indices,
+        )
+
+    def rewrite(
+        self,
+        prompt: str,
+        *,
+        max_tokens: int = 16000,
+        timeout: int | None = 30,
+    ) -> RewriteResponse:
+        response = self.client.chat.completions.create(
+            model=self.model_name,
+            messages=[{"role": "user", "content": prompt}],
+            max_completion_tokens=max_tokens,
+            timeout=timeout,
+        )
+        usage = getattr(response, "usage", None)
+        return RewriteResponse(
+            text=(response.choices[0].message.content or "").strip(),
+            prompt_tokens=int(getattr(usage, "prompt_tokens", 0) or 0),
+            completion_tokens=int(getattr(usage, "completion_tokens", 0) or 0),
+            total_tokens=int(getattr(usage, "total_tokens", 0) or 0),
         )

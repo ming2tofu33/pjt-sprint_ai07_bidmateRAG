@@ -338,6 +338,7 @@ def query(req: QueryRequest, request: Request) -> QueryResponse:
         system_prompt=system_prompt,
         top_k=top_k,
         max_context_chars=max_context_chars,
+        chat_history=req.history,
     )
 
     # 8. metadata 라벨링 (멘션 개수에 따라)
@@ -469,6 +470,7 @@ def query_stream(req: QueryRequest, request: Request) -> StreamingResponse:
                 system_prompt=system_prompt,
                 top_k=top_k,
                 max_context_chars=max_context_chars,
+                chat_history=req.history,
             ):
                 if event_type == "retrieval":
                     chunks = payload  # list[RetrievedChunk]

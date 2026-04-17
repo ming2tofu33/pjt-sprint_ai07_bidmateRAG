@@ -56,16 +56,31 @@ faithfulness, relevance, context_precision, context_recall을
 반드시 JSON만 출력하세요."""
 
 
-def build_rag_user_prompt(question: str, context: str) -> str:
-    return f"""다음 RFP 문서 내용을 참고하여 질문에 답변해주세요.
+def build_rag_user_prompt(
+    question: str,
+    context: str,
+    *,
+    rewritten_query: str | None = None,
+    memory_summary: str | None = None,
+    memory_slots: dict | None = None,
+) -> str:
+    sections = ["다음 RFP 문서 내용을 참고하여 질문에 답변해주세요."]
 
-## 참고 문서
-{context}
+    if rewritten_query and rewritten_query != question:
+        sections.append(f"## 재작성된 검색 질문\n{rewritten_query}")
 
-## 질문
-{question}
+    if memory_summary:
+        sections.append(f"## 대화 요약 메모리\n{memory_summary}")
 
-## 작성 절차
+    if memory_slots:
+        slot_lines = [f"- {key}: {value}" for key, value in memory_slots.items() if value]
+        if slot_lines:
+            sections.append("## 슬롯 메모리\n" + "\n".join(slot_lines))
+
+    sections.append(f"## 참고 문서\n{context}")
+    sections.append(f"## 질문\n{question}")
+    sections.append(
+        """## 작성 절차
 1. 질문을 먼저 해석하고, 필요한 답변 단위를 나누세요.
 2. 각 답변 단위별로 컨텍스트에서 근거가 있는지 확인하세요.
 3. 비교형 질문이면 기관/사업별로 정보를 분리해서 정리한 뒤 비교 결과를 쓰세요.
@@ -82,6 +97,8 @@ def build_rag_user_prompt(question: str, context: str) -> str:
 
 문서에 없는 항목:
 - 없는 항목이 있으면 구체적으로 적고, 없으면 `없음`이라고 적으세요."""
+    )
+    return "\n\n".join(sections)
 
 
 def build_judge_user_prompt(question: str, context: str, answer: str) -> str:

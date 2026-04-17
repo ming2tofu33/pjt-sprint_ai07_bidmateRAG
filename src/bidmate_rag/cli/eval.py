@@ -27,6 +27,9 @@ from bidmate_rag.evaluation.schema_validator import (
 from bidmate_rag.pipelines.runtime import _resolve_metadata_path, build_runtime_pipeline
 from bidmate_rag.schema import EvalSample, GenerationResult
 
+RETRIEVAL_METRIC_KEYS = ("hit_rate@5", "mrr", "ndcg@5", "map@5")
+JUDGE_METRIC_KEYS = ("faithfulness", "answer_relevance", "context_precision", "context_recall")
+
 
 def _split_csv(value: str | None) -> list[str] | None:
     """쉼표로 구분된 CLI 인자를 리스트로 파싱한다.
@@ -79,6 +82,7 @@ def _print_summary(
     samples: list[EvalSample],
     results: list[GenerationResult],
     overall_metrics: dict[str, float],
+    ops_metrics: dict[str, float] | None = None,
 ) -> None:
     """벤치마크 실행 결과를 콘솔에 출력한다.
 
@@ -91,6 +95,8 @@ def _print_summary(
         print("(no results)")
         return
 
+    ops_metrics = ops_metrics or {}
+
     # 각 결과를 요약 행으로 변환
     rows = []
     for sample, result in zip(samples, results, strict=False):
@@ -101,10 +107,16 @@ def _print_summary(
                 "difficulty": sample.metadata.get("difficulty", ""),
                 "tokens": int(result.token_usage.get("total", 0) or 0),
                 "latency_ms": round(result.latency_ms),
+                "cost_usd": round(float(result.cost_usd or 0.0), 6),
                 "error": bool(result.error),
             }
         )
     df = pd.DataFrame(rows)
+
+    retrieval_metrics = {
+        key: overall_metrics[key] for key in RETRIEVAL_METRIC_KEYS if key in overall_metrics
+    }
+    judge_metrics = {key: overall_metrics[key] for key in JUDGE_METRIC_KEYS if key in overall_metrics}
 
     # 전체 요약 출력
     print()
@@ -112,12 +124,29 @@ def _print_summary(
     print(
         f"errors={int(df['error'].sum())}  "
         f"avg_tokens={df['tokens'].mean():.0f}  "
-        f"avg_latency_ms={df['latency_ms'].mean():.0f}"
+        f"avg_latency_ms={ops_metrics.get('avg_latency_ms', df['latency_ms'].mean()):.0f}"
     )
     # 검색 지표 출력 (Hit Rate, MRR 등)
-    if overall_metrics:
-        metric_str = "  ".join(f"{k}={v}" for k, v in overall_metrics.items())
+    if retrieval_metrics:
+        metric_str = "  ".join(f"{k}={v}" for k, v in retrieval_metrics.items())
         print(f"retrieval: {metric_str}")
+    if judge_metrics:
+        metric_str = "  ".join(f"{k}={v}" for k, v in judge_metrics.items())
+        print(f"judge:     {metric_str}")
+    if ops_metrics:
+        ops_parts = [
+            f"generation_cost_usd=${float(ops_metrics.get('generation_cost_usd', 0.0)):.4f}",
+            f"judge_cost_usd=${float(ops_metrics.get('judge_cost_usd', 0.0)):.4f}",
+            f"total_cost_usd=${float(ops_metrics.get('total_cost_usd', 0.0)):.4f}",
+            f"total_tokens={int(ops_metrics.get('total_tokens', 0) or 0)}",
+        ]
+        rewrite_cost = float(ops_metrics.get("rewrite_cost_usd", 0.0) or 0.0)
+        rewrite_total = int(ops_metrics.get("rewrite_total_tokens", 0) or 0)
+        if rewrite_cost > 0.0:
+            ops_parts.insert(1, f"rewrite_cost_usd=${rewrite_cost:.4f}")
+        if rewrite_total:
+            ops_parts.append(f"rewrite_total_tokens={rewrite_total}")
+        print(f"ops:       {'  '.join(ops_parts)}")
 
     # 질문 타입별 통계
     if df["type"].astype(bool).any():
@@ -128,9 +157,10 @@ def _print_summary(
                 n=("id", "count"),
                 avg_tokens=("tokens", "mean"),
                 avg_latency_ms=("latency_ms", "mean"),
+                avg_cost_usd=("cost_usd", "mean"),
                 errors=("error", "sum"),
             )
-            .round(0)
+            .round({"avg_tokens": 0, "avg_latency_ms": 0, "avg_cost_usd": 6, "errors": 0})
         )
         print(by_type.to_string())
 
@@ -143,9 +173,10 @@ def _print_summary(
                 n=("id", "count"),
                 avg_tokens=("tokens", "mean"),
                 avg_latency_ms=("latency_ms", "mean"),
+                avg_cost_usd=("cost_usd", "mean"),
                 errors=("error", "sum"),
             )
-            .round(0)
+            .round({"avg_tokens": 0, "avg_latency_ms": 0, "avg_cost_usd": 6, "errors": 0})
         )
         print(by_diff.to_string())
 
@@ -161,6 +192,19 @@ def _print_artifacts(artifacts: EvaluationArtifacts) -> None:
     print(f"run jsonl: {artifacts.run_path}")
     print(f"summary:   {artifacts.summary_path}")
     print(f"meta:      {artifacts.meta_path}")
+    ops_metrics = getattr(artifacts, "ops_metrics", {})
+    if ops_metrics:
+        cost_parts = [f"generation=${float(ops_metrics.get('generation_cost_usd', 0.0)):.4f}"]
+        rewrite_cost = float(ops_metrics.get("rewrite_cost_usd", 0.0) or 0.0)
+        if rewrite_cost > 0.0:
+            cost_parts.append(f"rewrite=${rewrite_cost:.4f}")
+        cost_parts.extend(
+            [
+                f"judge=${float(ops_metrics.get('judge_cost_usd', 0.0)):.4f}",
+                f"total=${float(ops_metrics.get('total_cost_usd', 0.0)):.4f}",
+            ]
+        )
+        print(f"costs:     {' '.join(cost_parts)}")
     # LLM 판정을 실행했으면 비용/토큰 출력
     if not artifacts.judge_skipped:
         print(
@@ -313,7 +357,12 @@ def main() -> None:
     )
 
     # 6. 결과 요약 및 산출물 경로 출력
-    _print_summary(samples, artifacts.benchmark.results, artifacts.metrics)
+    _print_summary(
+        samples,
+        artifacts.benchmark.results,
+        artifacts.metrics,
+        getattr(artifacts, "ops_metrics", {}),
+    )
     _print_artifacts(artifacts)
 
 

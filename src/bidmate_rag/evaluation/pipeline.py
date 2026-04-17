@@ -20,7 +20,13 @@ from zoneinfo import ZoneInfo
 from bidmate_rag.config.settings import RuntimeConfig
 from bidmate_rag.evaluation.judge import LLMJudge
 from bidmate_rag.evaluation.judge_v2 import LLMJudgeV2
-from bidmate_rag.evaluation.metrics import calc_hit_rate, calc_map, calc_mrr, calc_ndcg
+from bidmate_rag.evaluation.metrics import (
+    calc_hit_rate,
+    calc_map,
+    calc_mrr,
+    calc_ndcg,
+    summarize_run_operations,
+)
 from bidmate_rag.evaluation.runner import (
     BenchmarkRunner,
     ProgressCallback,
@@ -45,6 +51,7 @@ class EvaluationArtifacts:
     judge_total_tokens: int = 0
     judge_skipped: bool = False
     metrics: dict[str, Any] = field(default_factory=dict)
+    ops_metrics: dict[str, Any] = field(default_factory=dict)
 
 
 def execute_evaluation(
@@ -146,6 +153,13 @@ def execute_evaluation(
             judge_mode="v2" if judge_v2 else "v1",
         )
 
+    ops_metrics = summarize_run_operations(
+        benchmark.results,
+        judge_total_cost_usd=judge_cost,
+    )
+    benchmark.metrics.update(ops_metrics)
+    _update_run_meta(meta_path, **ops_metrics)
+
     run_path = persist_run_results(benchmark.results, runs_dir=runs_path, run_id=resolved_run_id)
     summary_path = persist_benchmark_summary(
         [benchmark.to_summary_record()],
@@ -163,6 +177,7 @@ def execute_evaluation(
         judge_total_tokens=judge_tokens,
         judge_skipped=skip_judge,
         metrics=dict(benchmark.metrics),
+        ops_metrics=ops_metrics,
     )
 
 

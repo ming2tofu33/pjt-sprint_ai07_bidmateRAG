@@ -45,6 +45,12 @@ class RAGRetriever:
         enable_multiturn: bool = True,
         boost_config: dict | None = None,
         hybrid_config: dict | None = None,
+        rewrite_llm=None,
+        rewrite_mode: str = "llm_with_rule_fallback",
+        rewrite_max_completion_tokens: int = 16000,
+        rewrite_timeout_seconds: int = 30,
+        memory=None,
+        debug_trace_enabled: bool = True,
     ) -> None:
         """RAGRetriever를 초기화한다."""
         self.vector_store = vector_store
@@ -55,6 +61,16 @@ class RAGRetriever:
         self.enable_multiturn = enable_multiturn
         self.boost_config = boost_config
         self.hybrid_config = hybrid_config
+        self.rewrite_llm = rewrite_llm
+        self.rewrite_mode = rewrite_mode
+        self.rewrite_max_completion_tokens = rewrite_max_completion_tokens
+        self.rewrite_timeout_seconds = rewrite_timeout_seconds
+        self.memory = memory
+        self.debug_trace_enabled = debug_trace_enabled
+        self._last_debug: dict = {}
+
+    def _serialize_results(self, results: list) -> list[dict]:
+        return [result.to_record() for result in results]
 
     def _extract_scope_key(self, where: dict | None) -> tuple[str, list[str]] | None:
         if not where:
@@ -268,10 +284,54 @@ class RAGRetriever:
         """쿼리에 대해 메타데이터 필터링 후 벡터 검색을 수행한다."""
 
         agency_list = getattr(self.metadata_store, "agency_list", [])
-        resolved_query = (
-            rewrite_query_with_history(query, chat_history, agency_list)
+        rewrite_memory_state = (
+            self.memory.build(
+                chat_history or [],
+                current_question=query,
+                rewritten_query=None,
+            )
+            if self.enable_multiturn and self.memory is not None
+            else {"summary_buffer": "", "slot_memory": {}}
+        )
+        rewrite_slot_memory = rewrite_memory_state.get("slot_memory", {})
+        resolved_query, rewrite_trace = (
+            rewrite_query_with_history(
+                query,
+                chat_history,
+                agency_list,
+                llm=self.rewrite_llm,
+                mode=self.rewrite_mode,
+                slot_memory=rewrite_slot_memory,
+                max_completion_tokens=self.rewrite_max_completion_tokens,
+                timeout_seconds=self.rewrite_timeout_seconds,
+            )
             if self.enable_multiturn
-            else query
+            else (
+                query,
+                {
+                    "original_query": query,
+                    "rewritten_query": query,
+                    "rewrite_applied": False,
+                    "rewrite_reason": "original",
+                    "rewrite_prompt_tokens": 0,
+                    "rewrite_completion_tokens": 0,
+                    "rewrite_total_tokens": 0,
+                    "rewrite_cost_usd": 0.0,
+                },
+            )
+        )
+
+        # Generation용 memory state는 rewritten_query를 반영해 한 번 더 빌드.
+        # rewrite LLM이 본 slot_memory와 generation LLM이 보는 slot_memory를
+        # 소스 단일화 — chat 파이프라인이 이 state만 재사용한다.
+        generation_memory_state = (
+            self.memory.build(
+                chat_history or [],
+                current_question=query,
+                rewritten_query=resolved_query,
+            )
+            if self.enable_multiturn and self.memory is not None
+            else None
         )
         matched_agencies = extract_matched_agencies(resolved_query, agency_list)
         project_clues = extract_project_clues(resolved_query)
@@ -281,8 +341,9 @@ class RAGRetriever:
         if metadata_filter is not None:
             base_where = dict(metadata_filter) if metadata_filter else None
             where = dict(base_where) if base_where else None
+            where = self._augment_where_with_history_docs(resolved_query, where, chat_history)
             where = self._augment_where_with_project_docs(resolved_query, where)
-            where = self._augment_where_with_history_docs(query, where, chat_history)
+            where = self._augment_where_with_history_docs(resolved_query, where, chat_history)
         else:
             base_where = extract_metadata_filters(
                 resolved_query,
@@ -307,8 +368,9 @@ class RAGRetriever:
                 where = {**(where or {}), **range_filter}
                 base_where = {**(base_where or {}), **range_filter}
 
+            where = self._augment_where_with_history_docs(resolved_query, where, chat_history)
             where = self._augment_where_with_project_docs(resolved_query, where)
-            where = self._augment_where_with_history_docs(query, where, chat_history)
+            where = self._augment_where_with_history_docs(resolved_query, where, chat_history)
 
             if where is None and self.metadata_store is not None:
                 relevant_docs = self.metadata_store.find_relevant_docs(resolved_query, top_n=3)
@@ -388,6 +450,7 @@ class RAGRetriever:
                 force_scoped=force_scoped,
             )
 
+        before_rerank = list(results)
         results = cross_encoder_rerank(self.reranker, resolved_query, results, final_top_k)
         reranked = rerank_with_boost(
             results,
@@ -395,4 +458,35 @@ class RAGRetriever:
             section_hint=section_hint,
             boost_config=self.boost_config,
         )
-        return _assign_ranks(reranked[:final_top_k])
+        final_results = _assign_ranks(reranked[:final_top_k])
+        if self.debug_trace_enabled:
+            self._last_debug = {
+                **rewrite_trace,
+                "rewrite_slot_memory": rewrite_slot_memory,
+                "where": where,
+                "where_document": where_document,
+                "retrieved_chunks_before_rerank": self._serialize_results(before_rerank[:final_top_k]),
+                "retrieved_chunks_after_rerank": self._serialize_results(final_results),
+                "memory_state": generation_memory_state,
+            }
+        else:
+            # Keep the minimum runtime contract even when verbose tracing is off.
+            # chat still needs rewritten_query and rewrite token/cost values to keep
+            # generation input and cost accounting aligned with the retrieval step.
+            self._last_debug = {
+                "rewritten_query": resolved_query,
+                "rewrite_prompt_tokens": int(
+                    rewrite_trace.get("rewrite_prompt_tokens", 0) or 0
+                ),
+                "rewrite_completion_tokens": int(
+                    rewrite_trace.get("rewrite_completion_tokens", 0) or 0
+                ),
+                "rewrite_total_tokens": int(
+                    rewrite_trace.get("rewrite_total_tokens", 0) or 0
+                ),
+                "rewrite_cost_usd": float(
+                    rewrite_trace.get("rewrite_cost_usd", 0.0) or 0.0
+                ),
+                "memory_state": generation_memory_state,
+            }
+        return final_results

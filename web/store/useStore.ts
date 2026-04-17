@@ -152,6 +152,16 @@ function syncWorkingToChats(
   return { chats: updatedChats, currentChatId };
 }
 
+function toChatHistory(messages: Message[]): Array<{ role: Message["role"]; content: string }> {
+  return messages
+    .filter(
+      (message) =>
+        (message.role === "user" || message.role === "assistant") &&
+        message.content.trim().length > 0
+    )
+    .map((message) => ({ role: message.role, content: message.content }));
+}
+
 export const useStore = create<Store>()(
   persist(
     (set, get) => {
@@ -174,9 +184,18 @@ export const useStore = create<Store>()(
         pinnedDocs: DocumentSummary[];
         activeCommand: SlashCommandMeta | null;
         activeChatId: string;
+        history: Array<{ role: Message["role"]; content: string }>;
         signal: AbortSignal;
       }) => {
-        const { question, assistantId, pinnedDocs, activeCommand, activeChatId, signal } = params;
+        const {
+          question,
+          assistantId,
+          pinnedDocs,
+          activeCommand,
+          activeChatId,
+          history,
+          signal,
+        } = params;
 
         const updateAssistant = (patch: Partial<Message>) =>
           set((s) => {
@@ -208,6 +227,7 @@ export const useStore = create<Store>()(
             {
               question,
               mentioned_doc_ids: pinnedDocs.map((d) => d.id),
+              history,
               command: activeCommand?.id ?? null,
             },
             (event) => {
@@ -248,8 +268,7 @@ export const useStore = create<Store>()(
         } catch (err) {
           // AbortError: 사용자가 중단 버튼을 눌렀을 때 — 오류 버블 없이 조용히 종료.
           // 현재까지 받은 토큰과 citations는 유지한다.
-          const isAbort =
-            err instanceof DOMException && err.name === "AbortError";
+          const isAbort = err instanceof DOMException && err.name === "AbortError";
           if (!isAbort) {
             const message = err instanceof Error ? err.message : String(err);
             updateAssistant({
@@ -264,285 +283,288 @@ export const useStore = create<Store>()(
       };
 
       return {
-      sidebarCollapsed: false,
-      activeTab: "documents",
+        sidebarCollapsed: false,
+        activeTab: "documents",
 
-      documents: [],
-      documentSearchQuery: "",
-      documentFilters: {},
+        documents: [],
+        documentSearchQuery: "",
+        documentFilters: {},
 
-      chats: [],
-      currentChatId: null,
+        chats: [],
+        currentChatId: null,
 
-      pinnedDocs: [],
-      activeCommand: null,
-      messages: [],
+        pinnedDocs: [],
+        activeCommand: null,
+        messages: [],
 
-      previewDocId: null,
-      catalogOpen: false,
+        previewDocId: null,
+        catalogOpen: false,
 
-      searchFocusToken: 0,
-      inputFocusToken: 0,
+        searchFocusToken: 0,
+        inputFocusToken: 0,
 
-      highlightedCitationId: null,
-      highlightToken: 0,
+        highlightedCitationId: null,
+        highlightToken: 0,
 
-      isLoading: false,
-      lastError: null,
+        isLoading: false,
+        lastError: null,
 
-      abortController: null,
+        abortController: null,
 
-      setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
-      toggleSidebar: () =>
-        set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
-      setActiveTab: (tab) => set({ activeTab: tab }),
+        setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
+        toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
+        setActiveTab: (tab) => set({ activeTab: tab }),
 
-      setDocuments: (docs) => set({ documents: docs }),
-      setDocumentSearchQuery: (q) => set({ documentSearchQuery: q }),
-      setDocumentFilters: (f) => set({ documentFilters: f }),
+        setDocuments: (docs) => set({ documents: docs }),
+        setDocumentSearchQuery: (q) => set({ documentSearchQuery: q }),
+        setDocumentFilters: (f) => set({ documentFilters: f }),
 
-      pinDoc: (doc) => {
-        const existing = get().pinnedDocs;
-        if (existing.some((d) => d.id === doc.id)) return;
-        const nextPinned = [...existing, doc];
-        set({ pinnedDocs: nextPinned });
-        // chat이 이미 존재하면 즉시 sync — 새 chat은 sendMessage에서 생성됨
-        const { chats, currentChatId } = get();
-        if (currentChatId) {
-          const synced = syncWorkingToChats(chats, currentChatId, {
-            pinnedDocs: nextPinned,
-          });
-          set({ chats: synced.chats });
-        }
-      },
-      unpinDoc: (docId) => {
-        const nextPinned = get().pinnedDocs.filter((d) => d.id !== docId);
-        set({ pinnedDocs: nextPinned });
-        const { chats, currentChatId } = get();
-        if (currentChatId) {
-          const synced = syncWorkingToChats(chats, currentChatId, {
-            pinnedDocs: nextPinned,
-          });
-          set({ chats: synced.chats });
-        }
-      },
-      setCommand: (cmd) => {
-        set({ activeCommand: cmd });
-        const { chats, currentChatId } = get();
-        if (currentChatId) {
-          const synced = syncWorkingToChats(chats, currentChatId, {
-            activeCommand: cmd,
-          });
-          set({ chats: synced.chats });
-        }
-      },
-      clearContext: () => {
-        set({ pinnedDocs: [], activeCommand: null });
-        const { chats, currentChatId } = get();
-        if (currentChatId) {
-          const synced = syncWorkingToChats(chats, currentChatId, {
-            pinnedDocs: [],
-            activeCommand: null,
-          });
-          set({ chats: synced.chats });
-        }
-      },
-
-      openPreview: (docId) => set({ previewDocId: docId }),
-      closePreview: () => set({ previewDocId: null }),
-
-      openCatalog: () => set({ catalogOpen: true }),
-      closeCatalog: () => set({ catalogOpen: false }),
-
-      requestSearchFocus: () =>
-        set((s) => ({ searchFocusToken: s.searchFocusToken + 1 })),
-
-      requestInputFocus: () =>
-        set((s) => ({ inputFocusToken: s.inputFocusToken + 1 })),
-
-      /**
-       * 본문의 `[n]` 클릭 시 Evidence 패널의 해당 카드를 1.8초간 하이라이트.
-       * 빠른 연속 클릭 시 이전 타이머를 무효화하기 위해 토큰을 증가시킴.
-       */
-      highlightCitation: (id) => {
-        const token = get().highlightToken + 1;
-        set({ highlightedCitationId: id, highlightToken: token });
-        setTimeout(() => {
-          // 이후 다른 citation이 클릭되어 토큰이 증가했다면 이 cleanup은 무시.
-          if (get().highlightToken === token) {
-            set({ highlightedCitationId: null });
+        pinDoc: (doc) => {
+          const existing = get().pinnedDocs;
+          if (existing.some((d) => d.id === doc.id)) return;
+          const nextPinned = [...existing, doc];
+          set({ pinnedDocs: nextPinned });
+          // chat이 이미 존재하면 즉시 sync — 새 chat은 sendMessage에서 생성됨
+          const { chats, currentChatId } = get();
+          if (currentChatId) {
+            const synced = syncWorkingToChats(chats, currentChatId, {
+              pinnedDocs: nextPinned,
+            });
+            set({ chats: synced.chats });
           }
-        }, 1900);
-      },
+        },
+        unpinDoc: (docId) => {
+          const nextPinned = get().pinnedDocs.filter((d) => d.id !== docId);
+          set({ pinnedDocs: nextPinned });
+          const { chats, currentChatId } = get();
+          if (currentChatId) {
+            const synced = syncWorkingToChats(chats, currentChatId, {
+              pinnedDocs: nextPinned,
+            });
+            set({ chats: synced.chats });
+          }
+        },
+        setCommand: (cmd) => {
+          set({ activeCommand: cmd });
+          const { chats, currentChatId } = get();
+          if (currentChatId) {
+            const synced = syncWorkingToChats(chats, currentChatId, {
+              activeCommand: cmd,
+            });
+            set({ chats: synced.chats });
+          }
+        },
+        clearContext: () => {
+          set({ pinnedDocs: [], activeCommand: null });
+          const { chats, currentChatId } = get();
+          if (currentChatId) {
+            const synced = syncWorkingToChats(chats, currentChatId, {
+              pinnedDocs: [],
+              activeCommand: null,
+            });
+            set({ chats: synced.chats });
+          }
+        },
 
-      newChat: () =>
-        // 현재 chat은 이미 chats[]에 저장돼 있음 — working 상태만 초기화.
-        // 새 Chat은 첫 sendMessage에서 lazy-create.
-        set({
-          messages: [],
-          pinnedDocs: [],
-          activeCommand: null,
-          lastError: null,
-          currentChatId: null,
-          isLoading: false,
-        }),
+        openPreview: (docId) => set({ previewDocId: docId }),
+        closePreview: () => set({ previewDocId: null }),
 
-      openChat: (id) => {
-        const chat = get().chats.find((c) => c.id === id);
-        if (!chat) return;
-        set({
-          currentChatId: id,
-          messages: chat.messages,
-          pinnedDocs: chat.pinnedDocs,
-          activeCommand: chat.activeCommand,
-          lastError: null,
-          isLoading: false,
-        });
-      },
+        openCatalog: () => set({ catalogOpen: true }),
+        closeCatalog: () => set({ catalogOpen: false }),
 
-      deleteChat: (id) => {
-        const { chats, currentChatId } = get();
-        const nextChats = chats.filter((c) => c.id !== id);
-        // 현재 대화를 지우면 working 초기화
-        if (id === currentChatId) {
+        requestSearchFocus: () =>
+          set((s) => ({ searchFocusToken: s.searchFocusToken + 1 })),
+
+        requestInputFocus: () =>
+          set((s) => ({ inputFocusToken: s.inputFocusToken + 1 })),
+
+        /**
+         * 본문의 `[n]` 클릭 시 Evidence 패널의 해당 카드를 1.8초간 하이라이트.
+         * 빠른 연속 클릭 시 이전 타이머를 무효화하기 위해 토큰을 증가시킴.
+         */
+        highlightCitation: (id) => {
+          const token = get().highlightToken + 1;
+          set({ highlightedCitationId: id, highlightToken: token });
+          setTimeout(() => {
+            // 이후 다른 citation이 클릭되어 토큰이 증가했다면 이 cleanup은 무시.
+            if (get().highlightToken === token) {
+              set({ highlightedCitationId: null });
+            }
+          }, 1900);
+        },
+
+        newChat: () =>
+          // 현재 chat은 이미 chats[]에 저장돼 있음 — working 상태만 초기화.
+          // 새 Chat은 첫 sendMessage에서 lazy-create.
           set({
-            chats: nextChats,
-            currentChatId: null,
             messages: [],
             pinnedDocs: [],
             activeCommand: null,
             lastError: null,
+            currentChatId: null,
+            isLoading: false,
+          }),
+
+        openChat: (id) => {
+          const chat = get().chats.find((c) => c.id === id);
+          if (!chat) return;
+          set({
+            currentChatId: id,
+            messages: chat.messages,
+            pinnedDocs: chat.pinnedDocs,
+            activeCommand: chat.activeCommand,
+            lastError: null,
             isLoading: false,
           });
-        } else {
-          set({ chats: nextChats });
-        }
-      },
+        },
 
-      sendMessage: async (text) => {
-        const state = get();
-        // 이미 스트리밍 중이면 중복 호출 무시 (InputBar 레벨에서 막지만 방어적)
-        if (state.isLoading) return;
-
-        const userMessage: Message = {
-          id: newId("user"),
-          role: "user",
-          content: text,
-          createdAt: Date.now(),
-        };
-        const assistantId = newId("assistant");
-        const assistantMessage: Message = {
-          id: assistantId,
-          role: "assistant",
-          content: "",
-          createdAt: Date.now(),
-          citations: [],
-        };
-        const nextMessages = [...state.messages, userMessage, assistantMessage];
-
-        // 첫 메시지라면 Chat을 생성 (syncWorkingToChats가 처리)
-        const synced = syncWorkingToChats(state.chats, state.currentChatId, {
-          messages: nextMessages,
-          pinnedDocs: state.pinnedDocs,
-          activeCommand: state.activeCommand,
-        });
-        const controller = new AbortController();
-        set({
-          messages: nextMessages,
-          chats: synced.chats,
-          currentChatId: synced.currentChatId,
-          isLoading: true,
-          lastError: null,
-          abortController: controller,
-        });
-
-        await runQuery({
-          question: text,
-          assistantId,
-          pinnedDocs: state.pinnedDocs,
-          activeCommand: state.activeCommand,
-          activeChatId: synced.currentChatId,
-          signal: controller.signal,
-        });
-      },
-
-      /**
-       * 마지막 assistant 메시지(오류 포함)를 리셋하고 직전 user 메시지로 재질의.
-       * 유저 메시지는 중복 append하지 않고 기존 assistant bubble을 재사용.
-       */
-      retryLastMessage: async () => {
-        const state = get();
-        if (state.isLoading) return;
-        if (state.messages.length === 0) return;
-
-        // 뒤에서부터 마지막 assistant / 그 직전 user를 찾는다.
-        let assistantIdx = -1;
-        for (let i = state.messages.length - 1; i >= 0; i--) {
-          if (state.messages[i].role === "assistant") {
-            assistantIdx = i;
-            break;
+        deleteChat: (id) => {
+          const { chats, currentChatId } = get();
+          const nextChats = chats.filter((c) => c.id !== id);
+          // 현재 대화를 지우면 working 초기화
+          if (id === currentChatId) {
+            set({
+              chats: nextChats,
+              currentChatId: null,
+              messages: [],
+              pinnedDocs: [],
+              activeCommand: null,
+              lastError: null,
+              isLoading: false,
+            });
+          } else {
+            set({ chats: nextChats });
           }
-        }
-        if (assistantIdx < 0) return;
-        // 직전 user 메시지 (같은 exchange의 질문)
-        let userIdx = -1;
-        for (let i = assistantIdx - 1; i >= 0; i--) {
-          if (state.messages[i].role === "user") {
-            userIdx = i;
-            break;
+        },
+
+        sendMessage: async (text) => {
+          const state = get();
+          // 이미 스트리밍 중이면 중복 호출 무시 (InputBar 레벨에서 막지만 방어적)
+          if (state.isLoading) return;
+
+          const userMessage: Message = {
+            id: newId("user"),
+            role: "user",
+            content: text,
+            createdAt: Date.now(),
+          };
+          const assistantId = newId("assistant");
+          const assistantMessage: Message = {
+            id: assistantId,
+            role: "assistant",
+            content: "",
+            createdAt: Date.now(),
+            citations: [],
+          };
+          const nextMessages = [...state.messages, userMessage, assistantMessage];
+          const history = toChatHistory(state.messages);
+
+          // 첫 메시지라면 Chat을 생성 (syncWorkingToChats가 처리)
+          const synced = syncWorkingToChats(state.chats, state.currentChatId, {
+            messages: nextMessages,
+            pinnedDocs: state.pinnedDocs,
+            activeCommand: state.activeCommand,
+          });
+          const controller = new AbortController();
+          set({
+            messages: nextMessages,
+            chats: synced.chats,
+            currentChatId: synced.currentChatId,
+            isLoading: true,
+            lastError: null,
+            abortController: controller,
+          });
+
+          await runQuery({
+            question: text,
+            assistantId,
+            pinnedDocs: state.pinnedDocs,
+            activeCommand: state.activeCommand,
+            activeChatId: synced.currentChatId,
+            history,
+            signal: controller.signal,
+          });
+        },
+
+        /**
+         * 마지막 assistant 메시지(오류 포함)를 리셋하고 직전 user 메시지로 재질의.
+         * 유저 메시지는 중복 append하지 않고 기존 assistant bubble을 재사용.
+         */
+        retryLastMessage: async () => {
+          const state = get();
+          if (state.isLoading) return;
+          if (state.messages.length === 0) return;
+
+          // 뒤에서부터 마지막 assistant / 그 직전 user를 찾는다.
+          let assistantIdx = -1;
+          for (let i = state.messages.length - 1; i >= 0; i--) {
+            if (state.messages[i].role === "assistant") {
+              assistantIdx = i;
+              break;
+            }
           }
-        }
-        if (userIdx < 0) return;
+          if (assistantIdx < 0) return;
+          // 직전 user 메시지 (같은 exchange의 질문)
+          let userIdx = -1;
+          for (let i = assistantIdx - 1; i >= 0; i--) {
+            if (state.messages[i].role === "user") {
+              userIdx = i;
+              break;
+            }
+          }
+          if (userIdx < 0) return;
 
-        const question = state.messages[userIdx].content;
-        const assistantId = state.messages[assistantIdx].id;
+          const question = state.messages[userIdx].content;
+          const assistantId = state.messages[assistantIdx].id;
 
-        // assistant 메시지를 pending 상태로 리셋 (ID 유지 → bubble-enter 재발동 X,
-        // content 비우면 AssistantMessage가 자동으로 타이핑 점 상태 표시)
-        const resetMessages = state.messages.map((m, i) =>
-          i === assistantIdx
-            ? {
-                ...m,
-                content: "",
-                citations: [],
-                metadata: undefined,
-                error: undefined,
-                createdAt: Date.now(),
-              }
-            : m
-        );
-        const synced = syncWorkingToChats(state.chats, state.currentChatId, {
-          messages: resetMessages,
-        });
-        const controller = new AbortController();
-        set({
-          messages: resetMessages,
-          chats: synced.chats,
-          isLoading: true,
-          lastError: null,
-          abortController: controller,
-        });
+          // assistant 메시지를 pending 상태로 리셋 (ID 유지 → bubble-enter 재발동 X,
+          // content 비우면 AssistantMessage가 자동으로 타이핑 점 상태 표시)
+          const resetMessages = state.messages.map((m, i) =>
+            i === assistantIdx
+              ? {
+                  ...m,
+                  content: "",
+                  citations: [],
+                  metadata: undefined,
+                  error: undefined,
+                  createdAt: Date.now(),
+                }
+              : m
+          );
+          const history = toChatHistory(resetMessages);
+          const synced = syncWorkingToChats(state.chats, state.currentChatId, {
+            messages: resetMessages,
+          });
+          const controller = new AbortController();
+          set({
+            messages: resetMessages,
+            chats: synced.chats,
+            isLoading: true,
+            lastError: null,
+            abortController: controller,
+          });
 
-        await runQuery({
-          question,
-          assistantId,
-          pinnedDocs: state.pinnedDocs,
-          activeCommand: state.activeCommand,
-          activeChatId: synced.currentChatId,
-          signal: controller.signal,
-        });
-      },
+          await runQuery({
+            question,
+            assistantId,
+            pinnedDocs: state.pinnedDocs,
+            activeCommand: state.activeCommand,
+            activeChatId: synced.currentChatId,
+            history,
+            signal: controller.signal,
+          });
+        },
 
-      /**
-       * 스트리밍 중인 요청을 취소. abortController가 없으면 no-op.
-       * runQuery의 catch에서 AbortError를 감지해 오류 버블을 만들지 않는다.
-       */
-      abortCurrentRequest: () => {
-        const controller = get().abortController;
-        if (!controller) return;
-        controller.abort();
-        // isLoading은 runQuery의 finally에서 정리됨
-      },
+        /**
+         * 스트리밍 중인 요청을 취소. abortController가 없으면 no-op.
+         * runQuery의 catch에서 AbortError를 감지해 오류 버블을 만들지 않는다.
+         */
+        abortCurrentRequest: () => {
+          const controller = get().abortController;
+          if (!controller) return;
+          controller.abort();
+          // isLoading은 runQuery의 finally에서 정리됨
+        },
       };
     },
     {

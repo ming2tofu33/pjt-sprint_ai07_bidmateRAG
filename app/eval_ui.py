@@ -362,16 +362,14 @@ def _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_ch
 def _render_run_artifacts(st, artifacts) -> None:
     """평가 실행 결과를 메트릭 카드 + 표 + 리포트 다운로드로 렌더링."""
     metrics = artifacts.metrics or {}
+    ops_metrics = artifacts.ops_metrics or {}
     results = artifacts.benchmark.results
 
     # 비용/토큰/지연 집계
-    generation_cost = sum(float(r.cost_usd or 0.0) for r in results)
-    judge_cost = float(artifacts.judge_total_cost_usd or 0.0)
-    prompt_tokens = sum(int((r.token_usage or {}).get("prompt", 0) or 0) for r in results)
-    completion_tokens = sum(int((r.token_usage or {}).get("completion", 0) or 0) for r in results)
-    total_tokens = prompt_tokens + completion_tokens
-    latencies_ms = [float(r.latency_ms or 0.0) for r in results]
-    avg_latency_s = sum(latencies_ms) / len(latencies_ms) / 1000 if latencies_ms else 0.0
+    generation_cost = float(ops_metrics.get("generation_cost_usd", 0.0) or 0.0)
+    judge_cost = float(ops_metrics.get("judge_cost_usd", artifacts.judge_total_cost_usd) or 0.0)
+    total_tokens = int(ops_metrics.get("total_tokens", 0) or 0)
+    avg_latency_s = float(ops_metrics.get("avg_latency_ms", 0.0) or 0.0) / 1000
 
     # ── 검색 메트릭 카드 ──
     st.markdown("#### 🔍 검색 품질")

@@ -1,9 +1,15 @@
-"""Tests for evaluation/metrics.py — focused on identifier matching."""
+"""Tests for evaluation/metrics.py."""
 
 from __future__ import annotations
 
-from bidmate_rag.evaluation.metrics import calc_hit_rate, calc_map, calc_mrr, calc_ndcg
-from bidmate_rag.schema import Chunk, RetrievedChunk
+from bidmate_rag.evaluation.metrics import (
+    calc_hit_rate,
+    calc_map,
+    calc_mrr,
+    calc_ndcg,
+    summarize_run_operations,
+)
+from bidmate_rag.schema import Chunk, GenerationResult, RetrievedChunk
 
 
 def _make_chunk(
@@ -121,3 +127,71 @@ def test_hit_rate_outside_topk():
         _make_chunk(파일명="hit.hwp", rank=6),  # k=5 밖
     ]
     assert calc_hit_rate(chunks, ["hit.hwp"], k=5) == 0.0
+
+
+def test_summarize_run_operations_aggregates_cost_tokens_and_latency() -> None:
+    results = [
+        GenerationResult(
+            question_id="q1",
+            question="질문1",
+            scenario="scenario_b",
+            run_id="run-1",
+            embedding_provider="openai",
+            embedding_model="text-embedding-3-small",
+            llm_provider="openai",
+            llm_model="gpt-5-mini",
+            answer="답변1",
+            latency_ms=1000.0,
+            token_usage={"prompt": 100, "completion": 20, "total": 120},
+            cost_usd=0.001,
+        ),
+        GenerationResult(
+            question_id="q2",
+            question="질문2",
+            scenario="scenario_b",
+            run_id="run-1",
+            embedding_provider="openai",
+            embedding_model="text-embedding-3-small",
+            llm_provider="openai",
+            llm_model="gpt-5-mini",
+            answer="답변2",
+            latency_ms=3000.0,
+            token_usage={
+                "prompt": 200,
+                "completion": 50,
+                "total": 250,
+                "rewrite_prompt": 40,
+                "rewrite_completion": 10,
+                "rewrite_total": 50,
+            },
+            cost_usd=0.002,
+            debug={"rewrite_cost_usd": 0.0003},
+        ),
+    ]
+
+    summary = summarize_run_operations(results, judge_total_cost_usd=0.0008)
+
+    assert summary == {
+        "generation_cost_usd": 0.003,
+        "rewrite_cost_usd": 0.0003,
+        "judge_cost_usd": 0.0008,
+        "total_cost_usd": 0.0041,
+        "prompt_tokens": 300,
+        "completion_tokens": 70,
+        "rewrite_prompt_tokens": 40,
+        "rewrite_completion_tokens": 10,
+        "rewrite_total_tokens": 50,
+        "total_tokens": 420,
+        "avg_latency_ms": 2000.0,
+    }
+
+
+def test_summarize_run_operations_returns_zeroed_defaults_for_empty_results() -> None:
+    summary = summarize_run_operations([], judge_total_cost_usd=0.0008)
+
+    assert summary["generation_cost_usd"] == 0.0
+    assert summary["rewrite_cost_usd"] == 0.0
+    assert summary["judge_cost_usd"] == 0.0008
+    assert summary["total_cost_usd"] == 0.0008
+    assert summary["total_tokens"] == 0
+    assert summary["avg_latency_ms"] == 0.0

@@ -35,6 +35,41 @@ class HybridConfig(BaseModel):
     rrf_k: int = 60                    # RRF 순위 융합 상수
 
 
+class RewriteConfig(BaseModel):
+    """멀티턴 쿼리 재작성 설정."""
+
+    mode: str = "llm_with_rule_fallback"
+    max_completion_tokens: int = Field(16000, gt=0)
+    timeout_seconds: int = Field(30, gt=0)
+
+
+class SummaryBufferConfig(BaseModel):
+    """오래된 대화 요약 버퍼 설정."""
+
+    max_recent_turns: int = 4
+    max_summary_chars: int = 400
+
+
+class SlotMemoryConfig(BaseModel):
+    """구조화 슬롯 메모리 설정."""
+
+    enabled: bool = True
+
+
+class MemoryConfig(BaseModel):
+    """멀티턴 메모리 설정."""
+
+    enabled: bool = True
+    summary_buffer: SummaryBufferConfig = Field(default_factory=SummaryBufferConfig)
+    slot_memory: SlotMemoryConfig = Field(default_factory=SlotMemoryConfig)
+
+
+class DebugTraceConfig(BaseModel):
+    """디버그 추적 설정."""
+
+    enabled: bool = True
+
+
 class RetrievalConfig(BaseModel):
     """검색 전략 설정 (리랭커, 멀티턴, 부스팅, 하이브리드)."""
 
@@ -42,6 +77,9 @@ class RetrievalConfig(BaseModel):
     enable_multiturn: bool = True      # 멀티턴 검색 보강 사용 여부
     boost: BoostConfig = Field(default_factory=BoostConfig)
     hybrid: HybridConfig = Field(default_factory=HybridConfig)
+    rewrite: RewriteConfig = Field(default_factory=RewriteConfig)
+    memory: MemoryConfig = Field(default_factory=MemoryConfig)
+    debug_trace: DebugTraceConfig = Field(default_factory=DebugTraceConfig)
 
 
 class ProviderConfig(BaseModel):

@@ -1,3 +1,6 @@
+# chat/debug scratch artifacts
+/history.json
+
 # data
 data/raw/*
 !data/raw/.gitkeep

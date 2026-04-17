@@ -203,6 +203,34 @@ def test_post_query_with_single_mention(client) -> None:
     assert data["metadata"]["filter_applied"] == {"doc_id": "20240000001"}
 
 
+def test_post_query_forwards_history_to_web_query(client) -> None:
+    chunks = [_make_chunk("c1", "20240000001", 1)]
+    fake_result = _make_generation_result("답변", chunks)
+
+    captured = {}
+
+    def _fake_web_query(**kwargs):
+        captured.update(kwargs)
+        return fake_result
+
+    history = [
+        {"role": "user", "content": "국민연금공단 사업 알려줘"},
+        {"role": "assistant", "content": "차세대 ERP 사업입니다."},
+    ]
+    with patch("bidmate_rag.web_api.routes.web_query", side_effect=_fake_web_query):
+        response = client.post(
+            "/api/query",
+            json={
+                "question": "그 사업 일정은?",
+                "provider_config": "openai_gpt5mini",
+                "history": history,
+            },
+        )
+
+    assert response.status_code == 200
+    assert captured["chat_history"] == history
+
+
 def test_post_query_with_command_augments_query(client) -> None:
     chunks = [_make_chunk("c1", "doc-1.hwp", 1)]
     fake_result = _make_generation_result("표 형식 답변", chunks)

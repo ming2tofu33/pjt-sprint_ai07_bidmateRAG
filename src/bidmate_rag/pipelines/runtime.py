@@ -14,6 +14,7 @@ import pandas as pd
 from bidmate_rag.config.settings import RuntimeConfig, load_runtime_config
 from bidmate_rag.pipelines.chat import RAGChatPipeline
 from bidmate_rag.providers.llm.registry import build_embedding_provider, build_llm_provider
+from bidmate_rag.retrieval.memory import ConversationMemory
 from bidmate_rag.retrieval.retriever import RAGRetriever
 from bidmate_rag.retrieval.sparse_store import BM25SparseStore
 from bidmate_rag.retrieval.vector_store import ChromaVectorStore
@@ -195,6 +196,14 @@ def build_runtime_pipeline(
     if runtime.retrieval.hybrid.enabled and resolved_chunks_path.exists():
         sparse_store = BM25SparseStore.from_parquet(resolved_chunks_path)
 
+    memory = None
+    if runtime.retrieval.memory.enabled:
+        memory = ConversationMemory(
+            max_recent_turns=runtime.retrieval.memory.summary_buffer.max_recent_turns,
+            max_summary_chars=runtime.retrieval.memory.summary_buffer.max_summary_chars,
+            agency_list=getattr(metadata_store, "agency_list", []),
+            slot_enabled=runtime.retrieval.memory.slot_memory.enabled,
+        )
     reranker = _load_reranker(runtime.retrieval.reranker_model)
     retriever = RAGRetriever(
         vector_store=vector_store,
@@ -205,7 +214,18 @@ def build_runtime_pipeline(
         enable_multiturn=runtime.retrieval.enable_multiturn,
         boost_config=runtime.retrieval.boost.model_dump(),
         hybrid_config=runtime.retrieval.hybrid.model_dump(),
+        rewrite_llm=llm if runtime.retrieval.enable_multiturn else None,
+        rewrite_mode=runtime.retrieval.rewrite.mode,
+        rewrite_max_completion_tokens=runtime.retrieval.rewrite.max_completion_tokens,
+        rewrite_timeout_seconds=runtime.retrieval.rewrite.timeout_seconds,
+        memory=memory,
+        debug_trace_enabled=runtime.retrieval.debug_trace.enabled,
     )
-    pipeline = RAGChatPipeline(retriever=retriever, llm=llm)
+    pipeline = RAGChatPipeline(
+        retriever=retriever,
+        llm=llm,
+        memory=memory,
+        debug_trace_enabled=runtime.retrieval.debug_trace.enabled,
+    )
 
     return pipeline, runtime, embedder, llm

@@ -33,6 +33,7 @@ def split_and_merge_chunks(
     query: str,
     mentioned_doc_ids: list[str],
     top_k: int,
+    chat_history: list[dict] | None = None,
 ) -> list[RetrievedChunk]:
     """문서별로 top_k//N + 2개씩 검색한 뒤 점수로 정렬·절단한다.
 
@@ -45,7 +46,7 @@ def split_and_merge_chunks(
     for doc_id in mentioned_doc_ids:
         chunks = retriever.retrieve(
             query,
-            chat_history=None,
+            chat_history=chat_history,
             top_k=per_doc_k,
             metadata_filter=_doc_where(doc_id),
         )
@@ -70,16 +71,17 @@ def vector_search(
     query: str,
     mentioned_doc_ids: list[str],
     top_k: int,
+    chat_history: list[dict] | None = None,
 ) -> list[RetrievedChunk]:
     """Use the shared retriever path with explicit document scoping when needed."""
 
     if not mentioned_doc_ids:
-        return retriever.retrieve(query, chat_history=None, top_k=top_k)
+        return retriever.retrieve(query, chat_history=chat_history, top_k=top_k)
 
     if len(mentioned_doc_ids) == 1:
         return retriever.retrieve(
             query,
-            chat_history=None,
+            chat_history=chat_history,
             top_k=top_k,
             metadata_filter=_doc_where(mentioned_doc_ids[0]),
         )
@@ -89,6 +91,7 @@ def vector_search(
         query=query,
         mentioned_doc_ids=mentioned_doc_ids,
         top_k=top_k,
+        chat_history=chat_history,
     )
 
 
@@ -102,6 +105,7 @@ def web_query(
     system_prompt: str | None,
     top_k: int,
     max_context_chars: int,
+    chat_history: list[dict] | None = None,
 ) -> GenerationResult:
     """Web API의 통합 RAG 경로.
 
@@ -115,12 +119,13 @@ def web_query(
         query=augmented_query,
         mentioned_doc_ids=mentioned_doc_ids,
         top_k=top_k,
+        chat_history=chat_history,
     )
 
     return llm.generate(
         question=question,
         context_chunks=chunks,
-        history=[],
+        history=chat_history or [],
         generation_config={
             "max_context_chars": max_context_chars,
             "scenario": runtime.provider.scenario or runtime.provider.provider,
@@ -142,6 +147,7 @@ def web_query_stream(
     system_prompt: str | None,
     top_k: int,
     max_context_chars: int,
+    chat_history: list[dict] | None = None,
 ) -> Iterator[tuple[str, object]]:
     """Streaming 버전의 `web_query`.
 
@@ -161,6 +167,7 @@ def web_query_stream(
         query=augmented_query,
         mentioned_doc_ids=mentioned_doc_ids,
         top_k=top_k,
+        chat_history=chat_history,
     )
 
     # 컨텍스트 예산 기반으로 절단될 청크를 미리 제거 — retrieval 이벤트에서
@@ -179,7 +186,7 @@ def web_query_stream(
     for item in llm.generate_stream(
         question=question,
         context_chunks=visible_chunks,
-        history=[],
+        history=chat_history or [],
         generation_config=gen_config,
         system_prompt=system_prompt or SYSTEM_PROMPT,
     ):

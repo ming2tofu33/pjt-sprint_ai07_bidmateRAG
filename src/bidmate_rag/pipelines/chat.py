@@ -27,8 +27,10 @@ class RAGChatPipeline:
 
     retriever: object
     llm: object
+    memory: object | None = None
     system_prompt: str = SYSTEM_PROMPT
     default_generation_config: dict = field(default_factory=dict)
+    debug_trace_enabled: bool = True
 
     def answer(
         self,
@@ -67,6 +69,20 @@ class RAGChatPipeline:
             top_k=top_k,
             metadata_filter=metadata_filter,
         )
+        retrieval_debug = getattr(self.retriever, "_last_debug", {}) or {}
+        # Retriever가 generation용 memory state를 소유한다 — 있으면 재사용.
+        # 없는 경우(레거시 retriever, memory 비활성화)만 폴백으로 빌드.
+        memory_state = retrieval_debug.get("memory_state")
+        if memory_state is None:
+            memory_state = (
+                self.memory.build(
+                    chat_history or [],
+                    current_question=question,
+                    rewritten_query=retrieval_debug.get("rewritten_query", question),
+                )
+                if self.memory is not None
+                else {"recent_turns": [], "summary_buffer": "", "slot_memory": {}}
+            )
         config = {**self.default_generation_config, **(generation_config or {})}
         if question_id is not None:
             config["question_id"] = question_id
@@ -78,10 +94,34 @@ class RAGChatPipeline:
             config["embedding_provider"] = embedding_provider
         if embedding_model is not None:
             config["embedding_model"] = embedding_model
-        return self.llm.generate(
+        config["rewritten_query"] = retrieval_debug.get("rewritten_query", question)
+        config["memory_summary"] = memory_state.get("summary_buffer", "")
+        config["memory_slots"] = memory_state.get("slot_memory", {})
+        result = self.llm.generate(
             question=question,
             context_chunks=retrieved,
             history=chat_history or [],
             generation_config=config,
             system_prompt=self.system_prompt,
         )
+        rewrite_tokens = {
+            "rewrite_prompt": int(retrieval_debug.get("rewrite_prompt_tokens", 0) or 0),
+            "rewrite_completion": int(retrieval_debug.get("rewrite_completion_tokens", 0) or 0),
+            "rewrite_total": int(retrieval_debug.get("rewrite_total_tokens", 0) or 0),
+        }
+        if any(rewrite_tokens.values()):
+            result.token_usage.update(rewrite_tokens)
+        if self.debug_trace_enabled:
+            generation_cost = float(result.cost_usd or 0.0)
+            rewrite_cost = float(retrieval_debug.get("rewrite_cost_usd", 0.0) or 0.0)
+            result.debug.update(retrieval_debug)
+            result.debug.update(
+                {
+                    "memory_recent_turns": memory_state.get("recent_turns", []),
+                    "memory_summary": memory_state.get("summary_buffer", ""),
+                    "memory_slots": memory_state.get("slot_memory", {}),
+                    "generation_cost_usd": generation_cost,
+                    "total_cost_usd": round(generation_cost + rewrite_cost, 6),
+                }
+            )
+        return result

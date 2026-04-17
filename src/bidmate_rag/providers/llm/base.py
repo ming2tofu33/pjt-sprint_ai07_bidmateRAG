@@ -16,6 +16,16 @@ class StreamDelta:
     text: str
 
 
+@dataclass
+class RewriteResponse:
+    """멀티턴 쿼리 재작성 응답 — provider-agnostic."""
+
+    text: str
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    total_tokens: int = 0
+
+
 class BaseLLMProvider(ABC):
     provider_name: str
     model_name: str
@@ -62,3 +72,21 @@ class BaseLLMProvider(ABC):
         )
         yield StreamDelta(text=result.answer)
         yield result
+
+    def rewrite(
+        self,
+        prompt: str,
+        *,
+        max_tokens: int = 16000,
+        timeout: int | None = 30,
+    ) -> RewriteResponse:
+        """짧은 지시형 프롬프트에 대한 원샷 텍스트 생성.
+
+        멀티턴 query rewrite처럼 retrieval context 없이 LLM에게 단문 생성을
+        요청하는 경로에서 사용한다. 기본 구현은 미지원으로 예외를 던진다 —
+        구현하지 않은 프로바이더를 rewrite_llm으로 주입하면 즉시 실패해
+        룰 기반 폴백으로 빠지도록 하기 위함.
+        """
+        raise NotImplementedError(
+            f"{type(self).__name__} does not implement rewrite()"
+        )

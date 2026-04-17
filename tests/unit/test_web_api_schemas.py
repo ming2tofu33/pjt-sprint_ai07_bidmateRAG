@@ -35,6 +35,7 @@ def test_query_request_defaults() -> None:
     """Optional 필드는 None으로 폴백 — 실제 값은 configs/web.yaml에서 채워진다."""
     req = QueryRequest(question="요구사항 알려줘")
     assert req.mentioned_doc_ids == []
+    assert req.history == []
     assert req.command is None
     assert req.provider_config is None
     assert req.chunking_config is None

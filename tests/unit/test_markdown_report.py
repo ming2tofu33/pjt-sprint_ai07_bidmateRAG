@@ -51,8 +51,16 @@ def _make_fixture(
             "answer": "A1",
             "retrieved_chunks": [],
             "latency_ms": 1500.0,
-            "token_usage": {"prompt": 100, "completion": 50, "total": 150},
+            "token_usage": {
+                "prompt": 100,
+                "completion": 50,
+                "total": 150,
+                "rewrite_prompt": 20,
+                "rewrite_completion": 10,
+                "rewrite_total": 30,
+            },
             "cost_usd": 0.0012,
+            "debug": {"rewrite_cost_usd": 0.0001},
             "judge_scores": {
                 "faithfulness": 0.9,
                 "answer_relevance": 0.85,
@@ -72,8 +80,16 @@ def _make_fixture(
             "answer": "A2",
             "retrieved_chunks": [],
             "latency_ms": 2500.0,
-            "token_usage": {"prompt": 200, "completion": 100, "total": 300},
+            "token_usage": {
+                "prompt": 200,
+                "completion": 100,
+                "total": 300,
+                "rewrite_prompt": 30,
+                "rewrite_completion": 20,
+                "rewrite_total": 50,
+            },
             "cost_usd": 0.0024,
+            "debug": {"rewrite_cost_usd": 0.0003},
             "judge_scores": {},
         },
     ]
@@ -89,7 +105,10 @@ def _make_fixture(
         "provider_label": "openai:gpt-5-mini",
         "num_samples": 2,
         "avg_latency_ms": 2000.0,
-        "total_cost_usd": 0.0036,
+        "generation_cost_usd": 0.0036,
+        "rewrite_cost_usd": 0.0004,
+        "judge_cost_usd": 0.0008,
+        "total_cost_usd": 0.0048,
         "hit_rate@5": 0.85,
         "mrr": 0.72,
         "ndcg@5": 0.79,
@@ -138,6 +157,10 @@ def _make_fixture(
             "eval_path": "data/eval/eval_v1/eval_batch_02.csv",
             "collection_name": "test-collection",
             "judge_skipped": judge_skipped,
+            "generation_cost_usd": 0.0036,
+            "rewrite_cost_usd": 0.0004,
+            "judge_cost_usd": 0.0 if judge_skipped else 0.0008,
+            "total_cost_usd": 0.0040 if judge_skipped else 0.0048,
             "judge_total_cost_usd": 0.0 if judge_skipped else 0.0008,
             "judge_total_tokens": 0 if judge_skipped else 400,
         }
@@ -372,8 +395,15 @@ def test_render_markdown_includes_key_sections(tmp_path):
     assert "## 1. 가설" in md
     # 비용 표시
     assert "0.0036" in md  # generation cost
+    assert "0.0004" in md  # rewrite cost
     assert "0.0010" in md  # embedding cost
     assert "0.0008" in md  # judge cost
+    assert "0.0058" in md  # total cost including rewrite + embedding
+    assert "Rewrite Cost (USD)" in md
+    assert "Rewrite Prompt Tokens" in md
+    assert "Rewrite Completion Tokens" in md
+    assert "Rewrite Total Tokens" in md
+    assert "| Total Tokens | 530 |" in md
     # 본문 표 cost 명칭이 노션 속성과 동일하게 "Cost (USD)"로 통일
     assert "**Cost (USD)**" in md
     # 토큰 합계
@@ -469,6 +499,76 @@ def test_render_markdown_handles_missing_embedding(tmp_path):
     md = render_markdown(data)
     assert "임베딩 비용 미수집" in md
     assert data.embedding_meta is None
+
+
+def test_render_markdown_hides_rewrite_rows_when_unused(tmp_path):
+    rows = [
+        {
+            "question_id": "q1",
+            "question": "Q1",
+            "scenario": "openai",
+            "run_id": "bench-test1234",
+            "embedding_provider": "openai",
+            "embedding_model": "text-embedding-3-small",
+            "llm_provider": "openai",
+            "llm_model": "gpt-5-mini",
+            "answer": "A1",
+            "retrieved_chunks": [],
+            "latency_ms": 1500.0,
+            "token_usage": {"prompt": 100, "completion": 50, "total": 150},
+            "cost_usd": 0.0012,
+            "debug": {"rewrite_cost_usd": 0.0},
+            "judge_scores": {},
+        }
+    ]
+    _make_fixture(tmp_path, rows=rows)
+    (tmp_path / "runs" / "bench-test1234.meta.json").write_text(
+        json.dumps(
+            {
+                **json.loads((tmp_path / "runs" / "bench-test1234.meta.json").read_text(encoding="utf-8")),
+                "rewrite_cost_usd": 0.0,
+                "total_cost_usd": 0.0044,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    pd.DataFrame(
+        [
+            {
+                "experiment_name": "test-exp",
+                "run_id": "bench-test1234",
+                "scenario": "openai",
+                "provider_label": "openai:gpt-5-mini",
+                "num_samples": 1,
+                "avg_latency_ms": 1500.0,
+                "generation_cost_usd": 0.0012,
+                "rewrite_cost_usd": 0.0,
+                "judge_cost_usd": 0.0008,
+                "total_cost_usd": 0.0020,
+                "hit_rate@5": 0.85,
+                "mrr": 0.72,
+                "ndcg@5": 0.79,
+                "faithfulness": 0.9,
+                "answer_relevance": 0.85,
+                "context_precision": 0.7,
+                "context_recall": 0.8,
+            }
+        ]
+    ).to_parquet(tmp_path / "benchmarks" / "test-exp.parquet", index=False)
+    data = load_report_data(
+        run_id="bench-test1234",
+        runs_dir=tmp_path / "runs",
+        benchmarks_dir=tmp_path / "benchmarks",
+        embeddings_dir=tmp_path / "embeddings",
+    )
+
+    md = render_markdown(data)
+    assert "Rewrite Prompt Tokens" not in md
+    assert "Rewrite Completion Tokens" not in md
+    assert "Rewrite Total Tokens" not in md
+    assert "Rewrite Cost (USD)" not in md
 
 
 def test_render_markdown_handles_missing_meta(tmp_path):

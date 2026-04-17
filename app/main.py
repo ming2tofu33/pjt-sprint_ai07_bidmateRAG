@@ -30,6 +30,20 @@ EXAMPLE_QUESTIONS = [
 ]
 
 
+def _build_chat_history(messages: list[dict]) -> list[dict[str, str]]:
+    """Run 직전까지의 user/assistant 메시지만 멀티턴 history로 정리한다."""
+    history: list[dict[str, str]] = []
+    for message in messages:
+        role = message.get("role")
+        content = message.get("content")
+        if role not in {"user", "assistant"}:
+            continue
+        if not isinstance(content, str) or not content.strip():
+            continue
+        history.append({"role": role, "content": content})
+    return history
+
+
 def _running_under_streamlit() -> bool:
     try:
         from streamlit.runtime.scriptrunner import get_script_run_ctx
@@ -413,6 +427,7 @@ def _render_streamlit_app() -> None:
         prompt = pending or st.chat_input("질문을 입력하세요 (예: 국민연금공단 이러닝시스템 요구사항)")
 
         if prompt:
+            chat_history = _build_chat_history(st.session_state.messages)
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
@@ -435,6 +450,7 @@ def _render_streamlit_app() -> None:
                         experiment_config_path=selected_chunking,
                         top_k=top_k,
                         manual_filters=filters_to_pass,
+                        chat_history=chat_history,
                         system_prompt=prompt_override,
                         max_context_chars=max_context_chars,
                     )

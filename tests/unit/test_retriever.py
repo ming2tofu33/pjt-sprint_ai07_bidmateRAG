@@ -1,4 +1,7 @@
+from unittest.mock import MagicMock
+
 from bidmate_rag.retrieval.filters import extract_matched_agencies, extract_project_clues
+from bidmate_rag.retrieval.memory import ConversationMemory
 from bidmate_rag.retrieval.retriever import RAGRetriever
 from bidmate_rag.schema import Chunk, RetrievedChunk
 
@@ -88,6 +91,20 @@ class FakeSparseStore:
     def query(self, *, query: str, top_k: int = 5, where: dict | None = None):
         self.calls.append({"query": query, "top_k": top_k, "where": where})
         return self.query_results[:top_k]
+
+
+def _make_mock_llm(rewritten_text: str) -> MagicMock:
+    from bidmate_rag.providers.llm.base import RewriteResponse
+
+    mock_llm = MagicMock()
+    mock_llm.rewrite.return_value = RewriteResponse(
+        text=rewritten_text,
+        prompt_tokens=0,
+        completion_tokens=0,
+        total_tokens=0,
+    )
+    mock_llm.model_name = "gpt-5-mini"
+    return mock_llm
 
 
 def _retrieved_chunk(
@@ -771,6 +788,94 @@ def test_retriever_rewrites_follow_up_query_and_inherits_recent_agency_filter() 
     assert embedder.queries == ["국민연금공단 차세대 ERP 사업 예산은?"]
     assert vector_store.last_kwargs["where"]["발주 기관"] == "국민연금공단"
     assert vector_store.last_kwargs["where"]["파일명"] == {"$in": ["doc-1.hwp", "doc-2.hwp"]}
+    assert retriever._last_debug["rewritten_query"] == "국민연금공단 차세대 ERP 사업 예산은?"
+    assert retriever._last_debug["retrieved_chunks_before_rerank"]
+    assert retriever._last_debug["retrieved_chunks_after_rerank"]
+
+
+def test_retriever_uses_llm_rewrite_for_implicit_followup() -> None:
+    vector_store = FakeVectorStore()
+    embedder = FakeEmbedder()
+    mock_llm = _make_mock_llm("국민연금공단 차세대 ERP 사업의 평가기준")
+    memory = ConversationMemory(
+        max_recent_turns=4,
+        max_summary_chars=120,
+        agency_list=["국민연금공단"],
+    )
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=embedder,
+        metadata_store=FakeMetadataStore(),
+        rewrite_llm=mock_llm,
+        memory=memory,
+    )
+
+    retriever.retrieve(
+        "평가기준은?",
+        top_k=2,
+        chat_history=[
+            {"role": "user", "content": "국민연금공단 차세대 ERP 사업 알려줘"},
+            {"role": "assistant", "content": "해당 사업은 국민연금공단의 차세대 ERP 구축 사업입니다."},
+        ],
+    )
+
+    prompt = mock_llm.rewrite.call_args.args[0]
+    assert embedder.queries == ["국민연금공단 차세대 ERP 사업의 평가기준"]
+    mock_llm.rewrite.assert_called_once()
+    assert "발주기관: 국민연금공단" in prompt
+    assert "사업명" in prompt
+    assert retriever._last_debug["rewrite_reason"] == "llm"
+    assert retriever._last_debug["rewritten_query"] == "국민연금공단 차세대 ERP 사업의 평가기준"
+    assert retriever._last_debug["rewrite_slot_memory"]["발주기관"] == "국민연금공단"
+
+
+def test_retriever_keeps_minimal_runtime_state_when_debug_trace_disabled() -> None:
+    from bidmate_rag.providers.llm.base import RewriteResponse
+
+    vector_store = FakeVectorStore()
+    embedder = FakeEmbedder()
+    mock_llm = MagicMock()
+    mock_llm.rewrite.return_value = RewriteResponse(
+        text="국민연금공단 차세대 ERP 사업의 평가기준",
+        prompt_tokens=12,
+        completion_tokens=7,
+        total_tokens=19,
+    )
+    mock_llm.model_name = "gpt-5-mini"
+    memory = ConversationMemory(
+        max_recent_turns=4,
+        max_summary_chars=120,
+        agency_list=["국민연금공단"],
+    )
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=embedder,
+        metadata_store=FakeMetadataStore(),
+        rewrite_llm=mock_llm,
+        memory=memory,
+        debug_trace_enabled=False,
+    )
+
+    retriever.retrieve(
+        "평가기준은?",
+        top_k=2,
+        chat_history=[
+            {"role": "user", "content": "국민연금공단 차세대 ERP 사업 알려줘"},
+            {
+                "role": "assistant",
+                "content": "해당 사업은 국민연금공단의 차세대 ERP 구축 사업입니다.",
+            },
+        ],
+    )
+
+    assert retriever._last_debug["rewritten_query"] == "국민연금공단 차세대 ERP 사업의 평가기준"
+    assert retriever._last_debug["rewrite_prompt_tokens"] == 12
+    assert retriever._last_debug["rewrite_completion_tokens"] == 7
+    assert retriever._last_debug["rewrite_total_tokens"] == 19
+    assert retriever._last_debug["rewrite_cost_usd"] > 0.0
+    assert retriever._last_debug["memory_state"]["slot_memory"]["발주기관"] == "국민연금공단"
+    assert "retrieved_chunks_before_rerank" not in retriever._last_debug
+    assert "where" not in retriever._last_debug
 
 
 def test_retriever_can_disable_multiturn_rewrite_and_history_filter() -> None:

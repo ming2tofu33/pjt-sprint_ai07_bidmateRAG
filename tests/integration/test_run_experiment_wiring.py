@@ -205,3 +205,30 @@ def test_debug_tab_passes_metadata_filter_and_history_to_run_live_query():
     )
     assert "metadata_filter=normalized_filter" in src
     assert "chat_history=history" in src
+
+
+def test_streamlit_main_chat_history_builder_keeps_previous_turns_only():
+    from app.main import _build_chat_history
+
+    messages = [
+        {"role": "user", "content": "국민연금공단 사업 알려줘"},
+        {"role": "assistant", "content": "차세대 ERP 사업입니다.", "metadata": {"tokens": 12}},
+        {"role": "assistant", "content": ""},
+        {"role": "system", "content": "ignore"},
+        {"role": "user", "content": None},
+    ]
+
+    assert _build_chat_history(messages) == [
+        {"role": "user", "content": "국민연금공단 사업 알려줘"},
+        {"role": "assistant", "content": "차세대 ERP 사업입니다."},
+    ]
+
+
+def test_streamlit_main_chat_passes_history_to_run_live_query():
+    import inspect
+
+    from app import main
+
+    src = inspect.getsource(main._render_streamlit_app)
+    assert "chat_history = _build_chat_history" in src
+    assert "chat_history=chat_history" in src
