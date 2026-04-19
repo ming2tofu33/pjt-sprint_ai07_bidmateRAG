@@ -32,6 +32,19 @@ from bidmate_rag.web_api.schemas import (
 router = APIRouter()
 
 PDF_ROOT = Path("data/raw/PDF")
+CALCULATION_LABELS = {
+    "budget_difference": "예산 차이 계산",
+    "budget_sum": "예산 합계 계산",
+    "budget_average": "예산 평균 계산",
+    "budget_ratio": "예산 비율 계산",
+    "budget_max": "최대 예산 계산",
+    "budget_min": "최소 예산 계산",
+    "budget_order_desc": "예산 정렬 계산",
+    "budget_order_asc": "예산 정렬 계산",
+    "budget_percentage": "예산 비율 적용 계산",
+    "budget_single": "단일 금액 조회",
+    "bid_window_days": "입찰 기간 계산",
+}
 
 
 def _normalize_filename_stem(name: str) -> str:
@@ -257,8 +270,25 @@ def _static_response(cmd: SlashCommand) -> QueryResponse:
             filter_applied=None,
             retrieval_strategy="static",
             per_doc_k=None,
+            answer_source="static",
+            answer_source_label="정적 응답",
+            calculation_mode=None,
+            calculation_label=None,
         ),
     )
+
+
+def _resolve_answer_metadata(result: GenerationResult) -> tuple[str, str | None, str | None, str | None]:
+    debug = result.debug or {}
+    calculation_mode = debug.get("calculation_mode")
+    if isinstance(calculation_mode, str) and calculation_mode:
+        return (
+            "calculation",
+            "SQL 계산 응답",
+            calculation_mode,
+            CALCULATION_LABELS.get(calculation_mode, "구조화 계산 응답"),
+        )
+    return ("llm", "LLM 생성 응답", None, None)
 
 
 def _result_to_response(
@@ -268,6 +298,7 @@ def _result_to_response(
     strategy: str,
     per_doc_k: int | None,
 ) -> QueryResponse:
+    answer_source, answer_source_label, calculation_mode, calculation_label = _resolve_answer_metadata(result)
     return QueryResponse(
         answer=result.answer,
         citations=_build_citations(result.retrieved_chunks),
@@ -280,6 +311,10 @@ def _result_to_response(
             filter_applied=filter_applied,
             retrieval_strategy=strategy,
             per_doc_k=per_doc_k,
+            answer_source=answer_source,
+            answer_source_label=answer_source_label,
+            calculation_mode=calculation_mode,
+            calculation_label=calculation_label,
         ),
     )
 
@@ -381,6 +416,7 @@ def _build_metadata(
     strategy: str,
     per_doc_k: int | None,
 ) -> dict[str, Any]:
+    answer_source, answer_source_label, calculation_mode, calculation_label = _resolve_answer_metadata(result)
     return QueryMetadata(
         model=result.llm_model,
         token_usage=result.token_usage,
@@ -390,6 +426,10 @@ def _build_metadata(
         filter_applied=filter_applied,
         retrieval_strategy=strategy,
         per_doc_k=per_doc_k,
+        answer_source=answer_source,
+        answer_source_label=answer_source_label,
+        calculation_mode=calculation_mode,
+        calculation_label=calculation_label,
     ).model_dump()
 
 

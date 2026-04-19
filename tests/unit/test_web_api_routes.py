@@ -116,7 +116,12 @@ from unittest.mock import patch
 from bidmate_rag.schema import GenerationResult, Chunk, RetrievedChunk
 
 
-def _make_generation_result(answer: str, chunks: list[RetrievedChunk]) -> GenerationResult:
+def _make_generation_result(
+    answer: str,
+    chunks: list[RetrievedChunk],
+    *,
+    debug: dict | None = None,
+) -> GenerationResult:
     return GenerationResult(
         question_id="q-test",
         question="요구사항 알려줘",
@@ -134,6 +139,7 @@ def _make_generation_result(answer: str, chunks: list[RetrievedChunk]) -> Genera
         token_usage={"prompt": 100, "completion": 50, "total": 150, "cached": 0},
         cost_usd=0.001,
         context="...",
+        debug=debug or {},
     )
 
 
@@ -175,6 +181,8 @@ def test_post_query_no_mentions_no_command(client) -> None:
     assert data["citations"][0]["id"] == 1
     assert data["metadata"]["retrieval_strategy"] == "single"
     assert data["metadata"]["command_applied"] is None
+    assert data["metadata"]["answer_source"] == "llm"
+    assert data["metadata"]["calculation_mode"] is None
 
 
 def test_post_query_with_single_mention(client) -> None:
@@ -289,7 +297,64 @@ def test_post_query_static_help_command(client) -> None:
     assert response.status_code == 200
     data = response.json()
     assert data["metadata"]["retrieval_strategy"] == "static"
+    assert data["metadata"]["answer_source"] == "static"
     assert "/요약" in data["answer"]
+
+
+def test_post_query_exposes_calculation_metadata(client) -> None:
+    chunks = [_make_chunk("c1", "doc-1.hwp", 1), _make_chunk("c2", "doc-2.hwp", 2)]
+    fake_result = _make_generation_result(
+        "직답 답변:\n- 두 사업의 예산 차액은 1,000원입니다.",
+        chunks,
+        debug={"calculation_mode": "budget_difference"},
+    )
+
+    with patch("bidmate_rag.web_api.routes.web_query", return_value=fake_result):
+        response = client.post(
+            "/api/query",
+            json={
+                "question": "두 사업의 예산 차이는 얼마입니까?",
+                "provider_config": "openai_gpt5mini",
+                "mentioned_doc_ids": ["20240000001", "20240000002"],
+            },
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["metadata"]["answer_source"] == "calculation"
+    assert data["metadata"]["answer_source_label"] == "SQL 계산 응답"
+    assert data["metadata"]["calculation_mode"] == "budget_difference"
+    assert data["metadata"]["calculation_label"] == "예산 차이 계산"
+
+
+def test_post_query_stream_exposes_calculation_metadata(client) -> None:
+    chunks = [_make_chunk("c1", "doc-1.hwp", 1), _make_chunk("c2", "doc-2.hwp", 2)]
+    fake_result = _make_generation_result(
+        "직답 답변:\n- 두 사업의 예산 차액은 1,000원입니다.",
+        chunks,
+        debug={"calculation_mode": "budget_difference"},
+    )
+
+    def _fake_web_query_stream(**_kwargs):
+        yield ("retrieval", chunks)
+        yield ("token", fake_result.answer)
+        yield ("done", fake_result)
+
+    with patch("bidmate_rag.web_api.routes.web_query_stream", side_effect=_fake_web_query_stream):
+        response = client.post(
+            "/api/query/stream",
+            json={
+                "question": "두 사업의 예산 차이는 얼마입니까?",
+                "provider_config": "openai_gpt5mini",
+                "mentioned_doc_ids": ["20240000001", "20240000002"],
+            },
+        )
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/event-stream")
+    assert '"type": "done"' in response.text
+    assert '"answer_source": "calculation"' in response.text
+    assert '"calculation_mode": "budget_difference"' in response.text
 
 
 def test_post_query_unknown_command(client) -> None:

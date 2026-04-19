@@ -43,6 +43,10 @@ export interface QueryMetadata {
   filter_applied: Record<string, unknown> | null;
   retrieval_strategy: "single" | "per_doc_split" | "static";
   per_doc_k: number | null;
+  answer_source: "llm" | "calculation" | "static";
+  answer_source_label: string | null;
+  calculation_mode: string | null;
+  calculation_label: string | null;
 }
 
 export interface QueryResponse {

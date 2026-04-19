@@ -1,12 +1,14 @@
 import { RotateCcw } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
 import type { Message } from "@/lib/types";
+
 import { MarkdownWithCitations } from "./MarkdownWithCitations";
 
 interface Props {
   message: Message;
   showTail?: boolean;
   showMetadata?: boolean;
-  /** 제공되면 에러 버블 아래에 "다시 시도" 버튼이 렌더된다. */
   onRetry?: () => void;
 }
 
@@ -42,9 +44,13 @@ export function AssistantMessage({
     );
   }
 
-  // content가 비어있으면 "생성 중" 상태 — 버블 안에 iMessage 타이핑 점만 표시.
-  // 토큰이 도착해서 content가 생기면 점이 자연스럽게 답변으로 치환된다.
   const isPending = message.content.length === 0;
+  const isCalculation = message.metadata?.answer_source === "calculation";
+  const sourceLabel =
+    message.metadata?.answer_source_label ??
+    (isCalculation ? "SQL 계산 응답" : "LLM 생성 응답");
+  const calculationLabel =
+    message.metadata?.calculation_label ?? "구조화 계산 응답";
 
   return (
     <div className="flex flex-col items-start gap-1 px-2">
@@ -65,16 +71,44 @@ export function AssistantMessage({
             <span className="imessage-dot h-2 w-2 rounded-full bg-neutral-500" />
           </>
         ) : (
-          <MarkdownWithCitations content={message.content} />
+          <div className="space-y-2">
+            {isCalculation && (
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="secondary" className="text-[10px]">
+                  {calculationLabel}
+                </Badge>
+                <span className="text-[11px] text-muted-foreground">
+                  문서 구조화 필드와 SQL 계산 결과를 먼저 사용한 응답입니다.
+                </span>
+              </div>
+            )}
+            <MarkdownWithCitations content={message.content} />
+          </div>
         )}
       </div>
       {showMetadata && message.metadata && (
         <div className="ml-3 flex gap-2 text-[10px] text-muted-foreground">
-          <span>{message.metadata.model}</span>
-          <span>·</span>
-          <span>{(message.metadata.latency_ms / 1000).toFixed(1)}s</span>
-          <span>·</span>
-          <span>{message.metadata.token_usage.total ?? 0} tokens</span>
+          {isCalculation ? (
+            <>
+              <span>{sourceLabel}</span>
+              <span aria-hidden="true">·</span>
+              <span>{(message.metadata.latency_ms / 1000).toFixed(1)}s</span>
+              {message.citations && message.citations.length > 0 && (
+                <>
+                  <span aria-hidden="true">·</span>
+                  <span>근거 {message.citations.length}건</span>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <span>{message.metadata.model}</span>
+              <span aria-hidden="true">·</span>
+              <span>{(message.metadata.latency_ms / 1000).toFixed(1)}s</span>
+              <span aria-hidden="true">·</span>
+              <span>{message.metadata.token_usage.total ?? 0} tokens</span>
+            </>
+          )}
         </div>
       )}
     </div>

@@ -71,6 +71,8 @@ def test_query_response_contains_citations() -> None:
     data = response.model_dump()
     assert len(data["citations"]) == 1
     assert data["metadata"]["retrieval_strategy"] == "single"
+    assert data["metadata"]["answer_source"] == "llm"
+    assert data["metadata"]["calculation_mode"] is None
 
 
 def test_document_detail_quick_facts_list() -> None:

@@ -7,8 +7,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from time import perf_counter
 
 from bidmate_rag.config.prompts import SYSTEM_PROMPT
+from bidmate_rag.generation.calculation_engine import build_calculation_generation_result
 from bidmate_rag.schema import GenerationResult
 
 
@@ -31,6 +33,7 @@ class RAGChatPipeline:
     system_prompt: str = SYSTEM_PROMPT
     default_generation_config: dict = field(default_factory=dict)
     debug_trace_enabled: bool = True
+    calculation_engine: object | None = None
 
     def answer(
         self,
@@ -63,6 +66,7 @@ class RAGChatPipeline:
         Returns:
             GenerationResult (답변, 검색 청크, 토큰 사용량 등).
         """
+        started_at = perf_counter()
         retrieved = self.retriever.retrieve(
             question,
             chat_history=chat_history,
@@ -97,6 +101,37 @@ class RAGChatPipeline:
         config["rewritten_query"] = retrieval_debug.get("rewritten_query", question)
         config["memory_summary"] = memory_state.get("summary_buffer", "")
         config["memory_slots"] = memory_state.get("slot_memory", {})
+
+        if self.calculation_engine is not None:
+            calculation_answer = self.calculation_engine.try_answer(
+                question=question,
+                retrieved_chunks=retrieved,
+                metadata_filter=metadata_filter,
+            )
+            if calculation_answer is not None:
+                result = build_calculation_generation_result(
+                    question=question,
+                    calculation_answer=calculation_answer,
+                    context_chunks=retrieved,
+                    llm_provider=getattr(self.llm, "provider_name", ""),
+                    llm_model=getattr(self.llm, "model_name", ""),
+                    generation_config=config,
+                    latency_ms=(perf_counter() - started_at) * 1000,
+                )
+                if self.debug_trace_enabled:
+                    rewrite_cost = float(retrieval_debug.get("rewrite_cost_usd", 0.0) or 0.0)
+                    result.debug.update(retrieval_debug)
+                    result.debug.update(
+                        {
+                            "memory_recent_turns": memory_state.get("recent_turns", []),
+                            "memory_summary": memory_state.get("summary_buffer", ""),
+                            "memory_slots": memory_state.get("slot_memory", {}),
+                            "generation_cost_usd": 0.0,
+                            "total_cost_usd": round(rewrite_cost, 6),
+                        }
+                    )
+                return result
+
         result = self.llm.generate(
             question=question,
             context_chunks=retrieved,

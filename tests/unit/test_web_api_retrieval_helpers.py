@@ -116,6 +116,14 @@ class _FakeLLM:
         yield self.generate(**kwargs)
 
 
+class _FailLLM:
+    provider_name = "openai"
+    model_name = "gpt-5-mini"
+
+    def generate(self, **kwargs):
+        raise AssertionError("계산형 질문은 LLM generate를 타면 안 됩니다.")
+
+
 def test_per_doc_split_retrieves_each_doc_separately() -> None:
     retriever = _FakeRetriever()
     merged = split_and_merge_chunks(
@@ -277,3 +285,41 @@ def test_web_query_stream_forwards_chat_history_to_retriever_and_llm(monkeypatch
     assert [event[0] for event in events] == ["retrieval", "token", "done"]
     assert retriever.calls[0]["chat_history"] == history
     assert llm.stream_calls[0]["history"] == history
+
+
+def test_web_query_uses_calculation_engine_before_llm(monkeypatch) -> None:
+    chunks = [_make_chunk("doc-a.hwp", 1, 0.9), _make_chunk("doc-b.hwp", 2, 0.8)]
+    retriever = _FakePipelineRetriever(chunks)
+    pipeline = SimpleNamespace(
+        retriever=retriever,
+        calculation_engine=SimpleNamespace(
+            try_answer=lambda **_kwargs: SimpleNamespace(
+                mode="budget_difference",
+                answer="핵심 답변:\n- 차액은 700,000,000원입니다.\n\n계산 근거:\n- 테스트",
+            )
+        ),
+    )
+    runtime = SimpleNamespace(provider=SimpleNamespace(scenario="scenario_b", provider="openai"))
+    embedder = SimpleNamespace(provider_name="openai", model_name="text-embedding-3-small")
+    llm = _FailLLM()
+
+    monkeypatch.setattr(
+        helpers,
+        "get_pipeline",
+        lambda provider_config, chunking_config: (pipeline, runtime, embedder, llm),
+    )
+
+    result = helpers.web_query(
+        question="두 사업 예산 차이는 얼마야?",
+        augmented_query="두 사업 예산 차이는 얼마야?",
+        mentioned_doc_ids=[],
+        provider_config="openai_gpt5mini",
+        chunking_config=None,
+        system_prompt=None,
+        top_k=3,
+        max_context_chars=8000,
+        chat_history=[],
+    )
+
+    assert result.answer.startswith("핵심 답변:")
+    assert result.retrieved_doc_ids == ["doc-a.hwp", "doc-b.hwp"]

@@ -51,11 +51,19 @@ def test_build_runtime_pipeline_passes_multiturn_flag_to_retriever(
             captured.update(kwargs)
 
     class FakePipeline:
-        def __init__(self, retriever, llm, memory=None, debug_trace_enabled=True) -> None:
+        def __init__(
+            self,
+            retriever,
+            llm,
+            memory=None,
+            debug_trace_enabled=True,
+            calculation_engine=None,
+        ) -> None:
             self.retriever = retriever
             self.llm = llm
             self.memory = memory
             self.debug_trace_enabled = debug_trace_enabled
+            self.calculation_engine = calculation_engine
 
     monkeypatch.setattr(runtime_module, "build_embedding_provider", lambda _: object())
     monkeypatch.setattr(runtime_module, "build_llm_provider", lambda _: object())
@@ -152,11 +160,19 @@ def test_build_runtime_pipeline_passes_llm_to_retriever_when_multiturn_enabled(
             captured.update(kwargs)
 
     class FakePipeline:
-        def __init__(self, retriever, llm, memory=None, debug_trace_enabled=True) -> None:
+        def __init__(
+            self,
+            retriever,
+            llm,
+            memory=None,
+            debug_trace_enabled=True,
+            calculation_engine=None,
+        ) -> None:
             self.retriever = retriever
             self.llm = llm
             self.memory = memory
             self.debug_trace_enabled = debug_trace_enabled
+            self.calculation_engine = calculation_engine
 
     monkeypatch.setattr(runtime_module, "build_embedding_provider", lambda _: object())
     monkeypatch.setattr(runtime_module, "build_llm_provider", lambda _: llm_sentinel)

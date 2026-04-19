@@ -89,6 +89,10 @@ class QueryMetadata(BaseModel):
     filter_applied: dict[str, Any] | None
     retrieval_strategy: Literal["single", "per_doc_split", "static"]
     per_doc_k: int | None = None
+    answer_source: Literal["llm", "calculation", "static"] = "llm"
+    answer_source_label: str | None = None
+    calculation_mode: str | None = None
+    calculation_label: str | None = None
 
 
 class QueryResponse(BaseModel):

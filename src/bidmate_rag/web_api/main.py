@@ -33,7 +33,7 @@ def _load_web_config() -> dict:
     """
     if not _WEB_CONFIG_PATH.exists():
         return dict(_WEB_CONFIG_DEFAULTS)
-    loaded = yaml.safe_load(_WEB_CONFIG_PATH.read_text()) or {}
+    loaded = yaml.safe_load(_WEB_CONFIG_PATH.read_text(encoding="utf-8")) or {}
     return {**_WEB_CONFIG_DEFAULTS, **loaded}
 
 
