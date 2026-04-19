@@ -48,6 +48,25 @@ class _FakeRetriever:
         return [_make_chunk(doc_id, i + 1, 0.9 - 0.1 * i) for i in range(top_k)]
 
 
+class _ScoreMapRetriever:
+    def __init__(self, score_map: dict[str, list[float]]) -> None:
+        self.score_map = score_map
+        self.calls: list[dict] = []
+
+    def retrieve(self, query, chat_history=None, top_k=5, metadata_filter=None):
+        self.calls.append(
+            {
+                "query": query,
+                "chat_history": list(chat_history or []),
+                "top_k": top_k,
+                "metadata_filter": dict(metadata_filter or {}),
+            }
+        )
+        doc_id = metadata_filter["$or"][0]["doc_id"]
+        scores = self.score_map[doc_id][:top_k]
+        return [_make_chunk(doc_id, i + 1, score) for i, score in enumerate(scores)]
+
+
 class _FakePipelineRetriever:
     def __init__(self, chunks: list[RetrievedChunk]) -> None:
         self.chunks = chunks
@@ -132,6 +151,19 @@ def test_per_doc_split_resorts_by_score() -> None:
     assert scores == sorted(scores, reverse=True)
 
 
+def test_per_doc_split_uses_larger_pool_for_comparison_queries() -> None:
+    retriever = _FakeRetriever()
+    split_and_merge_chunks(
+        retriever,
+        query="A 사업과 B 사업을 비교해줘",
+        mentioned_doc_ids=["A", "B"],
+        top_k=4,
+    )
+
+    per_doc_ks = {call["top_k"] for call in retriever.calls}
+    assert per_doc_ks == {6}
+
+
 def test_per_doc_split_minimum_k_is_three() -> None:
     retriever = _FakeRetriever()
     split_and_merge_chunks(
@@ -143,6 +175,25 @@ def test_per_doc_split_minimum_k_is_three() -> None:
     # 5 // 6 = 0, max(0, 3) + 2 = 5
     per_doc_ks = {call["top_k"] for call in retriever.calls}
     assert per_doc_ks == {5}
+
+
+def test_comparison_merge_keeps_at_least_one_chunk_per_doc_when_top_k_allows() -> None:
+    retriever = _ScoreMapRetriever(
+        {
+            "A": [0.99, 0.98, 0.97, 0.96, 0.95, 0.94],
+            "B": [0.70, 0.69, 0.68, 0.67, 0.66, 0.65],
+            "C": [0.20, 0.19, 0.18, 0.17, 0.16, 0.15],
+        }
+    )
+    merged = split_and_merge_chunks(
+        retriever,
+        query="A, B, C 사업을 비교해줘",
+        mentioned_doc_ids=["A", "B", "C"],
+        top_k=5,
+    )
+
+    assert len(merged) == 5
+    assert {chunk.chunk.doc_id for chunk in merged} == {"A", "B", "C"}
 
 
 def test_per_doc_split_forwards_chat_history() -> None:

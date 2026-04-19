@@ -160,6 +160,30 @@ class RAGRetriever:
             reverse=True,
         )
 
+    def _scope_identity(self, result, where: dict | None) -> str:
+        metadata = getattr(result.chunk, "metadata", {}) or {}
+        if self._has_doc_level_constraint(where):
+            return self._doc_identity(result)
+        return str(metadata.get("발주 기관") or self._doc_identity(result))
+
+    def _promote_doc_diversity(self, results: list, top_k: int, where: dict | None) -> list:
+        """비교형 질문은 스코프(기관/문서)별 대표 청크를 먼저 확보한다."""
+        grouped_by_scope: dict[str, list] = {}
+        scope_order: list[str] = []
+
+        for item in results:
+            scope_id = self._scope_identity(item, where)
+            if scope_id not in grouped_by_scope:
+                grouped_by_scope[scope_id] = []
+                scope_order.append(scope_id)
+            grouped_by_scope[scope_id].append(item)
+
+        if len(grouped_by_scope) <= 1:
+            return _assign_ranks(results[:top_k])
+
+        grouped_results = [grouped_by_scope[scope_id] for scope_id in scope_order]
+        return self._merge_round_robin(grouped_results, top_k)
+
     def _has_doc_level_constraint(self, where: dict | None) -> bool:
         if not where:
             return False
@@ -490,15 +514,29 @@ class RAGRetriever:
                 force_scoped=force_scoped,
             )
 
+        scoped_mode = self._should_run_scoped_queries(
+            resolved_query,
+            where,
+            force_scoped=force_scoped,
+        )
+        rerank_top_k = (
+            min(len(results), max(final_top_k * 2, 6))
+            if scoped_mode
+            else final_top_k
+        )
+
         before_rerank = list(results)
-        results = self._apply_experimental_rerank(resolved_query, results, final_top_k)
+        results = self._apply_experimental_rerank(resolved_query, results, rerank_top_k)
         reranked = rerank_with_boost(
             results,
             query=resolved_query,
             section_hint=section_hint,
             boost_config=self.boost_config,
         )
-        final_results = _assign_ranks(reranked[:final_top_k])
+        if scoped_mode:
+            final_results = self._promote_doc_diversity(reranked, final_top_k, where)
+        else:
+            final_results = _assign_ranks(reranked[:final_top_k])
         if self.debug_trace_enabled:
             self._last_debug = {
                 **rewrite_trace,

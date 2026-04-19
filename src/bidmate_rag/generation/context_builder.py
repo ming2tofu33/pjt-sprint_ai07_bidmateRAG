@@ -22,6 +22,53 @@ _MISSING_STRINGS = {
 
 _SOURCE_KEYS = ("사업명", "발주 기관", "파일명")
 _DETAIL_KEYS = ("사업 금액", "공개연도", "기관유형", "사업도메인")
+_STOPWORDS = {
+    "사업",
+    "시스템",
+    "구축",
+    "용역",
+    "문서",
+    "질문",
+    "관련",
+    "해당",
+    "기준",
+    "무엇",
+    "얼마",
+    "언제",
+    "어떻게",
+    "대한",
+    "대해",
+    "각각",
+    "모두",
+    "비교",
+    "정보",
+    "정리",
+    "알려줘",
+    "알려",
+    "있나",
+    "있나요",
+    "입니까",
+    "무엇입니까",
+    "가능합니까",
+}
+_FOCUS_TERM_ALIASES = (
+    (
+        ("예산", "금액", "가격", "비용"),
+        ("예산", "사업예산", "사업 금액", "사업금액", "소요예산", "추정가격", "금액"),
+    ),
+    (
+        ("지식재산권", "저작권", "소유", "귀속"),
+        ("지식재산권", "저작권", "귀속", "단독 소유", "공동 소유", "발주처 단독", "공동활용"),
+    ),
+    (
+        ("심의", "점검표", "법제도"),
+        ("과업심의위원회", "과업변경심의위원회", "과업내용 확정 심의", "법제도 준수 여부 점검표", "법제도"),
+    ),
+    (
+        ("기간", "기한", "종료일", "착수일", "마감"),
+        ("사업기간", "과업기간", "기간", "종료일", "착수일", "기한", "마감"),
+    ),
+)
 
 
 def _is_missing(value: object) -> bool:
@@ -45,6 +92,37 @@ def _clean_text(value: object) -> str | None:
         return None
     text = str(value).strip()
     return text if text else None
+
+
+def _tokenize_text(value: str) -> list[str]:
+    return re.findall(r"[0-9a-z가-힣]+", value.lower())
+
+
+def _extract_focus_terms(question: str | None) -> list[str]:
+    if not question:
+        return []
+
+    normalized_question = " ".join(str(question).split()).lower()
+    terms: list[str] = []
+
+    for triggers, aliases in _FOCUS_TERM_ALIASES:
+        if any(trigger in normalized_question for trigger in triggers):
+            terms.extend(aliases)
+
+    for token in _tokenize_text(normalized_question):
+        if len(token) < 2 or token in _STOPWORDS:
+            continue
+        terms.append(token)
+
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for term in terms:
+        clean = term.strip().lower()
+        if not clean or clean in seen:
+            continue
+        seen.add(clean)
+        deduped.append(clean)
+    return deduped
 
 
 def _format_won(value: object) -> str | None:
@@ -133,16 +211,77 @@ def _build_grouped_chunk_body(chunk: RetrievedChunk) -> str:
     if section:
         lines.append(f"섹션={section}")
 
-    for key in _DETAIL_KEYS:
-        line = _format_metadata_line(key, chunk.chunk.metadata.get(key))
-        if line is not None:
-            lines.append(line)
-
     text = chunk.chunk.text
     if text:
         lines.append(text)
 
     return "\n".join(lines)
+
+
+def _chunk_focus_score(chunk: RetrievedChunk, focus_terms: list[str]) -> int:
+    if not focus_terms:
+        return 0
+
+    metadata = chunk.chunk.metadata or {}
+    section_text = (_clean_text(chunk.chunk.section) or "").lower()
+    header_text = " ".join(
+        filter(
+            None,
+            [
+                *(_clean_text(metadata.get(key)) for key in _SOURCE_KEYS),
+                *(_clean_text(metadata.get(key)) for key in _DETAIL_KEYS),
+            ],
+        )
+    ).lower()
+    body_text = (chunk.chunk.text or "").lower()
+
+    score = 0
+    for term in focus_terms:
+        if term in section_text:
+            score += 4
+        if term in header_text:
+            score += 3
+        if term in body_text:
+            score += 1
+    return score
+
+
+def _order_context_indices(chunks: list[RetrievedChunk], question: str | None) -> list[int]:
+    focus_terms = _extract_focus_terms(question)
+    if not focus_terms:
+        return list(range(len(chunks)))
+
+    group_order: list[str] = []
+    grouped_indices: dict[str, list[int]] = {}
+
+    for idx, chunk in enumerate(chunks):
+        group_key = _get_group_key(chunk)
+        if group_key not in grouped_indices:
+            grouped_indices[group_key] = []
+            group_order.append(group_key)
+        grouped_indices[group_key].append(idx)
+
+    sorted_groups: list[list[int]] = []
+    for group_key in group_order:
+        indices = grouped_indices[group_key]
+        sorted_groups.append(
+            sorted(
+                indices,
+                key=lambda idx: (
+                    -_chunk_focus_score(chunks[idx], focus_terms),
+                    -float(chunks[idx].score),
+                    idx,
+                ),
+            )
+        )
+
+    ordered_indices: list[int] = []
+    max_group_len = max((len(indices) for indices in sorted_groups), default=0)
+    for offset in range(max_group_len):
+        for indices in sorted_groups:
+            if offset < len(indices):
+                ordered_indices.append(indices[offset])
+    return ordered_indices
 
 
 def _render_grouped_context(
@@ -164,8 +303,12 @@ def _render_grouped_context(
 
     rendered_groups: list[str] = []
     for _group_key, first_chunk, grouped_items in groups:
-        header = f"[문서: {_build_doc_label(first_chunk)}]"
-        blocks = [header]
+        header_lines = [f"[문서: {_build_doc_label(first_chunk)}]"]
+        for key in _DETAIL_KEYS:
+            line = _format_metadata_line(key, first_chunk.chunk.metadata.get(key))
+            if line is not None:
+                header_lines.append(line)
+        blocks = ["\n".join(header_lines)]
         for citation_idx, chunk in grouped_items:
             body = _build_grouped_chunk_body(chunk)
             if with_citation_numbers:
@@ -208,6 +351,7 @@ def build_numbered_context_block(
     max_chars: int = 8000,
     *,
     with_citation_numbers: bool = True,
+    question: str | None = None,
 ) -> tuple[str, list[int]]:
     """번호가 붙은 컨텍스트 블록과 LLM이 실제로 본 청크 인덱스를 반환한다.
 
@@ -232,7 +376,10 @@ def build_numbered_context_block(
     total_chars = 0
     separator = "\n\n---\n\n"
 
-    for idx, chunk in enumerate(chunks):
+    ordered_indices = _order_context_indices(chunks, question)
+
+    for idx in ordered_indices:
+        chunk = chunks[idx]
         block = _build_chunk_block(chunk)
         if not block:
             continue

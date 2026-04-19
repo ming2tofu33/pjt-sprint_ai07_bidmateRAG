@@ -13,6 +13,7 @@ from typing import Protocol
 from bidmate_rag.config.prompts import SYSTEM_PROMPT
 from bidmate_rag.generation.context_builder import build_numbered_context_block
 from bidmate_rag.providers.llm.base import StreamDelta
+from bidmate_rag.retrieval.filters import is_comparison_query
 from bidmate_rag.schema import GenerationResult, RetrievedChunk
 from bidmate_rag.web_api.pipeline_cache import get_pipeline
 
@@ -35,13 +36,18 @@ def split_and_merge_chunks(
     top_k: int,
     chat_history: list[dict] | None = None,
 ) -> list[RetrievedChunk]:
-    """문서별로 top_k//N + 2개씩 검색한 뒤 점수로 정렬·절단한다.
+    """문서별로 분할 검색한 뒤 비교형 질문은 문서 커버리지를 우선 보장한다.
 
     `retriever` 파라미터는 duck-typed (Protocol) — 테스트에서 FakeRetriever 주입 가능.
     """
     if not mentioned_doc_ids:
         raise ValueError("mentioned_doc_ids must be non-empty")
-    per_doc_k = max(top_k // len(mentioned_doc_ids), 3) + 2
+    comparison_mode = is_comparison_query(query)
+    per_doc_k = _resolve_per_doc_k(
+        query=query,
+        mentioned_doc_ids=mentioned_doc_ids,
+        top_k=top_k,
+    )
     all_chunks: list[RetrievedChunk] = []
     for doc_id in mentioned_doc_ids:
         chunks = retriever.retrieve(
@@ -51,8 +57,12 @@ def split_and_merge_chunks(
             metadata_filter=_doc_where(doc_id),
         )
         all_chunks.extend(chunks)
-    all_chunks.sort(key=lambda c: -c.score)
-    return all_chunks[:top_k]
+    return _merge_chunks(
+        all_chunks,
+        mentioned_doc_ids=mentioned_doc_ids,
+        top_k=top_k,
+        comparison_mode=comparison_mode,
+    )
 
 
 def _doc_where(doc_id: str) -> dict:
@@ -63,6 +73,71 @@ def _doc_where(doc_id: str) -> dict:
     `doc_id` OR `파일명` 둘 다 매칭시켜야 한다.
     """
     return {"$or": [{"doc_id": doc_id}, {"파일명": doc_id}]}
+
+
+def _resolve_per_doc_k(*, query: str, mentioned_doc_ids: list[str], top_k: int) -> int:
+    """문서별 검색량을 계산한다.
+
+    비교형 질문은 문서별 근거가 빠지기 쉬우므로 기본값보다 조금 더 넉넉하게 가져온다.
+    """
+    base = max(top_k // len(mentioned_doc_ids), 3) + 2
+    if is_comparison_query(query):
+        return max(base, 6)
+    return base
+
+
+def _chunk_doc_keys(chunk: RetrievedChunk) -> set[str]:
+    metadata = chunk.chunk.metadata or {}
+    keys = {
+        str(chunk.chunk.doc_id),
+        str(metadata.get("파일명", "")),
+        str(metadata.get("ingest_file", "")),
+    }
+    return {key for key in keys if key}
+
+
+def _merge_chunks(
+    chunks: list[RetrievedChunk],
+    *,
+    mentioned_doc_ids: list[str],
+    top_k: int,
+    comparison_mode: bool,
+) -> list[RetrievedChunk]:
+    """최종 청크를 병합한다.
+
+    비교형 질문은 top_k가 허용하는 범위에서 문서별 대표 청크를 먼저 확보한다.
+    """
+    if top_k <= 0:
+        return []
+
+    ranked = sorted(chunks, key=lambda c: -c.score)
+    if not comparison_mode or len(mentioned_doc_ids) <= 1:
+        return ranked[:top_k]
+
+    selected: list[RetrievedChunk] = []
+    seen_chunk_ids: set[str] = set()
+
+    for doc_id in mentioned_doc_ids:
+        for chunk in ranked:
+            if chunk.chunk.chunk_id in seen_chunk_ids:
+                continue
+            if doc_id not in _chunk_doc_keys(chunk):
+                continue
+            selected.append(chunk)
+            seen_chunk_ids.add(chunk.chunk.chunk_id)
+            break
+        if len(selected) >= top_k:
+            return selected[:top_k]
+
+    for chunk in ranked:
+        if chunk.chunk.chunk_id in seen_chunk_ids:
+            continue
+        selected.append(chunk)
+        seen_chunk_ids.add(chunk.chunk.chunk_id)
+        if len(selected) >= top_k:
+            break
+
+    return selected[:top_k]
 
 
 def vector_search(

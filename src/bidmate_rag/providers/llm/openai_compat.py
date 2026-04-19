@@ -51,7 +51,9 @@ class OpenAICompatibleLLM(BaseLLMProvider):
                 LLM이 본 것만으로 필터링한다.
         """
         context, used_indices = build_numbered_context_block(
-            context_chunks, max_chars=generation_config.get("max_context_chars", 8000)
+            context_chunks,
+            max_chars=generation_config.get("max_context_chars", 8000),
+            question=question,
         )
         messages: list[dict] = [{"role": "system", "content": system_prompt}]
         # history는 두 가지 형식을 모두 지원:

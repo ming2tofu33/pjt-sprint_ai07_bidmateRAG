@@ -726,6 +726,44 @@ def test_retriever_applies_cross_encoder_after_multi_agency_fan_out_merge() -> N
     assert [result.rerank_score for result in results] == [0.95, 0.9]
 
 
+def test_retriever_preserves_doc_diversity_after_rerank_for_comparison_queries() -> None:
+    vector_store = ScopedFakeVectorStore(
+        {
+            "국민연금공단": [
+                _retrieved_chunk("nps-1", 0.99, agency="국민연금공단"),
+                _retrieved_chunk("nps-2", 0.98, agency="국민연금공단"),
+            ],
+            "기초과학연구원": [
+                _retrieved_chunk("ibs-1", 0.97, agency="기초과학연구원"),
+                _retrieved_chunk("ibs-2", 0.96, agency="기초과학연구원"),
+            ],
+        }
+    )
+    reranker = FakeReranker(
+        {
+            "[발주기관: 국민연금공단 | 사업명: nps-1-사업]\nnps-1": 0.99,
+            "[발주기관: 국민연금공단 | 사업명: nps-2-사업]\nnps-2": 0.98,
+            "[발주기관: 기초과학연구원 | 사업명: ibs-1-사업]\nibs-1": 0.50,
+            "[발주기관: 기초과학연구원 | 사업명: ibs-2-사업]\nibs-2": 0.40,
+        }
+    )
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=FakeEmbedder(),
+        metadata_store=FakeMetadataStore(),
+        reranker_model=reranker,
+    )
+
+    results = retriever.retrieve(
+        "국민연금공단과 기초과학연구원 사업을 비교해줘",
+        top_k=2,
+        metadata_filter={"발주 기관": {"$in": ["국민연금공단", "기초과학연구원"]}},
+    )
+
+    assert [result.chunk.chunk_id for result in results] == ["nps-1", "ibs-1"]
+    assert [result.rank for result in results] == [1, 2]
+
+
 def test_retriever_reranks_table_and_section_matches_over_higher_raw_score_text() -> None:
     vector_store = FakeVectorStore(
         query_results=[

@@ -72,7 +72,9 @@ class HFLocalLLM(BaseLLMProvider):
         system_prompt: str,
     ) -> GenerationResult:
         context, used_indices = build_numbered_context_block(
-            context_chunks, max_chars=generation_config.get("max_context_chars", 8000)
+            context_chunks,
+            max_chars=generation_config.get("max_context_chars", 8000),
+            question=question,
         )
         # LLM이 실제로 본 청크만 유지 — 본문 [n]과 Citation 카드 매칭 일치.
         visible_chunks = [context_chunks[i] for i in used_indices]
