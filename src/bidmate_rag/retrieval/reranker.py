@@ -11,11 +11,12 @@ import re
 from bidmate_rag.retrieval.filters import is_comparison_query, should_boost_tables
 
 # 부스팅 기본 상수 (boost_config 미지정 시 폴백용)
-SECTION_BOOST = 0.15
+SECTION_BOOST = 0.20
 TABLE_BOOST = 0.08
 METADATA_BOOST = 0.12
-MAX_TOTAL_BOOST = 0.30
+MAX_TOTAL_BOOST = 0.25
 MIN_MATCH_LEN = 3  # 정규화된 텍스트 최소 매칭 길이
+SECTION_HINT_MIN_MATCH_LEN = 2
 
 
 def _normalize_text(value: object) -> str:
@@ -47,6 +48,20 @@ def _metadata_matches_query(query_norm: str, result) -> bool:
         result.chunk.doc_id,
     )
     return any(_contains_normalized(query_norm, value) for value in (*agency_candidates, *project_candidates))
+
+
+def _section_hint_matches_result(section_hint: str | None, result) -> bool:
+    """section_hint가 섹션명뿐 아니라 본문/메타 텍스트에도 드러나는지 확인한다."""
+    hint_norm = _normalize_text(section_hint)
+    if len(hint_norm) < SECTION_HINT_MIN_MATCH_LEN:
+        return False
+
+    candidates = (
+        result.chunk.section,
+        result.chunk.text,
+        getattr(result.chunk, "text_with_meta", ""),
+    )
+    return any(hint_norm in _normalize_text(value) for value in candidates)
 
 
 def build_reranker_text(result) -> str:
@@ -130,9 +145,10 @@ def rerank_with_boost(
         return results
 
     cfg = boost_config or {}
-    section_weight = cfg.get("section", 0.12)
-    table_weight = cfg.get("table", 0.08)
-    max_total = cfg.get("max_total", 0.15)
+    section_weight = cfg.get("section", SECTION_BOOST)
+    table_weight = cfg.get("table", TABLE_BOOST)
+    metadata_weight = cfg.get("metadata", METADATA_BOOST)
+    max_total = cfg.get("max_total", MAX_TOTAL_BOOST)
 
     query_norm = _normalize_text(query)
     table_boost = should_boost_tables(query)
@@ -144,12 +160,12 @@ def rerank_with_boost(
 
     def boosted_score(result) -> float:
         bonus = 0.0
-        if section_hint and section_hint in result.chunk.section:
+        if _section_hint_matches_result(section_hint, result):
             bonus += section_weight
         if table_boost and result.chunk.content_type == "table":
             bonus += table_weight
         if metadata_boost_enabled and _metadata_matches_query(query_norm, result):
-            bonus += METADATA_BOOST
+            bonus += metadata_weight
         bonus = min(bonus, max_total)
         return result.score + bonus
 

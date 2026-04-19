@@ -24,10 +24,10 @@ logger = logging.getLogger(__name__)
 
 
 def _load_reranker(model_name: str | None):
-    """Cross-Encoder 리랭킹 모델을 로드한다.
+    """선택적 실험용 Cross-Encoder 리랭킹 모델을 로드한다.
 
     Args:
-        model_name: HuggingFace 모델명. None이면 리랭커를 사용하지 않는다.
+        model_name: HuggingFace 모델명. None이면 기본 운영 경로를 사용한다.
 
     Returns:
         CrossEncoder 모델 인스턴스. model_name이 None이거나 로드 실패 시 None.
@@ -37,12 +37,12 @@ def _load_reranker(model_name: str | None):
     try:
         from sentence_transformers import CrossEncoder
 
-        logger.info("Cross-Encoder 리랭킹 모델 로딩: %s", model_name)
+        logger.info("실험용 Cross-Encoder 리랭킹 모델 로딩: %s", model_name)
         model = CrossEncoder(model_name)
-        logger.info("Cross-Encoder 로딩 완료")
+        logger.info("실험용 Cross-Encoder 로딩 완료")
         return model
     except Exception as e:
-        logger.warning("Cross-Encoder 로딩 실패 (부스팅만 사용): %s", e)
+        logger.warning("실험용 Cross-Encoder 로딩 실패 (기본 운영 경로 계속 사용): %s", e)
         return None
 
 

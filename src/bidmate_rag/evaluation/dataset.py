@@ -354,6 +354,33 @@ def _resolve_agency_values(
     return resolved
 
 
+def _resolve_legacy_domain_agency_values(
+    raw_value: str,
+    agency_list: list[str] | None = None,
+    agency_alias_map: dict[str, str] | None = None,
+) -> list[str]:
+    
+    value = str(raw_value or "").strip()
+    if not value:
+        return []
+
+    normalized_value = normalize_agency_name(value)
+    resolved: list[str] = []
+    seen: set[str] = set()
+
+    for agency in agency_list or []:
+        if normalize_agency_name(agency) == normalized_value and agency not in seen:
+            resolved.append(agency)
+            seen.add(agency)
+
+    for agency in _lookup_agency_alias(value, agency_alias_map):
+        if agency not in seen:
+            resolved.append(agency)
+            seen.add(agency)
+
+    return resolved
+
+
 def _resolve_single_project_value(
     raw_value: str,
     scoped_agencies: list[str] | None = None,
@@ -543,9 +570,18 @@ def normalize_metadata_filter(
         if value == "다중" and target_key == EVAL_FILTER_KEY_MAP["agency"] and agency_list:
             add_resolved_agencies(_extract_agencies_from_question(question, agency_list))
             continue
-        if target_key in {EVAL_FILTER_KEY_MAP["agency"], EVAL_FILTER_KEY_MAP["domain"]}:
+        if target_key == EVAL_FILTER_KEY_MAP["agency"]:
             add_resolved_agencies(
                 _resolve_agency_values(
+                    value,
+                    agency_list=agency_list,
+                    agency_alias_map=agency_alias_map,
+                )
+            )
+            continue
+        if target_key == EVAL_FILTER_KEY_MAP["domain"]:
+            add_resolved_agencies(
+                _resolve_legacy_domain_agency_values(
                     value,
                     agency_list=agency_list,
                     agency_alias_map=agency_alias_map,
@@ -564,7 +600,7 @@ def normalize_metadata_filter(
         # "다중" → 질문에서 기관명 추출 후 $in 필터로 변환
         # 예: {"agency": "다중"} → {"발주 기관": {"$in": ["한국가스공사", "고려대학교"]}}
         if target_key == EVAL_FILTER_KEY_MAP["domain"] and isinstance(value, str):
-            matched_agencies = _resolve_agency_values(
+            matched_agencies = _resolve_legacy_domain_agency_values(
                 value,
                 agency_list=agency_list,
                 agency_alias_map=agency_alias_map,

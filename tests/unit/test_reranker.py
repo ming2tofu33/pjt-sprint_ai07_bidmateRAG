@@ -18,6 +18,7 @@ def _make_chunk(
     doc_id: str | None = None,
     resolved_agency: str = "",
     original_agency: str = "",
+    text: str | None = None,
 ) -> RetrievedChunk:
     return RetrievedChunk(
         rank=0,
@@ -25,8 +26,8 @@ def _make_chunk(
         chunk=Chunk(
             chunk_id=chunk_id,
             doc_id=doc_id or f"{chunk_id}-doc",
-            text=f"{chunk_id} 본문",
-            text_with_meta=f"{chunk_id} 본문",
+            text=text or f"{chunk_id} 본문",
+            text_with_meta=text or f"{chunk_id} 본문",
             char_count=10,
             section=section,
             content_type=content_type,
@@ -104,6 +105,35 @@ def test_rerank_with_boost_section_match_promotes_lower_score() -> None:
     results = rerank_with_boost(chunks, query="예산 표를 알려줘", section_hint="예산")
 
     assert results[0].chunk.chunk_id == "budget"
+    assert results[0].rank == 1
+
+
+def test_rerank_with_boost_default_section_weight_promotes_matching_section() -> None:
+    chunks = [
+        _make_chunk("overview", 0.85, section="사업개요"),
+        _make_chunk("budget", 0.70, section="예산"),
+    ]
+
+    results = rerank_with_boost(chunks, query="예산 알려줘", section_hint="예산")
+
+    assert results[0].chunk.chunk_id == "budget"
+    assert results[0].rank == 1
+
+
+def test_rerank_with_boost_uses_chunk_text_when_section_field_is_empty() -> None:
+    chunks = [
+        _make_chunk("overview", 0.88, section="사업개요", text="사업 개요와 일반 설명"),
+        _make_chunk(
+            "security",
+            0.78,
+            section="",
+            text="SER-002 보안 요구사항 USB 반입 반출 통제 규정",
+        ),
+    ]
+
+    results = rerank_with_boost(chunks, query="USB 반입 반출 규정 알려줘", section_hint="보안 요구사항")
+
+    assert results[0].chunk.chunk_id == "security"
     assert results[0].rank == 1
 
 

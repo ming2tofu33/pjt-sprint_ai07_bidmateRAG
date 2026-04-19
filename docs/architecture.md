@@ -23,9 +23,9 @@ flowchart TB
         K[사용자 질문 + 대화 이력] --> L[LLM Query Rewriting\n실패 시 규칙 기반 폴백]
         L --> M[Hybrid Retrieval\nDense + Sparse + RRF]
         J --> M
-        M --> N{Cross-Encoder\n사용 여부}
+        M --> N{선택적 실험용\nCross-Encoder 사용 여부}
         N -->|ON| O[재정렬]
-        N -->|OFF| P[그대로 진행]
+        N -->|OFF| P[기본 운영 경로 유지]
         O --> Q[Summary Buffer Memory\n+ Slot Memory]
         P --> Q
         Q --> R[컨텍스트 + 메모리 조합\n출처 태그 포함]
@@ -55,6 +55,9 @@ flowchart LR
 ```
 
 ## 주요 컴포넌트 상세
+
+- 기본 운영 경로: `LLM Query Rewriting -> Hybrid Retrieval -> 규칙 기반 정렬`
+- 선택적 실험 경로: `Cross-Encoder`를 켠 경우에만 후보 검색 뒤 재정렬 수행
 
 ### 1. 파싱 (02_preprocessing)
 
@@ -188,9 +191,9 @@ flowchart TB
     E --> G[Hybrid 검색\nDense + Sparse + RRF]
     F --> G
     C --> G
-    G --> H{Cross-Encoder\n사용 여부}
+    G --> H{선택적 실험용\nCross-Encoder 사용 여부}
     H -->|ON| I[재정렬]
-    H -->|OFF| J[그대로 진행]
+    H -->|OFF| J[기본 운영 경로 유지]
     I --> K[메모리 단계로 전달]
     J --> K
 ```
@@ -199,6 +202,9 @@ flowchart TB
 1. **LLM 재작성** → 성공 시 사용
 2. **규칙 기반 재작성** → LLM 실패 시 폴백
 3. **원본 쿼리 유지** → 규칙도 적용 불가 시 그대로 사용
+
+기본 운영 경로에서는 여기서 바로 hybrid retrieval과 규칙 기반 정렬로 진행한다.
+Cross-Encoder는 비교 실험이 필요할 때만 선택적으로 끼워 넣는 경로다.
 
 | 시나리오 | 재작성 방식 | 예시 |
 |----------|------------|------|

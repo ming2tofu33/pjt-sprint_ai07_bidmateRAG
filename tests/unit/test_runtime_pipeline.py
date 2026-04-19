@@ -82,7 +82,12 @@ def test_build_runtime_pipeline_passes_multiturn_flag_to_retriever(
     )
 
     assert captured["enable_multiturn"] is False
-    assert captured["boost_config"] == {"section": 0.12, "table": 0.08, "max_total": 0.15}
+    assert captured["boost_config"] == {
+        "section": 0.12,
+        "table": 0.08,
+        "metadata": 0.12,
+        "max_total": 0.15,
+    }
     assert captured["hybrid_config"] == {
         "enabled": True,
         "dense_pool_multiplier": 3,

@@ -1,4 +1,7 @@
-from bidmate_rag.retrieval.memory import ConversationMemory
+from bidmate_rag.retrieval.memory import (
+    ConversationMemory,
+    build_rewrite_safe_slot_memory,
+)
 
 
 def test_memory_keeps_recent_turns_and_extracts_slots() -> None:
@@ -44,3 +47,22 @@ def test_memory_supports_legacy_history_shape() -> None:
 
     assert len(state["recent_turns"]) == 2
     assert state["slot_memory"]["예산"] == "5억원"
+
+
+def test_build_rewrite_safe_slot_memory_keeps_only_context_slots() -> None:
+    rewrite_slots = build_rewrite_safe_slot_memory(
+        {
+            "발주기관": "교육부",
+            "사업명": "교육부 클라우드 전환 사업",
+            "예산": "3억원",
+            "일정": "2024년 6월까지",
+            "평가기준": "기술평가 80점",
+            "관심속성": "예산",
+        }
+    )
+
+    assert rewrite_slots == {
+        "발주기관": "교육부",
+        "사업명": "교육부 클라우드 전환 사업",
+        "관심속성": "예산",
+    }

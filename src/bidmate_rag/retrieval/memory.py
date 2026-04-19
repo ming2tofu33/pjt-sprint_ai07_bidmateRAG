@@ -29,6 +29,7 @@ _INTEREST_KEYWORDS = (
     ("하도급", "하도급"),
     ("클라우드", "클라우드"),
 )
+REWRITE_SAFE_SLOT_KEYS = ("발주기관", "사업명", "관심속성")
 
 
 def _normalize_text(text: str) -> str:
@@ -118,6 +119,17 @@ def _extract_interest(rewritten_query: str | None, current_question: str | None)
         if keyword in combined:
             return label
     return None
+
+
+def build_rewrite_safe_slot_memory(slot_memory: dict[str, str] | None) -> dict[str, str]:
+    """재작성 프롬프트에 안전하게 전달할 슬롯만 남긴다."""
+    if not slot_memory:
+        return {}
+    return {
+        key: value.strip()
+        for key, value in slot_memory.items()
+        if key in REWRITE_SAFE_SLOT_KEYS and isinstance(value, str) and value.strip()
+    }
 
 
 class ConversationMemory:

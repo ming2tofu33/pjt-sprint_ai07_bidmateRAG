@@ -10,6 +10,8 @@
 ## 핵심 기능
 
 - **공통 파이프라인**: 파싱 → 정제 → 청킹 → 인덱싱 → 검색 → 생성 → 평가 → 리포트
+- **기본 운영 검색 경로**: multiturn rewrite + hybrid retrieval + 규칙 기반 boost
+- **Cross-Encoder**: 비교용·실험용 경로로 보관 중이며 기본 설정에서는 사용하지 않음
 - **자동 트래킹**: 비용(생성/임베딩/judge 분리), 토큰, latency, git, config 스냅샷, 노션 친화 마크다운
 - **평가 메트릭**: Hit Rate@5 / MRR / nDCG@5 (검색) + Faithfulness / Answer Relevance / Context Precision / Recall (LLM judge)
 - **Grid search**: yaml 한 장에 `matrix:`로 chunk_size × top_k × provider 조합 자동 expand

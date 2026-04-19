@@ -5,7 +5,7 @@
   2. 필요하면 멀티턴 rewrite / history agency 상속
   3. 비교/나열형 질문이면 기관별 fan-out 검색
   4. Dense 또는 Hybrid 검색으로 후보 청크 조회
-  5. Cross-Encoder 리랭킹
+  5. 선택적 실험용 Cross-Encoder 리랭킹
   6. 섹션/테이블 부스팅
   7. shortlist / where_document 과적용 시 fallback
 """
@@ -17,10 +17,11 @@ from bidmate_rag.retrieval.filters import (
     extract_metadata_filters,
     extract_project_clues,
     extract_range_filters,
-    extract_section_hint,
+    extract_where_document_anchor,
     should_fan_out_multi_source_query,
 )
 from bidmate_rag.retrieval.hybrid import hybrid_query, resolve_hybrid_pool_sizes
+from bidmate_rag.retrieval.memory import build_rewrite_safe_slot_memory
 from bidmate_rag.retrieval.multiturn import (
     extract_recent_agency_filter,
     rewrite_query_with_history,
@@ -141,6 +142,24 @@ class RAGRetriever:
         collect(prefer_new_docs=False)
         return _assign_ranks(merged)
 
+    def _merge_query_variant_results(self, primary_results: list, secondary_results: list) -> list:
+        """원 질문/재작성 질문 결과를 합쳐 unique chunk 기준으로 정렬한다."""
+        if not secondary_results:
+            return primary_results
+
+        merged_by_chunk_id: dict[str, object] = {}
+        for item in [*primary_results, *secondary_results]:
+            chunk_id = item.chunk.chunk_id
+            existing = merged_by_chunk_id.get(chunk_id)
+            if existing is None or float(item.score) > float(existing.score):
+                merged_by_chunk_id[chunk_id] = item
+
+        return sorted(
+            merged_by_chunk_id.values(),
+            key=lambda result: float(result.score),
+            reverse=True,
+        )
+
     def _has_doc_level_constraint(self, where: dict | None) -> bool:
         if not where:
             return False
@@ -218,11 +237,12 @@ class RAGRetriever:
         *,
         force_scoped: bool = False,
     ) -> dict | None:
-        if not section_hint:
-            return None
-        if self._should_run_scoped_queries(query, where, force_scoped=force_scoped):
-            return None
-        return {"$contains": section_hint}
+        """Chroma 본문 $contains hard filter는 오탐 시 핵심 chunk를 배제하므로 비활성화한다.
+
+        section_hint는 rerank_with_boost의 soft boost 신호로만 사용한다.
+        """
+        _ = (query, where, section_hint, force_scoped)  # 시그니처 호환 유지
+        return None
 
     def _query_vector_store(
         self,
@@ -274,6 +294,10 @@ class RAGRetriever:
             hybrid_config=self.hybrid_config,
         )
 
+    def _apply_experimental_rerank(self, query: str, results: list, top_k: int) -> list:
+        """선택적으로 유지 중인 실험용 Cross-Encoder 리랭킹 단계."""
+        return cross_encoder_rerank(self.reranker, query, results, top_k)
+
     def retrieve(
         self,
         query: str,
@@ -293,7 +317,9 @@ class RAGRetriever:
             if self.enable_multiturn and self.memory is not None
             else {"summary_buffer": "", "slot_memory": {}}
         )
-        rewrite_slot_memory = rewrite_memory_state.get("slot_memory", {})
+        rewrite_slot_memory = build_rewrite_safe_slot_memory(
+            rewrite_memory_state.get("slot_memory", {})
+        )
         resolved_query, rewrite_trace = (
             rewrite_query_with_history(
                 query,
@@ -387,17 +413,17 @@ class RAGRetriever:
             sparse_store=self.sparse_store,
             hybrid_config=self.hybrid_config,
         )
-        section_hint = extract_section_hint(resolved_query)
-        where_document = (
-            self._build_where_document(
-                resolved_query,
-                where,
-                section_hint,
-                force_scoped=force_scoped,
-            )
-            if metadata_filter is not None
-            else None
+        section_hint = rewrite_trace.get("section_hint") if isinstance(rewrite_trace, dict) else None
+        where_document = self._build_where_document(
+            resolved_query,
+            where,
+            section_hint,
+            force_scoped=force_scoped,
         )
+        if where_document is None and not force_scoped and where:
+            dynamic_where_document_anchor = extract_where_document_anchor(resolved_query)
+            if dynamic_where_document_anchor:
+                where_document = {"$contains": dynamic_where_document_anchor}
         query_embedding = self.embedder.embed_query(resolved_query)
 
         results = self._query_vector_store(
@@ -410,6 +436,20 @@ class RAGRetriever:
             where_document=where_document,
             force_scoped=force_scoped,
         )
+
+        if rewrite_trace.get("rewrite_applied") and resolved_query != query:
+            original_query_embedding = self.embedder.embed_query(query)
+            original_query_results = self._query_vector_store(
+                query_embedding=original_query_embedding,
+                query=query,
+                top_k=final_top_k,
+                dense_pool_k=dense_pool_k,
+                sparse_pool_k=sparse_pool_k,
+                where=where,
+                where_document=where_document,
+                force_scoped=force_scoped,
+            )
+            results = self._merge_query_variant_results(results, original_query_results)
 
         if not results and where_document is not None:
             results = self._query_vector_store(
@@ -451,7 +491,7 @@ class RAGRetriever:
             )
 
         before_rerank = list(results)
-        results = cross_encoder_rerank(self.reranker, resolved_query, results, final_top_k)
+        results = self._apply_experimental_rerank(resolved_query, results, final_top_k)
         reranked = rerank_with_boost(
             results,
             query=resolved_query,

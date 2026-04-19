@@ -181,6 +181,29 @@ def extract_section_hint(query: str) -> str | None:
     return None
 
 
+WHERE_DOCUMENT_BLOCKLIST = {"평가", "기준", "요구사항", "사업개요", "예산"}
+DIRECT_PHRASE_PATTERN = re.compile(
+    r"([가-힣A-Za-z0-9·()/-]{2,20}"
+    r"(?:기간|기한|일수|인력|인수인계|지체상금률|지체상금|버전|명칭))"
+)
+
+
+def extract_where_document_anchor(query: str) -> str | None:
+    """질문 안의 구체 표현만 where_document anchor 후보로 추출한다."""
+    candidates: list[str] = []
+    for match in DIRECT_PHRASE_PATTERN.finditer(query):
+        phrase = match.group(1).strip()
+        if phrase in WHERE_DOCUMENT_BLOCKLIST:
+            continue
+        candidates.append(phrase)
+
+    if not candidates:
+        return None
+
+    candidates.sort(key=len, reverse=True)
+    return candidates[0]
+
+
 def should_boost_tables(query: str) -> bool:
     """쿼리가 테이블 관련 키워드를 포함하는지 판별
 

@@ -24,6 +24,7 @@ class RewriteResponse:
     prompt_tokens: int = 0
     completion_tokens: int = 0
     total_tokens: int = 0
+    section_hint: str | None = None
 
 
 class BaseLLMProvider(ABC):
