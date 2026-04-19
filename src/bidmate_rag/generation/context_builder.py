@@ -98,6 +98,10 @@ def _tokenize_text(value: str) -> list[str]:
     return re.findall(r"[0-9a-z가-힣]+", value.lower())
 
 
+def _normalize_for_match(value: str) -> str:
+    return re.sub(r"[^0-9a-z가-힣]+", "", value.lower())
+
+
 def _extract_focus_terms(question: str | None) -> list[str]:
     if not question:
         return []
@@ -123,6 +127,33 @@ def _extract_focus_terms(question: str | None) -> list[str]:
         seen.add(clean)
         deduped.append(clean)
     return deduped
+
+
+def _question_mentions_source(question: str | None, metadata: dict[str, object]) -> bool:
+    if not question:
+        return False
+
+    normalized_question = _normalize_for_match(question)
+    question_tokens = {
+        token for token in _tokenize_text(question) if len(token) >= 2 and token not in _STOPWORDS
+    }
+
+    for key in _SOURCE_KEYS:
+        value = _clean_text(metadata.get(key))
+        if value is None:
+            continue
+
+        normalized_value = _normalize_for_match(value)
+        if normalized_value and len(normalized_value) >= 4 and normalized_value in normalized_question:
+            return True
+
+        value_tokens = {
+            token for token in _tokenize_text(value) if len(token) >= 2 and token not in _STOPWORDS
+        }
+        if len(question_tokens & value_tokens) >= 2:
+            return True
+
+    return False
 
 
 def _format_won(value: object) -> str | None:
@@ -285,7 +316,11 @@ def _order_context_indices(chunks: list[RetrievedChunk], question: str | None) -
 
 
 def _render_grouped_context(
-    chunks: list[RetrievedChunk], used_indices: list[int], *, with_citation_numbers: bool
+    chunks: list[RetrievedChunk],
+    used_indices: list[int],
+    *,
+    with_citation_numbers: bool,
+    question: str | None = None,
 ) -> str:
     if not used_indices:
         return ""
@@ -304,6 +339,8 @@ def _render_grouped_context(
     rendered_groups: list[str] = []
     for _group_key, first_chunk, grouped_items in groups:
         header_lines = [f"[문서: {_build_doc_label(first_chunk)}]"]
+        if _question_mentions_source(question, first_chunk.chunk.metadata):
+            header_lines.append("질문대상=예")
         for key in _DETAIL_KEYS:
             line = _format_metadata_line(key, first_chunk.chunk.metadata.get(key))
             if line is not None:
@@ -394,5 +431,5 @@ def build_numbered_context_block(
         total_chars += len(candidate)
 
     return _render_grouped_context(
-        chunks, used_indices, with_citation_numbers=with_citation_numbers
+        chunks, used_indices, with_citation_numbers=with_citation_numbers, question=question
     ), used_indices

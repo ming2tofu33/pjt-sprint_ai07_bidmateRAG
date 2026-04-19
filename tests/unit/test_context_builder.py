@@ -260,3 +260,35 @@ def test_build_numbered_context_block_uses_round_robin_after_question_based_sort
     assert used_indices == [2, 3, 0, 1]
     assert context.index("사업예산은 100,000,000원입니다.") < context.index("사업 A 개요")
     assert context.index("사업예산은 200,000,000원입니다.") < context.index("사업 B 개요")
+
+
+def test_build_numbered_context_block_marks_question_scoped_documents() -> None:
+    chunks = [
+        _make_retrieved_chunk(
+            chunk_id="chunk-1",
+            text="고려대학교 포털 시스템 내용",
+            metadata={
+                "사업명": "차세대 포털·학사 정보시스템 구축사업",
+                "발주 기관": "고려대학교",
+                "파일명": "korea.pdf",
+            },
+        ),
+        _make_retrieved_chunk(
+            chunk_id="chunk-2",
+            text="다른 기관 문서 내용",
+            metadata={
+                "사업명": "통합 정보시스템 운영지원",
+                "발주 기관": "경기도사회서비스원",
+                "파일명": "ggsw.hwp",
+            },
+        ),
+    ]
+
+    context, _ = build_numbered_context_block(
+        chunks,
+        max_chars=2000,
+        question="고려대학교 차세대 포털·학사 정보시스템 구축사업의 예산을 알려줘",
+    )
+
+    assert "[문서: 차세대 포털·학사 정보시스템 구축사업 | 고려대학교 | korea.pdf]\n질문대상=예" in context
+    assert "[문서: 통합 정보시스템 운영지원 | 경기도사회서비스원 | ggsw.hwp]\n질문대상=예" not in context
