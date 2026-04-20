@@ -36,6 +36,60 @@ def test_rewrite_query_with_history_replaces_follow_up_reference_with_recent_top
     assert trace["rewrite_reason"] == "rule_fallback"
 
 
+def test_rule_only_rewrites_q063_style_implicit_followup_with_recent_topic() -> None:
+    query = (
+        "그럼 방금 말씀해주신 3초 이내 성능 응답 기준이 면제되는 예외 상황이 있다고 가정하겠습니다. "
+        "만약 특정 조건이 만족할 때 해당 디스플레이 성능 기준이 적용되지 않는다면, "
+        "파일 크기 측면과 동시 접속자 수 측면에서 각각 그 구체적인 예외 허용 기준은 무엇으로 설계되어 있나요?"
+    )
+
+    rewritten, trace = rewrite_query_with_history(
+        query=query,
+        chat_history=[
+            {
+                "role": "user",
+                "content": "한국한의학연구원 통합정보시스템의 일반 온라인 페이지 디스플레이 요구시간 성능 목표는 어떻게 되나요?",
+            },
+            {
+                "role": "assistant",
+                "content": "시스템 성능 요구사항(PER-003)에 따라, 사용자가 일반 페이지를 요청한 시각으로부터 3초 이내에 화면에 완전히 디스플레이 되어야 합니다.",
+            },
+        ],
+        agency_list=["한국한의학연구원"],
+        mode="rule_only",
+    )
+
+    expected_prefix = "한국한의학연구원 통합정보시스템의 일반 온라인 페이지 디스플레이 요구시간 성능 목표"
+    assert rewritten.startswith(f"{expected_prefix} ")
+    assert rewritten.endswith(query)
+    assert trace["rewrite_reason"] == "rule_fallback"
+    assert trace["rewrite_applied"] is True
+
+
+def test_rule_only_keeps_query_when_followup_discourse_already_has_explicit_agency() -> None:
+    query = "그럼 한국한의학연구원 통합정보시스템 성능 기준 예외는 무엇인가요?"
+
+    rewritten, trace = rewrite_query_with_history(
+        query=query,
+        chat_history=[
+            {
+                "role": "user",
+                "content": "한국한의학연구원 통합정보시스템의 일반 온라인 페이지 디스플레이 요구시간 성능 목표는 어떻게 되나요?",
+            },
+            {
+                "role": "assistant",
+                "content": "시스템 성능 요구사항(PER-003)에 따라, 사용자가 일반 페이지를 요청한 시각으로부터 3초 이내에 화면에 완전히 디스플레이 되어야 합니다.",
+            },
+        ],
+        agency_list=["한국한의학연구원"],
+        mode="rule_only",
+    )
+
+    assert rewritten == query
+    assert trace["rewrite_reason"] == "original"
+    assert trace["rewrite_applied"] is False
+
+
 def test_rewrite_query_with_history_uses_llm_for_implicit_followup() -> None:
     mock_llm = _make_mock_llm("국민연금공단 차세대 ERP 사업의 평가기준은?")
 

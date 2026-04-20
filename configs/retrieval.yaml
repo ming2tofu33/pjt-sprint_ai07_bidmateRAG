@@ -23,7 +23,7 @@ enable_multiturn: true
 
 # 멀티턴 질의 재작성 설정
 rewrite:
-  mode: rule_only  # LLM 재작성 우선, 실패 시 규칙 기반으로 폴백
+  mode: llm_with_rule_fallback  # LLM 재작성 우선, 실패 시 규칙 기반으로 폴백
   # gpt-5 계열은 reasoning 토큰이 completion에 포함되므로 넉넉하게 (CLAUDE.md 참조).
   # 로컬 HF 모델은 HFLocalLLM.rewrite()가 내부적으로 256 제한을 사용.
   max_completion_tokens: 16000  # rewrite 단계에서 허용할 최대 출력 토큰 수
