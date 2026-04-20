@@ -26,8 +26,8 @@
 | 프로젝트 구조 | [`docs/project-structure.md`](docs/project-structure.md) |
 | 의사결정 기록 | [`docs/decision-log.md`](docs/decision-log.md) |
 | 협업 규칙 | [`docs/collaboration/branch-strategy.md`](docs/collaboration/branch-strategy.md) |
-| PPT | [`docs/PPT/`](docs/PPT/) (슬라이드 31장 · HTML) |
-| 보고서 PDF | [보고서 PDF](docs/bidmate-rag-report.pdf) |
+| PPT | [`docs/PPT/`](docs/PPT/) (슬라이드 32장 · HTML) |
+| 보고서 PDF | [`docs/report.pdf`](docs/report.pdf) |
 | 협업 일지 | [Notion Logs](https://www.notion.so/sprint-ai07-bidsupportconsulting/Logs-334b6ef436c780c7976fedcdeae5b672?source=copy_link) |
 | Test Record | [Notion Test Record](https://www.notion.so/sprint-ai07-bidsupportconsulting/Test-Record-335b6ef436c780cb93aac9852858cd2c?source=copy_link) |
 
