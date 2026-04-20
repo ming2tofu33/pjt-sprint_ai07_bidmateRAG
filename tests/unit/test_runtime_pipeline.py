@@ -1,6 +1,8 @@
 import shutil
 from pathlib import Path
 
+import pytest
+
 from bidmate_rag.pipelines import runtime as runtime_module
 
 
@@ -199,5 +201,57 @@ def test_build_runtime_pipeline_passes_llm_to_retriever_when_multiturn_enabled(
     assert captured["rewrite_mode"] == "llm_with_rule_fallback"
     assert captured["memory"] is not None
     assert captured["debug_trace_enabled"] is True
+
+    shutil.rmtree(tmp_path, ignore_errors=True)
+
+
+def test_build_runtime_pipeline_raises_when_chroma_empty_without_auto_build(
+    monkeypatch,
+) -> None:
+    monkeypatch.delenv("BIDMATE_AUTO_BUILD_INDEX", raising=False)
+    tmp_path = Path(".pytest_tmp_runtime_pipeline_empty")
+    shutil.rmtree(tmp_path, ignore_errors=True)
+    tmp_path.mkdir(parents=True, exist_ok=True)
+
+    base = tmp_path / "base.yaml"
+    provider = tmp_path / "provider.yaml"
+    experiment = tmp_path / "experiment.yaml"
+    retrieval = tmp_path / "retrieval.yaml"
+    base.write_text("project_name: bidmate-rag\n", encoding="utf-8")
+    provider.write_text("provider: openai\nmodel: gpt-5-mini\n", encoding="utf-8")
+    experiment.write_text("name: ad-hoc\n", encoding="utf-8")
+    retrieval.write_text(
+        "enable_multiturn: false\n"
+        "hybrid:\n"
+        "  enabled: false\n"
+        "rewrite:\n"
+        "  mode: llm_with_rule_fallback\n"
+        "memory:\n"
+        "  enabled: false\n"
+        "debug_trace:\n"
+        "  enabled: false\n",
+        encoding="utf-8",
+    )
+
+    class FakeVectorStore:
+        def count(self) -> int:
+            return 0
+
+    monkeypatch.setattr(runtime_module, "build_embedding_provider", lambda _: object())
+    monkeypatch.setattr(runtime_module, "build_llm_provider", lambda _: object())
+    monkeypatch.setattr(runtime_module, "ChromaVectorStore", lambda **kwargs: FakeVectorStore())
+
+    chunks = tmp_path / "chunks.parquet"
+    chunks.write_text("placeholder", encoding="utf-8")
+
+    with pytest.raises(RuntimeError, match="Chroma 컬렉션"):
+        runtime_module.build_runtime_pipeline(
+            base_config_path=base,
+            provider_config_path=provider,
+            experiment_config_path=experiment,
+            retrieval_config_path=retrieval,
+            metadata_path=tmp_path / "missing.parquet",
+            chunks_path=chunks,
+        )
 
     shutil.rmtree(tmp_path, ignore_errors=True)

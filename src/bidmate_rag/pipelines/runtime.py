@@ -7,6 +7,7 @@ CLI 스크립트와 Streamlit UI가 공유하는 파이프라인 조립 로직.
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -173,11 +174,26 @@ def build_runtime_pipeline(
     )
     resolved_chunks_path = _resolve_chunks_path(runtime, chunks_path)
 
-    # collection이 비어있으면 자동으로 DB 생성
+    # collection이 비어 있으면 기본은 중단한다. 무인 전체 재임베딩은 시간이 매우 길고
+    # 시나리오 A/B 동일 조건 재현에는 팀이 배포한 chroma_db(zip)가 필요하다.
     if hasattr(vector_store, "count") and vector_store.count() == 0:
-        from bidmate_rag.pipelines.build_index import build_index_from_parquet
-
         if resolved_chunks_path.exists():
+            auto_build = os.environ.get("BIDMATE_AUTO_BUILD_INDEX", "").strip().lower() in (
+                "1",
+                "true",
+                "yes",
+            )
+            if not auto_build:
+                cn = collection_name_for_config(runtime)
+                raise RuntimeError(
+                    f"Chroma 컬렉션 '{cn}' 문서 수가 0입니다. "
+                    "동일 조건 비교·재현을 위해 팀 chroma_db(zip)를 풀어 "
+                    "`artifacts/chroma_db/`와 맞추거나, 이미 채워진 컬렉션을 사용하세요. "
+                    "처음부터 전체 청크 재임베딩이 필요하면 "
+                    "`BIDMATE_AUTO_BUILD_INDEX=1` 환경 변수를 설정하세요."
+                )
+            from bidmate_rag.pipelines.build_index import build_index_from_parquet
+
             print(f"[자동 빌드] {collection_name_for_config(runtime)}")
             build_index_from_parquet(
                 str(resolved_chunks_path),

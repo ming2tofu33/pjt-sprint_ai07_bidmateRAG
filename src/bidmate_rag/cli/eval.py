@@ -262,6 +262,11 @@ def main() -> None:
     parser.add_argument("--provider-config", required=True)  # 프로바이더 설정 YAML
     parser.add_argument("--base-config", default="configs/base.yaml")  # 기본 설정 YAML
     parser.add_argument("--experiment-config", default=None)  # 실험 설정 YAML (선택)
+    parser.add_argument(
+        "--retrieval-config",
+        default="configs/retrieval.yaml",
+        help="검색 전략 YAML (Hybrid, Boost, 멀티턴 등). 기본 configs/retrieval.yaml",
+    )
     parser.add_argument("--runs-dir", default="artifacts/logs/runs")  # 실행 로그 저장 경로
     parser.add_argument(
         "--benchmarks-dir", default="artifacts/logs/benchmarks"
@@ -331,6 +336,7 @@ def main() -> None:
         base_config_path=args.base_config,
         provider_config_path=args.provider_config,
         experiment_config_path=args.experiment_config,
+        retrieval_config_path=args.retrieval_config,
     )
 
     # 1.5. 시스템 프롬프트 오버라이드 (YAML 컴포넌트 조합)
@@ -376,6 +382,7 @@ def main() -> None:
             "base": args.base_config,
             "provider": args.provider_config,
             "experiment": args.experiment_config,
+            "retrieval": args.retrieval_config,
             "prompt": args.prompt_config,
         },
         runs_dir=args.runs_dir,
