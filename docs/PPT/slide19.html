@@ -19,7 +19,7 @@
 </div>
 <!-- Header Right -->
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
-<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #64748B; letter-spacing: 0.5px; margin: 0;"><span style="font-weight: 700; color: #475569;">19</span><span style="font-weight: 500; color: #94A3B8;">/31</span></p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #64748B; letter-spacing: 0.5px; margin: 0;"><span style="font-weight: 700; color: #475569;">19</span><span style="font-weight: 500; color: #94A3B8;">/32</span></p>
 </div>
 <!-- Top Divider -->
 <div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
@@ -98,12 +98,12 @@ Q. <span style="font-family: 'Pretendard', monospace; font-weight: 700;">"PER-00
 <span style="color: #1F2937; font-weight: 700;">원인:</span> Sparse(BM25) 키워드 매칭 미적용
 </p>
 </div>
-<!-- ============ FAILURE 3: 대명사 붕괴 ============ -->
+<!-- ============ FAILURE 3: 멀티턴 맥락 복원 실패 ============ -->
 <div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 840px; width: 360px; height: 280px; background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid #DC2626; border-radius: 6px; z-index: 1;"></div>
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 218px; left: 860px; width: 320px; z-index: 10;">
 <div style="display: flex; align-items: center;">
 <span style="font-family: 'Pretendard', monospace; font-size: 11px; font-weight: 700; color: #FFFFFF; background: #DC2626; padding: 3px 8px; border-radius: 10px;">실패 ③</span>
-<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin-left: 8px;">대명사 붕괴</span>
+<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin-left: 8px;">멀티턴 맥락 복원 실패</span>
 </div>
 </div>
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 258px; left: 860px; width: 320px; z-index: 10;">
@@ -118,7 +118,7 @@ Q. <span style="font-family: 'Pretendard', monospace; font-weight: 700;">"PER-00
 Q. "<span style="font-weight: 700;">그 사업</span>의 예산은?" (후속)
 </p>
 <p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #DC2626; margin: 0; line-height: 1.5;">
-→ 전혀 다른 사업 검색, 대명사 해석 실패
+→ 전혀 다른 사업 검색, 후속질문 맥락 복원 실패
 </p>
 </div>
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 445px; left: 860px; width: 320px; z-index: 10;">
@@ -158,7 +158,7 @@ Q. "<span style="font-weight: 700;">그 사업</span>의 예산은?" (후속)
 <!-- Footer -->
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 693px; left: 80px; width: 1120px; height: 20px; z-index: 10;">
 <p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #64748B; margin: 0;">
-3대 실패 해결 경로 · ① 기관혼동 → 메타 필터 + Hybrid / ② 고유명사 → Sparse(BM25) / ③ 대명사 → 멀티턴 Rewrite (슬라이드 22)
+3대 실패 해결 경로 · ① 기관혼동 → 메타 필터 + Hybrid / ② 고유명사 → Sparse(BM25) / ③ 맥락 복원 실패 → 멀티턴 Rewrite (슬라이드 22)
 </p>
 </div>
 </div>

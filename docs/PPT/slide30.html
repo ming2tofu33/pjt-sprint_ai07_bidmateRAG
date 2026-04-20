@@ -5,176 +5,305 @@
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>현재 상태와 재설계 방향</title>
+<title>생성 품질 5지표 상세 + 에러 진화</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;display=swap" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
 </head>
 <body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
 <div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
 <!-- Header Left -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 400px; z-index: 10;">
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 500px; z-index: 10;">
 <p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; margin: 0;">
-                마무리 · 현재 상태 &amp; 로드맵
-            </p>
+<span style="color: #FF7B9C;">생성 품질 분석</span> · 섹션 ⑤ · 5지표 상세 + 에러 진화
+</p>
 </div>
 <!-- Header Right -->
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
-<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #64748B; letter-spacing: 0.5px; margin: 0;"><span style="font-weight: 700; color: #475569;">30</span><span style="font-weight: 500; color: #94A3B8;">/31</span></p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #64748B; letter-spacing: 0.5px; margin: 0;"><span style="font-weight: 700; color: #475569;">30</span><span style="font-weight: 500; color: #94A3B8;">/32</span></p>
 </div>
 <!-- Top Divider -->
 <div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
 <!-- Main Title -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 105px; left: 80px; width: 800px; height: 60px; z-index: 10;">
-<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #111827; letter-spacing: -2px; margin: 0; line-height: 1.2; line-height: 1.2;">
-                현재 상태와 재설계 방향
-            </p>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 98px; left: 80px; width: 1120px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #111827; letter-spacing: -2px; margin: 0; line-height: 1.2;">
+생성 품질 5지표 상세 + 에러 진화
+</p>
 </div>
-<!-- D-1 Update Badge -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 110px; left: 1020px; width: 180px; height: 36px; z-index: 10; text-align: right;">
-<span style="display: inline-block; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; background: #10B981; color: #FFFFFF; font-size: 15px; font-weight: 900; padding: 8px 16px; border-radius: 6px;">
-                Judge v2 실측 반영
-            </span>
+<!-- Subtitle -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 150px; left: 80px; width: 1120px; height: 30px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 500; color: #64748B; margin: 0;">
+4지표 균형도 + 에러 유형 분포 — <span style="font-weight: 700; color: #1F2937;">Groundedness 0.94 · Completeness 0.85 · Citation 0.98</span> 등 5지표 상세 보완
+</p>
 </div>
-<!-- ===================================================================== -->
-<!-- Left Column: Current Bottleneck (Width: 540px, Left: 80px)             -->
-<!-- ===================================================================== -->
-<!-- Left Section Title Shape -->
-<div data-object="true" data-object-type="shape" style="position: absolute; top: 190px; left: 80px; width: 540px; height: 32px; border-left: 4px solid #FF7B9C; z-index: 1;"></div>
-<!-- Left Section Title Text -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 194px; left: 96px; width: 520px; height: 26px; z-index: 10;">
-<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 900; color: #1F2937; margin: 0;">시나리오 A·B 상호 보완 지표</p>
+
+<!-- ============ LEFT: Radar Chart Card ============ -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 80px; width: 540px; height: 390px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
+<!-- Title + Horizontal Legend (single top row) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 215px; left: 100px; width: 500px; z-index: 11;">
+<div style="display: flex; align-items: center; justify-content: space-between; font-family: 'Pretendard', 'Noto Sans KR', sans-serif;">
+<p style="font-size: 15px; font-weight: 700; color: #1F2937; margin: 0;">4지표 균형도</p>
+<div style="display: flex; align-items: center; gap: 14px; font-size: 12px;">
+<div style="display: flex; align-items: center; gap: 6px;">
+<span style="width: 10px; height: 10px; border-radius: 50%; background: #607196;"></span>
+<span style="font-weight: 600; color: #1F2937;">A-EXP01</span>
 </div>
-<!-- Comparison Table Background -->
-<div data-object="true" data-object-type="shape" style="position: absolute; top: 240px; left: 80px; width: 542px; height: 252px; background: #FFFFFF; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
-<!-- Comparison Table Header -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 240px; left: 80px; width: 542px; height: 40px; z-index: 10;">
-<div style="display: flex; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #64748B; background: #F8F9FA; border-bottom: 1px solid #E8E9ED; border-radius: 12px 12px 0 0; padding: 10px 0;">
-<div style="width: 30%; text-align: center;">지표명</div>
-<div style="width: 35%; text-align: center;">A (P4_C2)</div>
-<div style="width: 35%; text-align: center;">B (ad-hoc)</div>
+<div style="display: flex; align-items: center; gap: 6px;">
+<span style="width: 10px; height: 10px; border-radius: 50%; background: #D49B25;"></span>
+<span style="font-weight: 600; color: #1F2937;">A-P4_C2</span>
 </div>
-</div>
-<!-- Comparison Table Row 1 -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 280px; left: 81px; width: 540px; height: 42px; z-index: 10;">
-<div style="display: flex; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; color: #1F2937; border-bottom: 1px solid #E8E9ED; padding: 11px 0;">
-<div style="width: 30%; text-align: center; font-weight: 700; color: #64748B;">4지표 평균</div>
-<div style="width: 35%; text-align: center; font-weight: 900; color: #FF7B9C;">0.8875 <span style="font-size: 10px; font-weight: 500; color: #94A3B8;">(v1: 0.8438)</span></div>
-<div style="width: 35%; text-align: center; font-weight: 500;">0.7575 <span style="font-size: 10px; color: #94A3B8;">(v1: 0.6188)</span></div>
+<div style="display: flex; align-items: center; gap: 6px;">
+<span style="width: 10px; height: 10px; border-radius: 50%; background: #FF7B9C;"></span>
+<span style="font-weight: 600; color: #1F2937;">B-Opt</span>
 </div>
 </div>
-<!-- Comparison Table Row 2 -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 322px; left: 81px; width: 540px; height: 42px; z-index: 10;">
-<div style="display: flex; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; color: #1F2937; border-bottom: 1px solid #E8E9ED; padding: 11px 0;">
-<div style="width: 30%; text-align: center; font-weight: 700; color: #64748B;">Faithfulness</div>
-<div style="width: 35%; text-align: center; font-weight: 900; color: #FF7B9C;">0.9500</div>
-<div style="width: 35%; text-align: center; font-weight: 500;">0.9000</div>
 </div>
 </div>
-<!-- Comparison Table Row 3 -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 364px; left: 81px; width: 540px; height: 42px; z-index: 10;">
-<div style="display: flex; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; color: #1F2937; border-bottom: 1px solid #E8E9ED; padding: 11px 0;">
-<div style="width: 30%; text-align: center; font-weight: 700; color: #64748B;">Latency</div>
-<div style="width: 35%; text-align: center; font-weight: 500;">18.5s</div>
-<div style="width: 35%; text-align: center; font-weight: 900; color: #607196;">5.3s</div>
+<!-- Radar Canvas (full card width, max height) -->
+<div data-object="true" data-object-type="chart" style="position: absolute; top: 245px; left: 88px; width: 524px; height: 340px; z-index: 10;">
+<canvas id="radarChart"></canvas>
 </div>
+
+<!-- ============ RIGHT: Stacked Bar Card ============ -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 660px; width: 540px; height: 390px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 215px; left: 680px; width: 500px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0;">
+에러율 구성 변화 <span style="font-weight: 500; color: #64748B; font-size: 12px; margin-left: 6px;">(에러율 ≈ 1 − Faithfulness)</span>
+</p>
 </div>
-<!-- Comparison Table Row 4 -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 406px; left: 81px; width: 540px; height: 42px; z-index: 10;">
-<div style="display: flex; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; color: #1F2937; border-bottom: 1px solid #E8E9ED; padding: 11px 0;">
-<div style="width: 30%; text-align: center; font-weight: 700; color: #64748B;">Cost/query</div>
-<div style="width: 35%; text-align: center; font-weight: 500;">$0.00 <span style="font-size: 10px; color: #94A3B8;">(로컬)</span></div>
-<div style="width: 35%; text-align: center; font-weight: 900; color: #607196;">$0.005</div>
+<!-- Stacked Bar Canvas -->
+<div data-object="true" data-object-type="chart" style="position: absolute; top: 245px; left: 680px; width: 500px; height: 335px; z-index: 10;">
+<canvas id="stackedChart"></canvas>
 </div>
+
+<!-- ============ Bottom Zone: Insight (left 65%) + Cost (right 35%) ============ -->
+<!-- Left: Insight Banner -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 605px; left: 80px; width: 720px; height: 70px; background: #EAECEF; border-left: 4px solid #FF7B9C; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 620px; left: 110px; width: 680px; height: 40px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0;">
+<span style="font-weight: 900; color: #FF7B9C; margin-right: 8px;">핵심 인사이트</span>환각은 사라지고, 논리 오류 비중이 커짐
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #64748B; margin: 0;">
+Hallucination 20% → 0% · 프롬프트·검색 해결 완료 · 남은 과제는 LLM 추론 능력 개선
+</p>
 </div>
-<!-- Comparison Table Row 5 (Highlight) -->
-<div data-object="true" data-object-type="shape" style="position: absolute; top: 448px; left: 80px; width: 542px; height: 44px; background: #FFF5F7; border-radius: 0 0 12px 12px; z-index: 2;"></div>
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 448px; left: 80px; width: 542px; height: 44px; z-index: 10;">
-<div style="display: flex; align-items: center; height: 44px; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; color: #1F2937;">
-<div style="width: 30%; text-align: center; font-weight: 900; color: #FF7B9C;">강점</div>
-<div style="width: 35%; text-align: center; font-weight: 700; color: #FF7B9C;">품질 우위</div>
-<div style="width: 35%; text-align: center; font-weight: 700; color: #607196;">속도·비용 효율</div>
+<!-- Right: Cost Mini Card -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 605px; left: 820px; width: 380px; height: 70px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 615px; left: 840px; width: 340px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11px; font-weight: 700; color: #64748B; letter-spacing: 0.3px; margin: 0 0 5px 0;">💰 Cost/query <span style="font-weight: 500; color: #94A3B8;">(임베딩 제외, 20문항 기준)</span></p>
+<div style="display: flex; justify-content: space-between; align-items: baseline; font-family: 'Pretendard', 'Noto Sans KR', sans-serif;">
+<span style="font-size: 13px; font-weight: 700; color: #D49B25;">A-P4: <span style="font-family: 'Pretendard', monospace; color: #1F2937;">$0.0009</span></span>
+<span style="font-size: 13px; font-weight: 700; color: #FF7B9C;">B-Opt: <span style="font-family: 'Pretendard', monospace; color: #1F2937;">$0.005</span></span>
+<span style="font-size: 11px; color: #94A3B8;">(5.6×)</span>
 </div>
-</div>
-<div data-object="true" data-object-type="shape" style="position: absolute; top: 240px; left: 80px; width: 542px; height: 252px; background: transparent; border: 1px solid #E2E8F0; border-radius: 12px; box-sizing: border-box; z-index: 11;"></div>
-<!-- Left Conclusion Box Shape -->
-<div data-object="true" data-object-type="shape" style="position: absolute; top: 510px; left: 80px; width: 542px; height: 50px; background: #FFFFFF; border: 1px solid #607196; border-radius: 6px; z-index: 1;"></div>
-<!-- Left Conclusion Box Text -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 524px; left: 91px; width: 520px; height: 22px; z-index: 10; text-align: center;">
-<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0;">동일 파이프라인 · 시나리오별 강점이 달라 용도별 선택</p>
-</div>
-<!-- ===================================================================== -->
-<!-- Vertical Divider -->
-<!-- ===================================================================== -->
-<div data-object="true" data-object-type="shape" style="position: absolute; top: 190px; left: 660px; width: 1px; height: 370px; background: #E2E8F0; z-index: 1;"></div>
-<!-- ===================================================================== -->
-<!-- Right Column: Roadmap (Width: 540px, Left: 700px)                      -->
-<!-- ===================================================================== -->
-<!-- Right Section Title Shape -->
-<div data-object="true" data-object-type="shape" style="position: absolute; top: 190px; left: 700px; width: 540px; height: 32px; border-left: 4px solid #FF7B9C; z-index: 1;"></div>
-<!-- Right Section Title Text -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 194px; left: 716px; width: 520px; height: 26px; z-index: 10;">
-<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 900; color: #1F2937; margin: 0;">로드맵 · 3단계 계획</p>
-</div>
-<!-- Phase 1 Timeline Box Shape -->
-<div data-object="true" data-object-type="shape" style="position: absolute; top: 240px; left: 700px; width: 540px; height: 96px; background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 6px solid #10B981; border-radius: 12px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.08); z-index: 1;"></div>
-<!-- Phase 1 Text -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 250px; left: 720px; width: 500px; height: 80px; z-index: 10;">
-<div style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif;">
-<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
-<p style="font-size: 14px; font-weight: 900; color: #1F2937; margin: 0;">Phase 1 <span style="font-weight: 500; color: #94A3B8; margin-left: 4px;">(단기)</span></p>
-<span style="background: #10B981; color: #FFFFFF; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">완료</span>
-</div>
-<p style="font-size: 15px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0; line-height: 1.4;">프롬프트 20종 실험 완료 · P4_C2_F5_S3_T5 0.8875 달성</p>
-<p style="font-size: 13px; font-weight: 500; color: #64748B; margin: 0;">2026-04-20 결과 확정</p>
-</div>
-</div>
-<!-- Arrow 1-2 -->
-<div data-object="true" data-object-type="icon" style="position: absolute; top: 338px; left: 730px; width: 20px; height: 16px; z-index: 10; text-align: center;">
-<i class="fas fa-arrow-down" style="color: #94A3B8; font-size: 14px;"></i>
-</div>
-<!-- Phase 2 Timeline Box Shape -->
-<div data-object="true" data-object-type="shape" style="position: absolute; top: 356px; left: 700px; width: 540px; height: 88px; background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 6px solid #607196; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
-<!-- Phase 2 Text -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 366px; left: 720px; width: 500px; height: 70px; z-index: 10;">
-<div style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif;">
-<p style="font-size: 14px; font-weight: 900; color: #1F2937; margin: 0 0 6px 0;">Phase 2 <span style="font-weight: 500; color: #94A3B8; margin-left: 4px;">(중기)</span></p>
-<p style="font-size: 15px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0; line-height: 1.3;">B에 A-Top1 프롬프트 이전 실험 · A 80문항 full 벤치마크</p>
-<p style="font-size: 13px; font-weight: 500; color: #64748B; margin: 0;">2026-05 ~ 06</p>
-</div>
-</div>
-<!-- Arrow 2-3 -->
-<div data-object="true" data-object-type="icon" style="position: absolute; top: 446px; left: 730px; width: 20px; height: 16px; z-index: 10; text-align: center;">
-<i class="fas fa-arrow-down" style="color: #94A3B8; font-size: 14px;"></i>
-</div>
-<!-- Phase 3 Timeline Box Shape -->
-<div data-object="true" data-object-type="shape" style="position: absolute; top: 464px; left: 700px; width: 540px; height: 88px; background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 6px solid #BABFD1; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
-<!-- Phase 3 Text -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 474px; left: 720px; width: 500px; height: 70px; z-index: 10;">
-<div style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif;">
-<p style="font-size: 14px; font-weight: 900; color: #1F2937; margin: 0 0 6px 0;">Phase 3 <span style="font-weight: 500; color: #94A3B8; margin-left: 4px;">(장기)</span></p>
-<p style="font-size: 15px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0; line-height: 1.3;">파이프라인 최적화 한계 돌파 — 도메인 특화 PEFT(LoRA) 파인튜닝</p>
-<p style="font-size: 13px; font-weight: 500; color: #64748B; margin: 0;">2026-07+ · 시나리오 A 체급 한계 타파</p>
-</div>
-</div>
-<!-- ===================================================================== -->
-<!-- Bottom Core Banner -->
-<!-- ===================================================================== -->
-<!-- Core Insight Banner Shape -->
-<div data-object="true" data-object-type="shape" style="position: absolute; top: 590px; left: 80px; width: 1120px; height: 70px; background: #EAECEF; border-left: 4px solid #FF7B9C; border-radius: 4px; z-index: 1;"></div>
-<!-- Core Insight Banner Text -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 613px; left: 110px; width: 1060px; height: 30px; z-index: 10;">
-<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 700; color: #1F2937; margin: 0;">
-<span style="font-weight: 900; color: #FF7B9C; margin-right: 12px;">핵심 메시지</span>청킹·하이브리드·Soft Boost 파이프라인과 CE 배제·Judge v2 전환의 엔지니어링 결단이 MRR 1.0의 도약을 이끌었다
-            </p>
 </div>
 <!-- Footer Divider -->
-<div data-object="true" data-object-type="shape" style="position: absolute; top: 680px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
-<!-- Footer Left -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 693px; left: 80px; width: 600px; height: 20px; z-index: 10;">
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 685px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Footer -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 695px; left: 80px; width: 1120px; height: 20px; z-index: 10;">
 <p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 400; color: #94A3B8; margin: 0;">
-                2026-04-20 기준 · Judge v2 재채점 · eval_batch_45 20문항 공통 조건
-            </p>
+팀원 분석 노트북 · A-EXP01 baseline / A-P4_C2 최적화 / Scenario-B · 5지표: Faithfulness · Answer Relevance · Context Precision · Context Recall · (Groundedness / Completeness / Citation 추가)
+</p>
 </div>
+
+<script>
+const DECK_FONT = "'Pretendard', 'Noto Sans KR', sans-serif";
+const INK = '#1F2937';
+const MUTED = '#64748B';
+const HAIRLINE = '#E2E8F0';
+const NAVY = '#607196';
+const YELLOW = '#D49B25';
+const PINK = '#FF7B9C';
+const RED = '#DC2626';
+const YELLOW_BAR = '#FFC759';
+
+// ============ RADAR ============
+const radarCtx = document.getElementById('radarChart').getContext('2d');
+new Chart(radarCtx, {
+    type: 'radar',
+    data: {
+        labels: ['Faithfulness', 'Answer Relevance', 'Context Precision', 'Context Recall'],
+        datasets: [
+            {
+                label: 'A-EXP01',
+                data: [0.80, 0.50, 0.90, 0.90],
+                borderColor: NAVY,
+                backgroundColor: 'rgba(96, 113, 150, 0.12)',
+                borderWidth: 3,
+                pointRadius: 5,
+                pointBackgroundColor: NAVY,
+                pointBorderColor: '#FFFFFF',
+                pointBorderWidth: 1.5
+            },
+            {
+                label: 'A-P4_C2',
+                data: [0.95, 0.65, 1.00, 0.95],
+                borderColor: YELLOW,
+                backgroundColor: 'rgba(212, 155, 37, 0.12)',
+                borderWidth: 3,
+                pointRadius: 5,
+                pointBackgroundColor: YELLOW,
+                pointBorderColor: '#FFFFFF',
+                pointBorderWidth: 1.5
+            },
+            {
+                label: 'B-Opt',
+                data: [1.00, 0.80, 0.93, 0.90],
+                borderColor: PINK,
+                backgroundColor: 'rgba(255, 123, 156, 0.15)',
+                borderWidth: 3,
+                pointRadius: 5,
+                pointBackgroundColor: PINK,
+                pointBorderColor: '#FFFFFF',
+                pointBorderWidth: 1.5
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 4, bottom: 4, left: 4, right: 4 } },
+        scales: {
+            r: {
+                min: 0,
+                max: 1.0,
+                ticks: {
+                    stepSize: 0.2,
+                    color: '#BABFD1',
+                    font: { family: DECK_FONT, size: 10 },
+                    backdropColor: 'rgba(0,0,0,0)'
+                },
+                grid: { color: HAIRLINE },
+                angleLines: { color: HAIRLINE },
+                pointLabels: {
+                    color: INK,
+                    font: { family: DECK_FONT, size: 13, weight: '700' },
+                    padding: 6
+                }
+            }
+        },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#FFFFFF',
+                titleColor: INK,
+                bodyColor: MUTED,
+                borderColor: HAIRLINE,
+                borderWidth: 1,
+                padding: 10,
+                cornerRadius: 4,
+                titleFont: { family: DECK_FONT, size: 12, weight: 'bold' },
+                bodyFont: { family: DECK_FONT, size: 11 }
+            }
+        }
+    }
+});
+
+// ============ STACKED BAR (절대 에러율) ============
+// 에러율 = 1 − Faithfulness · 각 세그먼트 = 에러 유형 비중 × 에러율
+// A-EXP01: Faith 0.80 → 20% err (Hall 4, Miss 10, Logic 6)
+// A-P4_C2: Faith 0.95 →  5% err (Hall 0.25, Miss 1, Logic 3.75)
+// B-Opt:   Faith 1.00 →  0% err (거의 없음)
+const stackedCtx = document.getElementById('stackedChart').getContext('2d');
+new Chart(stackedCtx, {
+    type: 'bar',
+    data: {
+        labels: [
+            ['A-EXP01', 'Faith 0.80 · err 20%'],
+            ['A-P4_C2', 'Faith 0.95 · err 5%'],
+            ['B-Opt',   'Faith 1.00 · err ~0%']
+        ],
+        datasets: [
+            {
+                label: 'Hallucination (환각)',
+                data: [4, 0.25, 0],
+                backgroundColor: RED,
+                borderColor: '#FFFFFF',
+                borderWidth: 1.5
+            },
+            {
+                label: 'Missing Info (누락)',
+                data: [10, 1, 0],
+                backgroundColor: YELLOW_BAR,
+                borderColor: '#FFFFFF',
+                borderWidth: 1.5
+            },
+            {
+                label: 'Logic Error (논리)',
+                data: [6, 3.75, 0],
+                backgroundColor: NAVY,
+                borderColor: '#FFFFFF',
+                borderWidth: 1.5
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 8, bottom: 8 } },
+        scales: {
+            x: {
+                stacked: true,
+                grid: { display: false },
+                ticks: {
+                    color: INK,
+                    font: { family: DECK_FONT, size: 11, weight: '600' }
+                }
+            },
+            y: {
+                stacked: true,
+                min: 0,
+                max: 25,
+                ticks: {
+                    stepSize: 5,
+                    color: MUTED,
+                    font: { family: DECK_FONT, size: 10 },
+                    callback: function(value) { return value + '%'; }
+                },
+                grid: { color: HAIRLINE, drawBorder: false },
+                title: {
+                    display: true,
+                    text: 'Error Rate (%)',
+                    color: INK,
+                    font: { family: DECK_FONT, size: 11, weight: '700' }
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'bottom',
+                align: 'center',
+                labels: {
+                    color: INK,
+                    font: { family: DECK_FONT, size: 12, weight: '600' },
+                    padding: 10,
+                    boxWidth: 14,
+                    boxHeight: 14,
+                    usePointStyle: true,
+                    pointStyle: 'rectRounded'
+                }
+            },
+            tooltip: {
+                backgroundColor: '#FFFFFF',
+                titleColor: INK,
+                bodyColor: MUTED,
+                borderColor: HAIRLINE,
+                borderWidth: 1,
+                padding: 10,
+                cornerRadius: 4,
+                titleFont: { family: DECK_FONT, size: 12, weight: 'bold' },
+                bodyFont: { family: DECK_FONT, size: 11 },
+                callbacks: {
+                    label: function(ctx) {
+                        const v = ctx.parsed.y;
+                        return ctx.dataset.label + ': ' + (v < 0.1 ? '≈0' : v.toFixed(2)) + '%';
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
 </div>
 </body>
 </html>
