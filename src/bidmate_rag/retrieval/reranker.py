@@ -8,12 +8,20 @@ from __future__ import annotations
 
 import re
 
-from bidmate_rag.retrieval.filters import is_comparison_query, should_boost_tables
+from bidmate_rag.retrieval.filters import (
+    extract_numeric_anchors,
+    is_comparison_query,
+    should_boost_tables,
+)
 
 # 부스팅 기본 상수 (boost_config 미지정 시 폴백용)
 SECTION_BOOST = 0.20
 TABLE_BOOST = 0.08
 METADATA_BOOST = 0.12
+# 숫자 앵커는 exact-match 신호라 의미 부스트와 다른 축으로 본다.
+# 기본적으로 max_total 캡 밖에 더해져서 "본문에 동일 금액/연도가 등장하는 청크"를
+# 강하게 끌어올린다.
+NUMERIC_BOOST = 0.30
 MAX_TOTAL_BOOST = 0.25
 MIN_MATCH_LEN = 3  # 정규화된 텍스트 최소 매칭 길이
 SECTION_HINT_MIN_MATCH_LEN = 2
@@ -159,13 +167,21 @@ def rerank_with_boost(
     section_weight = cfg.get("section", SECTION_BOOST)
     table_weight = cfg.get("table", TABLE_BOOST)
     metadata_weight = cfg.get("metadata", METADATA_BOOST)
+    numeric_weight = cfg.get("numeric", NUMERIC_BOOST)
     max_total = cfg.get("max_total", MAX_TOTAL_BOOST)
 
     query_norm = _normalize_text(query)
     table_boost = should_boost_tables(query)
     metadata_boost_enabled = not is_comparison_query(query)
-    if not section_hint and not table_boost and not any(
-        metadata_boost_enabled and _metadata_matches_query(query_norm, result) for result in results
+    numeric_anchors = extract_numeric_anchors(query)
+    if (
+        not section_hint
+        and not table_boost
+        and not numeric_anchors
+        and not any(
+            metadata_boost_enabled and _metadata_matches_query(query_norm, result)
+            for result in results
+        )
     ):
         return _assign_ranks(results)
 
@@ -178,6 +194,11 @@ def rerank_with_boost(
         if metadata_boost_enabled and _metadata_matches_query(query_norm, result):
             bonus += metadata_weight
         bonus = min(bonus, max_total)
+        # 숫자 앵커는 exact-match이라 별도 축으로 max_total 밖에서 가산한다.
+        if numeric_anchors and any(
+            anchor in result.chunk.text for anchor in numeric_anchors
+        ):
+            bonus += numeric_weight
         return result.score + bonus
 
     ordered = sorted(

@@ -183,13 +183,14 @@ def test_retriever_merges_metadata_range_and_section_filters() -> None:
 
     retriever.retrieve("국민연금공단 2024년 5억 이상 보안 요구사항 알려줘", top_k=3)
 
-    assert vector_store.last_kwargs["where"] == {
+    main_call = vector_store.calls[0]
+    assert main_call["where"] == {
         "발주 기관": "국민연금공단",
         "사업 금액": {"$gte": 500000000},
         "공개연도": 2024,
     }
-    assert vector_store.last_kwargs["where_document"] is None
-    assert vector_store.last_kwargs["top_k"] == 9
+    assert main_call["where_document"] is None
+    assert main_call["top_k"] == 9
 
 
 def test_retriever_expands_candidate_pool_without_reranker() -> None:
@@ -1232,3 +1233,126 @@ def test_retriever_queries_original_text_as_secondary_variant_when_rewrite_appli
 
     assert embedder.queries == ["국민연금공단 보안 규정", "USB 반입 반출해도 되나요?"]
     assert [result.chunk.chunk_id for result in results] == ["rewritten-hit", "original-hit"]
+
+
+def test_anchor_auxiliary_runs_for_direct_phrase_fact_query() -> None:
+    """직접 구문 앵커(사업기간)가 있으면 보조 검색 경로가 1회 추가 실행된다."""
+    vector_store = SequenceFakeVectorStore(
+        responses=[
+            [_retrieved_chunk("main", 0.9, agency="국민연금공단")],
+            [_retrieved_chunk("aux", 0.85, agency="국민연금공단")],
+        ]
+    )
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=FakeEmbedder(),
+        metadata_store=FakeMetadataStore(),
+        hybrid_config={"enabled": False, "anchor_auxiliary": True},
+    )
+
+    retriever.retrieve("국민연금공단 사업기간 알려줘", top_k=3)
+
+    assert len(vector_store.calls) == 2
+    assert vector_store.calls[0]["where_document"] is None
+    assert vector_store.calls[1]["where_document"] == {"$contains": "사업기간"}
+
+
+def test_anchor_auxiliary_runs_for_numeric_anchor_only() -> None:
+    """직접 구문이 없어도 숫자 앵커(12억원)만 있으면 보조 경로가 실행된다."""
+    vector_store = SequenceFakeVectorStore(
+        responses=[
+            [_retrieved_chunk("main", 0.9, agency="국민연금공단")],
+            [_retrieved_chunk("aux", 0.85, agency="국민연금공단")],
+        ]
+    )
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=FakeEmbedder(),
+        metadata_store=FakeMetadataStore(),
+        hybrid_config={"enabled": False, "anchor_auxiliary": True},
+    )
+
+    retriever.retrieve("12억원 규모 사업 찾아줘", top_k=3)
+
+    assert len(vector_store.calls) == 2
+    assert vector_store.calls[1]["where_document"] == {"$contains": "12억원"}
+
+
+def test_anchor_auxiliary_skipped_when_no_anchor() -> None:
+    """앵커가 없는 일반 질의에서는 보조 경로가 돌지 않는다."""
+    vector_store = SequenceFakeVectorStore(
+        responses=[[_retrieved_chunk("only", 0.9, agency="국민연금공단")]]
+    )
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=FakeEmbedder(),
+        metadata_store=FakeMetadataStore(),
+        hybrid_config={"enabled": False, "anchor_auxiliary": True},
+    )
+
+    retriever.retrieve("국민연금공단 보안 요구사항 알려줘", top_k=3)
+
+    assert len(vector_store.calls) == 1
+
+
+def test_anchor_auxiliary_disabled_by_flag() -> None:
+    """anchor_auxiliary: False면 fact형 질의에도 보조 경로가 돌지 않는다."""
+    vector_store = SequenceFakeVectorStore(
+        responses=[[_retrieved_chunk("only", 0.9, agency="국민연금공단")]]
+    )
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=FakeEmbedder(),
+        metadata_store=FakeMetadataStore(),
+        hybrid_config={"enabled": False, "anchor_auxiliary": False},
+    )
+
+    retriever.retrieve("국민연금공단 사업기간 알려줘", top_k=3)
+
+    assert len(vector_store.calls) == 1
+
+
+def test_anchor_auxiliary_skipped_when_force_scoped() -> None:
+    """multi-source fan-out(force_scoped=True) 중이면 앵커 보조 경로를 스킵한다."""
+    vector_store = FakeVectorStore(
+        [_retrieved_chunk("chunk-1", 0.9, agency="국민연금공단")]
+    )
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=FakeEmbedder(),
+        metadata_store=FakeMetadataStore(),
+        hybrid_config={"enabled": False, "anchor_auxiliary": True},
+    )
+
+    retriever.retrieve(
+        "국민연금공단과 기초과학연구원의 사업기간 알려줘",
+        top_k=3,
+    )
+
+    anchor_aux_calls = [
+        call
+        for call in vector_store.calls
+        if call.get("where_document") == {"$contains": "사업기간"}
+    ]
+    assert anchor_aux_calls == []
+
+
+def test_anchor_auxiliary_merges_main_and_aux_results() -> None:
+    """메인과 보조 결과가 score 기준으로 중복 제거되며 합쳐진다."""
+    vector_store = SequenceFakeVectorStore(
+        responses=[
+            [_retrieved_chunk("main-only", 0.9, agency="국민연금공단")],
+            [_retrieved_chunk("aux-only", 0.95, agency="국민연금공단")],
+        ]
+    )
+    retriever = RAGRetriever(
+        vector_store=vector_store,
+        embedder=FakeEmbedder(),
+        metadata_store=FakeMetadataStore(),
+        hybrid_config={"enabled": False, "anchor_auxiliary": True},
+    )
+
+    results = retriever.retrieve("국민연금공단 사업기간 알려줘", top_k=5)
+
+    chunk_ids = {result.chunk.chunk_id for result in results}
+    assert {"main-only", "aux-only"}.issubset(chunk_ids)

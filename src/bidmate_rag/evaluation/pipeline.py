@@ -67,9 +67,10 @@ def execute_evaluation(
     run_id: str | None = None,
     skip_judge: bool = False,
     judge_model: str = "gpt-4o-mini",
-    judge_v2: bool = False,
+    judge_v2: bool = True,
     progress_callback: ProgressCallback | None = None,
     top_k: int | None = None,
+    system_prompt: str | None = None, # 시나리오 A 시스템 프롬프트 추가
 ) -> EvaluationArtifacts:
     """Run an evaluation end-to-end and write all artifacts to disk.
 
@@ -114,8 +115,8 @@ def execute_evaluation(
         top_k = top_k
     )
 
-    
-
+    if system_prompt:
+        pipeline.system_prompt = system_prompt
     def answer_fn(sample: EvalSample) -> GenerationResult:
         # 평가셋의 metadata_filter / history를 retrieval에 실제로 적용
         # (이전엔 dataset.py가 sample.metadata에 저장만 하고 무시되던 상태)
@@ -215,7 +216,7 @@ def _run_judge(
     benchmark: BenchmarkRunResult,
     judge_model: str,
     *,
-    judge_v2: bool = False,
+    judge_v2: bool = True,
 ) -> tuple[float, int]:
     """Run LLM judge on each sample, mutate result.judge_scores, return cost/tokens."""
     judge = LLMJudgeV2(model=judge_model) if judge_v2 else LLMJudge(model=judge_model)
@@ -260,6 +261,7 @@ def _write_run_meta(
         "timestamp_kst": now_utc.astimezone(ZoneInfo("Asia/Seoul")).strftime("%Y-%m-%d %H:%M:%S"),
         "git": capture_git_info(),
         "configs": {k: v for k, v in config_paths.items() if v},
+        "prompt_config": config_paths.get("prompt"), # 프롬프트 설정 경로 추가
         "notes_path": runtime.experiment.notes_path,
         "config_snapshot": runtime.model_dump(),
         "eval_path": eval_path,

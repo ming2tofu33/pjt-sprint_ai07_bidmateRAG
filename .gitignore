@@ -1,6 +1,9 @@
 # chat/debug scratch artifacts
 /history.json
-
+#보고서 작성 관련
+/notion/
+/notion2/
+/experiments/
 # data
 data/raw/*
 !data/raw/.gitkeep
@@ -249,3 +252,19 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+configs/experiments/generated2/
+.agents/
+FETCH_HEAD
+Study.md
+study2A.md
+app/finetuning_ui.py
+artifacts/chroma_db_semantic/
+artifacts/training/
+reports/
+scripts/build_project_report.py
+scripts/prepare_sft_data.py
+skills-lock.json
+experiments/notebooks/
+
+# Scenario A research files
+research/scenario_a/

@@ -13,16 +13,17 @@ boost:
 # 하이브리드 검색: Dense 벡터 + BM25 Sparse + RRF 융합
 hybrid:
   enabled: true              # 하이브리드 검색 활성화 여부
-  dense_pool_multiplier: 3   # Dense 후보 풀 배수
-  sparse_pool_multiplier: 3  # Sparse 후보 풀 배수
+  dense_pool_multiplier: 5   # Dense 후보 풀 배수
+  sparse_pool_multiplier: 5  # Sparse 후보 풀 배수
   rrf_k: 60                  # RRF 순위 융합 상수
+  anchor_auxiliary: true     # fact형 질의에 anchor 보조 검색 1회 추가
 
 # 멀티턴 검색 보강 (이전 대화 기반 질의 재작성 + 기관 필터 계승)
 enable_multiturn: true
 
 # 멀티턴 질의 재작성 설정
 rewrite:
-  mode: llm_with_rule_fallback  # LLM 재작성 우선, 실패 시 규칙 기반으로 폴백
+  mode: rule_only  # LLM 재작성 우선, 실패 시 규칙 기반으로 폴백
   # gpt-5 계열은 reasoning 토큰이 completion에 포함되므로 넉넉하게 (CLAUDE.md 참조).
   # 로컬 HF 모델은 HFLocalLLM.rewrite()가 내부적으로 256 제한을 사용.
   max_completion_tokens: 16000  # rewrite 단계에서 허용할 최대 출력 토큰 수

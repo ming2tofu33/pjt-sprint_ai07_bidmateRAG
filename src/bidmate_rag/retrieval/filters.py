@@ -166,6 +166,29 @@ def extract_range_filters(query: str) -> dict | None:
     return where or None
 
 
+NUMERIC_ANCHOR_PATTERN = re.compile(
+    r"\d[\d,]*(?:\.\d+)?\s*(?:억원|억|천만원|백만원|만원|원|년|월|일)"
+)
+
+
+def extract_numeric_anchors(query: str) -> list[str]:
+    """쿼리에서 단위가 붙은 숫자 토큰(금액·연도·날짜)을 anchor로 추출한다.
+
+    임베딩 유사도로는 '12억'과 '11억'이 거의 같게 보이므로, 본문에
+    정확히 같은 숫자 문자열이 있는 청크를 boost에서 강하게 밀어주기 위한 신호.
+    단위 없이 떠다니는 숫자(페이지 번호·표 번호 등)는 노이즈라 제외한다.
+    """
+    anchors: list[str] = []
+    seen: set[str] = set()
+    for match in NUMERIC_ANCHOR_PATTERN.findall(query):
+        normalized = re.sub(r"\s+", "", match).strip()
+        if len(normalized) < 2 or normalized in seen:
+            continue
+        anchors.append(normalized)
+        seen.add(normalized)
+    return anchors
+
+
 def extract_section_hint(query: str) -> str | None:
     """쿼리에서 섹션 키워드 힌트를 추출
 

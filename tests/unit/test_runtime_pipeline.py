@@ -101,6 +101,7 @@ def test_build_runtime_pipeline_passes_multiturn_flag_to_retriever(
         "dense_pool_multiplier": 3,
         "sparse_pool_multiplier": 3,
         "rrf_k": 60,
+        "anchor_auxiliary": True,
     }
     assert captured["rewrite_llm"] is None
     assert captured["rewrite_mode"] == "llm_with_rule_fallback"

@@ -1,0 +1,3 @@
+provider: huggingface
+model: Qwen/Qwen2.5-7B-Instruct
+description: "Qwen2.5 7B 한국어 최적화 모델"

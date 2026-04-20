@@ -298,9 +298,11 @@ def main() -> None:
         help="LLM model used by the judge (default: gpt-4o-mini).",
     )
     parser.add_argument(
-        "--judge-v2",
-        action="store_true",
-        help="Use evidence-first judge v2 (keeps v1 as default).",
+        "--judge-v1",
+        dest="judge_v2",
+        action="store_false",
+        default=True,
+        help="Use legacy judge v1 (keeps v2 as default).",
     )
     parser.add_argument(
         "--strict",
@@ -317,6 +319,11 @@ def main() -> None:
         action="store_true",
         help="평가 진행 상황을 질문 단위로 콘솔에 출력.",
     )
+    parser.add_argument(
+        "--prompt-config",
+        default=None,
+        help="프롬프트 설정 YAML 파일 경로 (예: configs/prompts/prompt_P1.yaml)",
+    )
     args = parser.parse_args()
 
     # 1. 런타임 파이프라인 조립 (설정 → 프로바이더 → 리트리버 → LLM)
@@ -325,6 +332,12 @@ def main() -> None:
         provider_config_path=args.provider_config,
         experiment_config_path=args.experiment_config,
     )
+
+    # 1.5. 시스템 프롬프트 오버라이드 (YAML 컴포넌트 조합)
+    from bidmate_rag.config.components import build_system_prompt_from_components
+    system_prompt = None
+    if args.prompt_config:
+        system_prompt = build_system_prompt_from_components(args.prompt_config)
 
     # 2. 평가셋 로딩 ("다중" 필터 → $in 변환을 위해 기관 목록 전달)
     agency_list = getattr(pipeline.retriever.metadata_store, "agency_list", [])
@@ -363,6 +376,7 @@ def main() -> None:
             "base": args.base_config,
             "provider": args.provider_config,
             "experiment": args.experiment_config,
+            "prompt": args.prompt_config,
         },
         runs_dir=args.runs_dir,
         benchmarks_dir=args.benchmarks_dir,
@@ -371,6 +385,7 @@ def main() -> None:
         judge_model=args.judge_model,
         progress_callback=_build_progress_callback(args.progress),
         judge_v2=args.judge_v2,
+        system_prompt=system_prompt,
     )
 
     # 6. 결과 요약 및 산출물 경로 출력

@@ -336,6 +336,8 @@ def _build_context(data: ReportData) -> dict[str, Any]:
     # Eval path
     eval_path = meta.get("eval_path", "?")
     eval_basename = Path(str(eval_path)).name if eval_path != "?" else "?"
+    prompt_config = meta.get("prompt_config", "?")
+    prompt_basename = Path(str(prompt_config)).name if prompt_config != "?" else "?"
     num_samples = int(summary.get("num_samples") or len(data.results) or 0)
 
     # Cost warnings (priced?) — 빈 줄이 어색하지 않도록 warning이 있을 때만 \n 감싸기
@@ -429,6 +431,7 @@ def _build_context(data: ReportData) -> dict[str, Any]:
         "timestamp_kst": meta.get("timestamp_kst", "N/A"),
         "scenario": scenario,
         "eval_basename": eval_basename,
+        "prompt_basename": prompt_basename,
         "eval_path": eval_path,
         "num_samples": num_samples,
         "embedding_model": embedding_model,

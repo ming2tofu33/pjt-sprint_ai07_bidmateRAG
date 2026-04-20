@@ -34,6 +34,7 @@ class HybridConfig(BaseModel):
     dense_pool_multiplier: int = 3     # Dense 후보 풀 배수
     sparse_pool_multiplier: int = 3    # Sparse 후보 풀 배수
     rrf_k: int = 60                    # RRF 순위 융합 상수
+    anchor_auxiliary: bool = True      # fact형 질의에 anchor 보조 검색 1회 추가
 
 
 class RewriteConfig(BaseModel):

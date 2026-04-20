@@ -1,0 +1,8 @@
+# configs/experiments/gemma_fixed_eval.yaml
+name: "fixed-gemma-test"
+retrieval_top_k: 5
+chunk_size: 1000
+chunk_overlap: 150
+embedding_model: "BAAI/bge-m3"  # BGE-M3 임베딩 고정
+embedding_provider: "huggingface"
+prompt_path: "configs/prompts/prompt_P1_C1_F1_S1_T1.yaml"  # 테스트할 프롬프트 경로

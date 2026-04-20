@@ -13,6 +13,7 @@ from app.api.routes import (
     list_chunking_configs,
     list_scenario_a_embeddings,
     list_scenario_a_llms,
+    list_prompt_configs,
     load_benchmark_frames,
     load_metadata_options,
     load_run_records,
@@ -220,6 +221,20 @@ def _render_streamlit_app() -> None:
 
         # 시스템 프롬프트 편집
         from bidmate_rag.config.prompts import SYSTEM_PROMPT as DEFAULT_PROMPT
+        st.subheader("📝 프롬프트 버전")
+        prompt_configs = list_prompt_configs()
+        if prompt_configs:
+            selected_prompt_config = st.selectbox(
+                "프롬프트 선택",
+                [None] + prompt_configs,
+                format_func=lambda p: "직접 편집" if p is None else _yaml.safe_load(p.read_text()).get("description", p.stem),
+                key="prompt_config_select",
+            )
+            if selected_prompt_config:
+                loaded_prompt = _yaml.safe_load(selected_prompt_config.read_text()).get("system_prompt", "")
+                if loaded_prompt:
+                    st.session_state["custom_prompt"] = loaded_prompt
+                    st.caption(f"✅ {selected_prompt_config.stem} 프롬프트 적용됨")
         with st.expander("📝 시스템 프롬프트", expanded=False):
             custom_prompt = st.text_area(
                 "프롬프트 편집",
@@ -602,7 +617,7 @@ def _render_streamlit_app() -> None:
 
     # ── 탭 3: 평가 ──
     with eval_tab:
-        render_eval_tabs(st, run_live_query, list_provider_configs, list_chunking_configs, list_scenario_a_embeddings, list_scenario_a_llms, load_benchmark_frames, load_run_records)
+        render_eval_tabs(st, run_live_query, list_provider_configs, list_chunking_configs, list_scenario_a_embeddings, list_scenario_a_llms,list_prompt_configs, load_benchmark_frames, load_run_records)
 
 
 def _render_debug_panel(st_module, meta: dict) -> None:

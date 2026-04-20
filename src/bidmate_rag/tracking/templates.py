@@ -21,6 +21,7 @@ REPORT_TEMPLATE = """\
 | 날짜 | {timestamp_kst} |
 | 시나리오 | {scenario} |
 | 평가셋 버전 | {eval_basename} |
+| 프롬프트 버전 | {prompt_basename} |
 | 임베딩 모델 | {embedding_model} |
 | 생성 모델 | {llm_model} |
 | Chunk Size | {chunk_size} |
@@ -50,6 +51,7 @@ REPORT_TEMPLATE = """\
 | Git Branch | {git_branch} |
 | Git Commit | {git_commit} {dirty_marker} |
 | 평가셋 | {eval_path} ({num_samples} samples) |
+| 프롬프트 | {prompt_basename} |
 | 임베딩 모델 | {embedding_model} |
 | 생성 모델 | {llm_model} |
 | Vector DB | ChromaDB ({collection_name}) |

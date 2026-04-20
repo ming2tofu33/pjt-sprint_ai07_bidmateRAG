@@ -120,8 +120,8 @@ def build_rag_user_prompt(
         if slot_lines:
             sections.append("## 슬롯 메모리\n" + "\n".join(slot_lines))
 
-    sections.append(f"## 참고 문서\n{context}")
     sections.append(f"## 질문\n{question}")
+    sections.append("아래 제공된 문서를 바탕으로 위 질문에 답하세요.")
     sections.append(
         """## 작성 절차
 1. 질문을 먼저 해석하고, 필요한 답변 단위를 나누세요.
@@ -163,6 +163,7 @@ def build_rag_user_prompt(
 문서에 없는 항목:
 - 없는 항목이 있으면 구체적으로 적고, 없으면 `없음`이라고 적으세요."""
     )
+    sections.append(f"## 참고 문서\n{context}")
     return "\n\n".join(sections)
 
 

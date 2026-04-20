@@ -1,3 +1,0 @@
-provider: huggingface
-model: Qwen/Qwen2.5-0.5B-Instruct
-description: "Qwen2.5 0.5B 경량 로컬 모델"

@@ -6,6 +6,14 @@ class _FakeTokenizer:
     def encode(self, text: str) -> list[int]:
         return list(range(len(text)))
 
+    def apply_chat_template(
+        self,
+        messages: list[dict],
+        tokenize: bool = False,
+        add_generation_prompt: bool = True,
+    ) -> str:
+        return "\n".join(message["content"] for message in messages)
+
 
 class _FakeGenerator:
     def __init__(self) -> None:

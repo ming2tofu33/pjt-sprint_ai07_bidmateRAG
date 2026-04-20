@@ -202,6 +202,31 @@ def test_rerank_with_boost_promotes_metadata_match() -> None:
     assert results[0].rank == 1
 
 
+def test_rerank_with_boost_numeric_anchor_promotes_exact_amount_match() -> None:
+    """본문에 질의의 금액 앵커가 정확히 등장하는 청크를 상위로 끌어올린다."""
+    chunks = [
+        _make_chunk(
+            "near",
+            0.92,
+            section="예산",
+            text="본 사업 예산은 11억원 규모로 책정되어 있다.",
+        ),
+        _make_chunk(
+            "exact",
+            0.80,
+            section="예산",
+            text="본 사업 총 예산은 12억원이다.",
+        ),
+    ]
+
+    results = rerank_with_boost(
+        chunks, query="12억원 사업 예산 알려줘", section_hint=None
+    )
+
+    assert results[0].chunk.chunk_id == "exact"
+    assert results[0].rank == 1
+
+
 def test_rerank_with_boost_uses_agency_fallback_metadata_fields() -> None:
     chunks = [
         _make_chunk("generic", 0.88, agency="조달청", project="일반 사업", section="일반"),

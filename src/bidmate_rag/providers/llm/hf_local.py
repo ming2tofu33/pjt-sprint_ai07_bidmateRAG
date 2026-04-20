@@ -9,7 +9,7 @@ from bidmate_rag.config.prompts import build_rag_user_prompt
 from bidmate_rag.generation.context_builder import build_numbered_context_block
 from bidmate_rag.providers.llm.base import BaseLLMProvider, RewriteResponse
 from bidmate_rag.schema import GenerationResult, RetrievedChunk
-
+import re
 
 class HFLocalLLM(BaseLLMProvider):
     def __init__(self, model_name: str, 
@@ -87,22 +87,35 @@ class HFLocalLLM(BaseLLMProvider):
         )
         generator = self._get_generator()
         tokenizer = generator.tokenizer
-        full_input = f"{system_prompt}\n\n{prompt}"
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt},
+        ]
+
+        # chat template 직접 적용
+        input_text = tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True
+        )
 
         # 입력 토큰 수 측정
-        input_tokens = len(tokenizer.encode(full_input))
+        input_tokens = len(tokenizer.encode(input_text))
 
         # 지연 시간 측정
         start = time.time()
         response = generator(
-            full_input,
+            input_text,
             max_new_tokens=generation_config.get("max_new_tokens", 512),
             do_sample=False,
             return_full_text=False,
+            repetition_penalty=1.3,
         )
         latency_ms = (time.time() - start) * 1000
 
         generated_text = response[0]["generated_text"].strip() if response else ""
+        generated_text = re.sub(r'<[^>]+>', '', generated_text).strip()
 
         # 출력 토큰 수 측정
         output_tokens = len(tokenizer.encode(generated_text)) if generated_text else 0
