@@ -39,13 +39,31 @@
 
 <!-- ============ LEFT: Radar Chart Card ============ -->
 <div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 80px; width: 540px; height: 390px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
+<!-- Title (top of card) -->
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 215px; left: 100px; width: 500px; z-index: 10;">
 <p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0;">
 4지표 균형도 <span style="font-weight: 500; color: #64748B; font-size: 13px; margin-left: 6px;">Faithfulness · AR · CP · CR</span>
 </p>
 </div>
-<!-- Radar Canvas -->
-<div data-object="true" data-object-type="chart" style="position: absolute; top: 245px; left: 100px; width: 500px; height: 335px; z-index: 10;">
+<!-- HTML Legend (top-left corner of card) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 248px; left: 100px; width: 150px; z-index: 11;">
+<div style="display: flex; flex-direction: column; gap: 10px; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px;">
+<div style="display: flex; align-items: center; gap: 8px;">
+<span style="width: 10px; height: 10px; border-radius: 50%; background: #607196; flex-shrink: 0;"></span>
+<span style="font-weight: 600; color: #1F2937;">A-EXP01</span>
+</div>
+<div style="display: flex; align-items: center; gap: 8px;">
+<span style="width: 10px; height: 10px; border-radius: 50%; background: #D49B25; flex-shrink: 0;"></span>
+<span style="font-weight: 600; color: #1F2937;">A-P4_C2</span>
+</div>
+<div style="display: flex; align-items: center; gap: 8px;">
+<span style="width: 10px; height: 10px; border-radius: 50%; background: #FF7B9C; flex-shrink: 0;"></span>
+<span style="font-weight: 600; color: #1F2937;">B-Opt</span>
+</div>
+</div>
+</div>
+<!-- Radar Canvas (expanded, shifted right to clear legend column) -->
+<div data-object="true" data-object-type="chart" style="position: absolute; top: 240px; left: 240px; width: 370px; height: 350px; z-index: 10;">
 <canvas id="radarChart"></canvas>
 </div>
 
@@ -110,34 +128,34 @@ new Chart(radarCtx, {
         labels: ['Faithfulness', 'Answer Relevance', 'Context Precision', 'Context Recall'],
         datasets: [
             {
-                label: 'A-EXP01 (Baseline)',
+                label: 'A-EXP01',
                 data: [0.80, 0.50, 0.90, 0.90],
                 borderColor: NAVY,
                 backgroundColor: 'rgba(96, 113, 150, 0.12)',
-                borderWidth: 2.5,
-                pointRadius: 4,
+                borderWidth: 3,
+                pointRadius: 5,
                 pointBackgroundColor: NAVY,
                 pointBorderColor: '#FFFFFF',
                 pointBorderWidth: 1.5
             },
             {
-                label: 'A-P4_C2 (Optimized)',
+                label: 'A-P4_C2',
                 data: [0.95, 0.65, 1.00, 0.95],
                 borderColor: YELLOW,
                 backgroundColor: 'rgba(212, 155, 37, 0.12)',
-                borderWidth: 2.5,
-                pointRadius: 4,
+                borderWidth: 3,
+                pointRadius: 5,
                 pointBackgroundColor: YELLOW,
                 pointBorderColor: '#FFFFFF',
                 pointBorderWidth: 1.5
             },
             {
-                label: 'Scenario-B',
+                label: 'B-Opt',
                 data: [1.00, 0.80, 0.93, 0.90],
                 borderColor: PINK,
-                backgroundColor: 'rgba(255, 123, 156, 0.12)',
-                borderWidth: 2.5,
-                pointRadius: 4,
+                backgroundColor: 'rgba(255, 123, 156, 0.15)',
+                borderWidth: 3,
+                pointRadius: 5,
                 pointBackgroundColor: PINK,
                 pointBorderColor: '#FFFFFF',
                 pointBorderWidth: 1.5
@@ -147,7 +165,7 @@ new Chart(radarCtx, {
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        layout: { padding: { top: 8, bottom: 8 } },
+        layout: { padding: { top: 10, bottom: 10, left: 10, right: 10 } },
         scales: {
             r: {
                 min: 0,
@@ -167,19 +185,7 @@ new Chart(radarCtx, {
             }
         },
         plugins: {
-            legend: {
-                position: 'bottom',
-                align: 'center',
-                labels: {
-                    color: INK,
-                    font: { family: DECK_FONT, size: 12, weight: '600' },
-                    padding: 12,
-                    boxWidth: 14,
-                    boxHeight: 14,
-                    usePointStyle: true,
-                    pointStyle: 'circle'
-                }
-            },
+            legend: { display: false },
             tooltip: {
                 backgroundColor: '#FFFFFF',
                 titleColor: INK,
