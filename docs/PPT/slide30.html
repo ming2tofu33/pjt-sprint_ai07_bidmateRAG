@@ -39,31 +39,28 @@
 
 <!-- ============ LEFT: Radar Chart Card ============ -->
 <div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 80px; width: 540px; height: 390px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
-<!-- Title (top of card) -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 215px; left: 100px; width: 500px; z-index: 10;">
-<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0;">
-4지표 균형도 <span style="font-weight: 500; color: #64748B; font-size: 13px; margin-left: 6px;">Faithfulness · AR · CP · CR</span>
-</p>
-</div>
-<!-- HTML Legend (top-left corner of card) -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 248px; left: 100px; width: 150px; z-index: 11;">
-<div style="display: flex; flex-direction: column; gap: 10px; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px;">
-<div style="display: flex; align-items: center; gap: 8px;">
-<span style="width: 10px; height: 10px; border-radius: 50%; background: #607196; flex-shrink: 0;"></span>
+<!-- Title + Horizontal Legend (single top row) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 215px; left: 100px; width: 500px; z-index: 11;">
+<div style="display: flex; align-items: center; justify-content: space-between; font-family: 'Pretendard', 'Noto Sans KR', sans-serif;">
+<p style="font-size: 15px; font-weight: 700; color: #1F2937; margin: 0;">4지표 균형도</p>
+<div style="display: flex; align-items: center; gap: 14px; font-size: 12px;">
+<div style="display: flex; align-items: center; gap: 6px;">
+<span style="width: 10px; height: 10px; border-radius: 50%; background: #607196;"></span>
 <span style="font-weight: 600; color: #1F2937;">A-EXP01</span>
 </div>
-<div style="display: flex; align-items: center; gap: 8px;">
-<span style="width: 10px; height: 10px; border-radius: 50%; background: #D49B25; flex-shrink: 0;"></span>
+<div style="display: flex; align-items: center; gap: 6px;">
+<span style="width: 10px; height: 10px; border-radius: 50%; background: #D49B25;"></span>
 <span style="font-weight: 600; color: #1F2937;">A-P4_C2</span>
 </div>
-<div style="display: flex; align-items: center; gap: 8px;">
-<span style="width: 10px; height: 10px; border-radius: 50%; background: #FF7B9C; flex-shrink: 0;"></span>
+<div style="display: flex; align-items: center; gap: 6px;">
+<span style="width: 10px; height: 10px; border-radius: 50%; background: #FF7B9C;"></span>
 <span style="font-weight: 600; color: #1F2937;">B-Opt</span>
 </div>
 </div>
 </div>
-<!-- Radar Canvas (expanded, shifted right to clear legend column) -->
-<div data-object="true" data-object-type="chart" style="position: absolute; top: 240px; left: 240px; width: 370px; height: 350px; z-index: 10;">
+</div>
+<!-- Radar Canvas (full card width, max height) -->
+<div data-object="true" data-object-type="chart" style="position: absolute; top: 245px; left: 88px; width: 524px; height: 340px; z-index: 10;">
 <canvas id="radarChart"></canvas>
 </div>
 
@@ -165,7 +162,7 @@ new Chart(radarCtx, {
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        layout: { padding: { top: 10, bottom: 10, left: 10, right: 10 } },
+        layout: { padding: { top: 4, bottom: 4, left: 4, right: 4 } },
         scales: {
             r: {
                 min: 0,
@@ -180,7 +177,8 @@ new Chart(radarCtx, {
                 angleLines: { color: HAIRLINE },
                 pointLabels: {
                     color: INK,
-                    font: { family: DECK_FONT, size: 12, weight: '700' }
+                    font: { family: DECK_FONT, size: 13, weight: '700' },
+                    padding: 6
                 }
             }
         },
