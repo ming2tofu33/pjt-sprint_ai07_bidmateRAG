@@ -53,7 +53,7 @@
 <div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 660px; width: 540px; height: 390px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 215px; left: 680px; width: 500px; z-index: 10;">
 <p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0;">
-에러 유형 분포 변화 <span style="font-weight: 500; color: #64748B; font-size: 13px; margin-left: 6px;">환각 → 누락 → 논리 오류로 이동</span>
+에러율 구성 변화 <span style="font-weight: 500; color: #64748B; font-size: 12px; margin-left: 6px;">(에러율 ≈ 1 − Faithfulness)</span>
 </p>
 </div>
 <!-- Stacked Bar Canvas -->
@@ -195,30 +195,38 @@ new Chart(radarCtx, {
     }
 });
 
-// ============ STACKED BAR ============
+// ============ STACKED BAR (절대 에러율) ============
+// 에러율 = 1 − Faithfulness · 각 세그먼트 = 에러 유형 비중 × 에러율
+// A-EXP01: Faith 0.80 → 20% err (Hall 4, Miss 10, Logic 6)
+// A-P4_C2: Faith 0.95 →  5% err (Hall 0.25, Miss 1, Logic 3.75)
+// B-Opt:   Faith 1.00 →  0% err (거의 없음)
 const stackedCtx = document.getElementById('stackedChart').getContext('2d');
 new Chart(stackedCtx, {
     type: 'bar',
     data: {
-        labels: ['A-EXP01\n(Baseline)', 'A-P4_C2\n(Optimized)', 'Scenario-B'],
+        labels: [
+            ['A-EXP01', 'Faith 0.80 · err 20%'],
+            ['A-P4_C2', 'Faith 0.95 · err 5%'],
+            ['B-Opt',   'Faith 1.00 · err ~0%']
+        ],
         datasets: [
             {
                 label: 'Hallucination (환각)',
-                data: [20, 5, 0],
+                data: [4, 0.25, 0],
                 backgroundColor: RED,
                 borderColor: '#FFFFFF',
                 borderWidth: 1.5
             },
             {
                 label: 'Missing Info (누락)',
-                data: [50, 20, 10],
+                data: [10, 1, 0],
                 backgroundColor: YELLOW_BAR,
                 borderColor: '#FFFFFF',
                 borderWidth: 1.5
             },
             {
                 label: 'Logic Error (논리)',
-                data: [30, 75, 90],
+                data: [6, 3.75, 0],
                 backgroundColor: NAVY,
                 borderColor: '#FFFFFF',
                 borderWidth: 1.5
@@ -235,15 +243,15 @@ new Chart(stackedCtx, {
                 grid: { display: false },
                 ticks: {
                     color: INK,
-                    font: { family: DECK_FONT, size: 12, weight: '600' }
+                    font: { family: DECK_FONT, size: 11, weight: '600' }
                 }
             },
             y: {
                 stacked: true,
                 min: 0,
-                max: 100,
+                max: 25,
                 ticks: {
-                    stepSize: 20,
+                    stepSize: 5,
                     color: MUTED,
                     font: { family: DECK_FONT, size: 10 },
                     callback: function(value) { return value + '%'; }
@@ -251,7 +259,7 @@ new Chart(stackedCtx, {
                 grid: { color: HAIRLINE, drawBorder: false },
                 title: {
                     display: true,
-                    text: 'Error Share (%)',
+                    text: 'Error Rate (%)',
                     color: INK,
                     font: { family: DECK_FONT, size: 11, weight: '700' }
                 }
@@ -283,7 +291,8 @@ new Chart(stackedCtx, {
                 bodyFont: { family: DECK_FONT, size: 11 },
                 callbacks: {
                     label: function(ctx) {
-                        return ctx.dataset.label + ': ' + ctx.parsed.y + '%';
+                        const v = ctx.parsed.y;
+                        return ctx.dataset.label + ': ' + (v < 0.1 ? '≈0' : v.toFixed(2)) + '%';
                     }
                 }
             }
