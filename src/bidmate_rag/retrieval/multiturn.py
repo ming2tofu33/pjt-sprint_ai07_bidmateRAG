@@ -33,9 +33,22 @@ FOLLOW_UP_AGENCY_KEYWORDS = [
     "이 기관",
     "해당 기관",
 ]
-_TRAILING_REQUEST_PATTERN = re.compile(
-    r"\s*(알려줘|정리해줘|설명해줘|보여줘|찾아줘|비교해줘|말해줘|요약해줘|뭐야)$"
+FOLLOW_UP_DISCOURSE_CUES = [
+    "그럼",
+    "그러면",
+    "그렇다면",
+]
+_FOLLOW_UP_REFERENCE_PATTERNS = (
+    re.compile(r"(?:방금|앞서|이전(?:에)?|위(?:에서)?)\s*(?:말씀|설명|알려)해주신"),
+    re.compile(r"(?:이|그|해당)\s+(?:\S+\s+){0,3}(?:기준|조건|경우|예외|항목|요건|내용)\b"),
 )
+_TRAILING_REQUEST_PATTERN = re.compile(
+    r"\s*(알려줘|알려주세요|정리해줘|정리해주세요|설명해줘|설명해주세요|보여줘|보여주세요|찾아줘|찾아주세요|비교해줘|비교해주세요|말해줘|말해주세요|요약해줘|요약해주세요|뭐야)$"
+)
+_QUESTION_ENDING_PATTERN = re.compile(
+    r"\s*(?:은|는|이|가|을|를)?\s*(?:어떻게 되(?:나요|나)?|무엇(?:인가요|입니까|인가)?|무슨 내용(?:인가요|입니까)?|얼마(?:인가요|입니까)?|언제(?:인가요|입니까)?|어디(?:인가요|입니까)?|뭔가요|뭐야)\??$"
+)
+_TRAILING_TOPIC_PARTICLE_PATTERN = re.compile(r"\s*(?:은|는|이|가|을|를)\s*$")
 _WHITESPACE_PATTERN = re.compile(r"\s+")
 _REWRITE_PROMPT_TEMPLATE = """당신은 공공입찰 RAG 검색용 쿼리 재작성 전문가입니다.
 대화 이력과 현재 후속 질문, 그리고 구조화된 슬롯 메모리를 보고
@@ -154,11 +167,13 @@ def _build_rewrite_history_lines(chat_history: list[dict] | None) -> list[str]:
 def _normalize_topic_candidate(text: str) -> str:
     normalized = _WHITESPACE_PATTERN.sub(" ", text).strip().strip("\"'")
     normalized = re.sub(r"[?!.]+$", "", normalized).strip()
+    normalized = _QUESTION_ENDING_PATTERN.sub("", normalized).strip()
     while True:
         trimmed = _TRAILING_REQUEST_PATTERN.sub("", normalized).strip()
         if trimmed == normalized:
             break
         normalized = trimmed
+    normalized = _TRAILING_TOPIC_PARTICLE_PATTERN.sub("", normalized).strip()
     return normalized
 
 
@@ -176,6 +191,17 @@ def _extract_recent_topic_from_history(chat_history: list[dict] | None) -> str |
     for candidate in prioritized + fallback:
         return candidate
     return None
+
+
+def _has_follow_up_signal(query: str) -> bool:
+    if any(
+        keyword in query
+        for keyword in FOLLOW_UP_TOPIC_KEYWORDS
+        + FOLLOW_UP_AGENCY_KEYWORDS
+        + FOLLOW_UP_DISCOURSE_CUES
+    ):
+        return True
+    return any(pattern.search(query) for pattern in _FOLLOW_UP_REFERENCE_PATTERNS)
 
 
 def extract_recent_agency_filter(
@@ -353,15 +379,14 @@ def _rule_based_rewrite(
     chat_history: list[dict] | None,
     agency_list: list[str],
 ) -> str:
-    if not any(
-        keyword in query for keyword in FOLLOW_UP_TOPIC_KEYWORDS + FOLLOW_UP_AGENCY_KEYWORDS
-    ):
+    if not _has_follow_up_signal(query):
         return query
 
     rewritten = query
     recent_topic = _extract_recent_topic_from_history(chat_history)
     recent_agency_filter = extract_recent_agency_filter(chat_history, agency_list)
     recent_agency = recent_agency_filter["발주 기관"] if recent_agency_filter else ""
+    query_agencies = extract_matched_agencies(query, agency_list)
 
     if recent_agency:
         for keyword in FOLLOW_UP_AGENCY_KEYWORDS:
@@ -372,7 +397,7 @@ def _rule_based_rewrite(
             rewritten = rewritten.replace(keyword, recent_topic)
 
     rewritten = _WHITESPACE_PATTERN.sub(" ", rewritten).strip()
-    if rewritten == query and recent_topic:
+    if rewritten == query and recent_topic and recent_topic not in query and not query_agencies:
         rewritten = f"{recent_topic} {query}".strip()
     return rewritten
 
