@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>의사결정: Kordoc + Fallback 이중화 &amp; 유니코드 정규화</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;display=swap" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 400px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #607196; letter-spacing: 0.5px; margin: 0;">
+<span style="color: #FF7B9C; margin-right: 8px;">★ 임팩트</span>· 데이터 엔지니어링
+        </p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #607196; letter-spacing: 0.5px; margin: 0;">
+            슬라이드 10
+        </p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 105px; left: 80px; width: 1120px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #1F2937; letter-spacing: -1.5px; margin: 0; line-height: 1.2;">
+            의사결정: Kordoc + Fallback 이중화 &amp; 유니코드 정규화
+        </p>
+</div>
+<!-- Hook Box Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 180px; left: 80px; width: 1120px; height: 70px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 4px solid #FF7B9C; border-radius: 4px; z-index: 1;"></div>
+<!-- Hook Box Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 202px; left: 104px; width: 1072px; height: 35px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 20px; font-weight: 500; color: #1F2937; margin: 0; line-height: 1.5;">
+            "<span style="color: #FF7B9C; font-weight: 700;">단일 파서 장애</span>가 전체 파이프라인의 중단으로 이어지지 않도록 견고하게 설계"
+        </p>
+</div>
+<!-- Flowchart Area Background Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 280px; left: 80px; width: 702px; height: 382px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<!-- Flowchart Content Textbox (fixed padding/clipping) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 280px; left: 80px; width: 702px; height: 382px; z-index: 10;">
+<div style="position: relative; width: 100%; height: 100%; font-family: 'Noto Sans KR', sans-serif;">
+<!-- Flowchart Node 1: Original Doc -->
+<div style="position: absolute; top: 30px; left: 100px; width: 220px; height: 46px; background: #FAFAFA; border: 1px solid #E8E9ED; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #1F2937; box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);">
+                원본 문서 (HWP, PDF)
+            </div>
+<!-- Flowchart Node 2: Kordoc -->
+<div style="position: absolute; top: 130px; left: 100px; width: 220px; height: 65px; background: #FFFFFF; border: 2px solid #607196; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(96, 113, 150, 0.1);">
+<span style="font-size: 13px; color: #607196; font-weight: 700; margin-bottom: 2px;">주력 파서</span>
+<span style="font-size: 18px; color: #1F2937; font-weight: 700;">Kordoc</span>
+</div>
+<!-- Flowchart Node 3: Fallback -->
+<div style="position: absolute; top: 130px; left: 420px; width: 220px; height: 65px; background: #FFFDF5; border: 2px dashed #FFC759; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+<span style="font-size: 13px; color: #D49B25; font-weight: 700; margin-bottom: 2px;">보조 파서 (Fallback)</span>
+<span style="font-size: 15px; color: #1F2937; font-weight: 700; font-family: 'Nanum Gothic Coding', monospace;">hwp-hwpx-parser</span>
+</div>
+<!-- Flowchart Node 4: Unicode Normalization -->
+<div style="position: absolute; top: 260px; left: 100px; width: 540px; height: 65px; background: #FFF5F7; border: 2px solid #FF7B9C; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(255, 123, 156, 0.1);">
+<span style="font-size: 13px; color: #FF7B9C; font-weight: 700; margin-bottom: 2px;">정본 텍스트 보존의 핵심</span>
+<span style="font-size: 18px; color: #1F2937; font-weight: 700;">유니코드 정규화 파이프라인 (PUA·NBSP)</span>
+</div>
+<!-- Arrow 1: Doc -> Kordoc -->
+<div style="position: absolute; top: 76px; left: 209px; width: 2px; height: 48px; background: #BABFD1;"></div>
+<div style="position: absolute; top: 124px; left: 205px; border-width: 6px 5px 0 5px; border-style: solid; border-color: #BABFD1 transparent transparent transparent;"></div>
+<!-- Arrow 2: Kordoc -> Fallback (Fail) -->
+<div style="position: absolute; top: 161px; left: 320px; width: 94px; height: 2px; background: #FFC759;"></div>
+<div style="position: absolute; top: 156px; left: 414px; border-width: 6px 0 6px 6px; border-style: solid; border-color: transparent transparent transparent #FFC759;"></div>
+<div style="position: absolute; top: 140px; left: 345px; font-size: 12px; font-weight: 700; color: #D49B25; letter-spacing: -0.5px;">파싱 실패 시</div>
+<!-- Arrow 3: Kordoc -> Unicode (Success) -->
+<div style="position: absolute; top: 195px; left: 209px; width: 2px; height: 59px; background: #607196;"></div>
+<div style="position: absolute; top: 254px; left: 205px; border-width: 6px 5px 0 5px; border-style: solid; border-color: #607196 transparent transparent transparent;"></div>
+<div style="position: absolute; top: 215px; left: 175px; font-size: 13px; font-weight: 700; color: #607196;">성공</div>
+<!-- Arrow 4: Fallback -> Unicode -->
+<div style="position: absolute; top: 195px; left: 529px; width: 2px; height: 59px; background: #BABFD1;"></div>
+<div style="position: absolute; top: 254px; left: 525px; border-width: 6px 5px 0 5px; border-style: solid; border-color: #BABFD1 transparent transparent transparent;"></div>
+<!-- Result Output Indicator -->
+<div style="position: absolute; top: 325px; left: 369px; width: 2px; height: 25px; background: #BABFD1;"></div>
+<div style="position: absolute; top: 350px; left: 365px; border-width: 6px 5px 0 5px; border-style: solid; border-color: #BABFD1 transparent transparent transparent;"></div>
+<div style="position: absolute; top: 356px; left: 290px; width: 160px; text-align: center; font-size: 14px; font-weight: 700; color: #1F2937;">정본 텍스트 추출 완료</div>
+</div>
+</div>
+<!-- Design Philosophy Card 1 Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 280px; left: 810px; width: 395px; height: 125px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 4px solid #607196; border-radius: 6px; z-index: 1;"></div>
+<!-- Design Philosophy Card 1 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 295px; left: 834px; width: 346px; height: 100px; z-index: 10;">
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #607196;">주력 + 보조 이중화</span>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 400; color: #1F2937; margin: 8px 0 0 0; line-height: 1.5; word-break: keep-all;">
+            단일 파서의 포맷 지원 한계 및 버그를 극복하기 위해 Kordoc과 hwp-hwpx-parser를 교차 운용하여 생존성 확보
+        </p>
+</div>
+<!-- Design Philosophy Card 2 Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 415px; left: 810px; width: 395px; height: 120px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 4px solid #FFC759; border-radius: 6px; z-index: 1;"></div>
+<!-- Design Philosophy Card 2 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 430px; left: 834px; width: 346px; height: 95px; z-index: 10;">
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #D49B25;">단일 장애 방지 (SPOF)</span>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 400; color: #1F2937; margin: 8px 0 0 0; line-height: 1.5; word-break: keep-all;">
+            특정 엣지 케이스 문서의 파싱 실패가 전체 배치 데이터 파이프라인의 중단으로 번지지 않도록 견고하게 차단
+        </p>
+</div>
+<!-- Design Philosophy Card 3 Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 545px; left: 810px; width: 395px; height: 125px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 4px solid #FF7B9C; border-radius: 6px; z-index: 1;"></div>
+<!-- Design Philosophy Card 3 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 560px; left: 834px; width: 346px; height: 100px; z-index: 10;">
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #FF7B9C;">정본 텍스트 보존</span>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 400; color: #1F2937; margin: 8px 0 0 0; line-height: 1.5; word-break: keep-all;">
+            한글 PUA 및 NBSP 공백 등 유니코드 깨짐을 선제적으로 정규화하여, 이후 진행될 노이즈 정제 작업의 신뢰성 기반 마련
+        </p>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 685px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Footer Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 695px; left: 80px; width: 500px; height: 20px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 400; color: #BABFD1; margin: 0;">
+            파싱/정제 모듈, 공공입찰 RFP 101건 전수 적용
+        </p>
+</div>
+<!-- Footer Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 695px; left: 700px; width: 500px; height: 20px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #607196; margin: 0;">
+            데이터 엔지니어링  ·  설계 원칙
+        </p>
+</div>
+</div>
+</body>
+</html>

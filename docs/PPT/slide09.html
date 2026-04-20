@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RFP 특수성 + 유니코드 이슈</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;family=Nanum+Gothic+Coding:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 400px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #607196; letter-spacing: 0.5px; margin: 0;">
+<span style="color: #FFC759; margin-right: 8px;">기술표</span>· 섹션 ②
+            </p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #607196; letter-spacing: 0.5px; margin: 0;">
+                슬라이드 9
+            </p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 105px; left: 80px; width: 880px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #1F2937; letter-spacing: -1.5px; margin: 0; line-height: 1.2;">
+                RFP 문서 특수성 + 유니코드 파괴 이슈
+            </p>
+</div>
+<!-- Placeholder Badge Background - Widened to prevent overflow -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 115px; left: 970px; width: 230px; height: 44px; background: #FFFDF5; border: 2px dashed #FFC759; border-radius: 22px; z-index: 1;"></div>
+<!-- Placeholder Badge Text - Centered and adjusted width -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 115px; left: 970px; width: 230px; height: 44px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #D49B25; margin: 0; line-height: 40px; text-align: center;">
+<i class="fa-solid fa-person-digging" style="margin-right: 6px;"></i> D-3 실측 갱신 예정
+            </p>
+</div>
+<!-- Left Area: Format Distribution Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 180px; left: 80px; width: 400px; height: 475px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 8px; z-index: 1;"></div>
+<!-- Left Area: Format Distribution Content -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 210px; left: 104px; width: 352px; height: 410px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 700; color: #1F2937; margin: 0 0 10px 0; text-align: center;">
+                포맷 분포 (총 분석 대상)
+            </p>
+<div style="text-align: center; margin-bottom: 25px;">
+<span style="font-family: 'Black Han Sans', sans-serif; font-size: 72px; color: #607196; line-height: 1;">101</span>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 20px; font-weight: 700; color: #607196;">건</span>
+</div>
+<!-- Stacked Bar Chart -->
+<div style="width: 100%; height: 24px; display: flex; border-radius: 12px; overflow: hidden; margin-bottom: 30px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+<div style="width: 95%; background: #607196; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-family: 'Nanum Gothic Coding', monospace; font-size: 12px; font-weight: 700;">HWP</div>
+<div style="width: 4%; background: #FFC759;"></div>
+<div style="width: 1%; background: #FF7B9C;"></div>
+</div>
+<!-- Legend / Table Details -->
+<div style="display: flex; flex-direction: column; gap: 15px;">
+<!-- HWP -->
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #FAFAFA; border: 1px solid #E8E9ED; border-radius: 6px;">
+<div style="display: flex; align-items: center; gap: 12px;">
+<div style="width: 12px; height: 12px; background: #607196; border-radius: 3px;"></div>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937;">HWP</span>
+</div>
+<div style="text-align: right;">
+<span style="font-family: 'Black Han Sans', sans-serif; font-size: 24px; color: #1F2937;">96</span>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #BABFD1; margin-left: 4px;">(95%)</span>
+</div>
+</div>
+<!-- PDF -->
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #FAFAFA; border: 1px solid #E8E9ED; border-radius: 6px;">
+<div style="display: flex; align-items: center; gap: 12px;">
+<div style="width: 12px; height: 12px; background: #FFC759; border-radius: 3px;"></div>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937;">PDF</span>
+</div>
+<div style="text-align: right;">
+<span style="font-family: 'Black Han Sans', sans-serif; font-size: 24px; color: #1F2937;">4</span>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #BABFD1; margin-left: 4px;">(4%)</span>
+</div>
+</div>
+<!-- DOCX -->
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #FAFAFA; border: 1px solid #E8E9ED; border-radius: 6px;">
+<div style="display: flex; align-items: center; gap: 12px;">
+<div style="width: 12px; height: 12px; background: #FF7B9C; border-radius: 3px;"></div>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937;">DOCX</span>
+</div>
+<div style="text-align: right;">
+<span style="font-family: 'Black Han Sans', sans-serif; font-size: 24px; color: #1F2937;">1</span>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #BABFD1; margin-left: 4px;">(1%)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Area: Card 1 (Table) Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 180px; left: 510px; width: 335px; height: 225px; background: #FFFFFF; border: 1px solid #E8E9ED; border-top: 4px solid #607196; border-radius: 6px; z-index: 1;"></div>
+<!-- Right Area: Card 1 Content -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 205px; left: 535px; width: 285px; height: 175px; z-index: 10;">
+<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+<div style="width: 40px; height: 40px; background: rgba(96, 113, 150, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+<i class="fa-solid fa-table-cells" style="font-size: 20px; color: #607196;"></i>
+</div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 700; color: #1F2937; margin: 0;">표 구조 해체</p>
+</div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 400; color: #607196; margin: 0; line-height: 1.6; word-break: keep-all;">
+                아래아한글 특유의 셀 병합, 다중 중첩 표 등 복잡한 물리적 구조가 일반 파서에서 추출 시 평면화되어 텍스트와 매핑 연결이 완전히 파괴됨.
+            </p>
+</div>
+<!-- Right Area: Card 2 (Columns) Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 180px; left: 865px; width: 335px; height: 225px; background: #FFFFFF; border: 1px solid #E8E9ED; border-top: 4px solid #607196; border-radius: 6px; z-index: 1;"></div>
+<!-- Right Area: Card 2 Content -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 205px; left: 890px; width: 285px; height: 175px; z-index: 10;">
+<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+<div style="width: 40px; height: 40px; background: rgba(96, 113, 150, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+<i class="fa-solid fa-columns" style="font-size: 20px; color: #607196;"></i>
+</div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 700; color: #1F2937; margin: 0;">다단 레이아웃 붕괴</p>
+</div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 400; color: #607196; margin: 0; line-height: 1.6; word-break: keep-all;">
+                2단 이상으로 나뉜 페이지를 시각적 흐름(좌측 단 전체 → 우측 단 전체)이 아닌, 단순 수평 좌표 기반으로 읽어 문장 순서가 심각하게 뒤섞임.
+            </p>
+</div>
+<!-- Right Area: Card 3 (TOC) Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 430px; left: 510px; width: 335px; height: 225px; background: #FFFFFF; border: 1px solid #E8E9ED; border-top: 4px solid #607196; border-radius: 6px; z-index: 1;"></div>
+<!-- Right Area: Card 3 Content -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 455px; left: 535px; width: 285px; height: 175px; z-index: 10;">
+<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+<div style="width: 40px; height: 40px; background: rgba(96, 113, 150, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+<i class="fa-solid fa-list-ol" style="font-size: 20px; color: #607196;"></i>
+</div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 700; color: #1F2937; margin: 0;">목차 계층 소실</p>
+</div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 400; color: #607196; margin: 0; line-height: 1.6; word-break: keep-all;">
+                문서의 논리적 뼈대인 <code>1. ➔ 가. ➔ 1) ➔ (1)</code> 등의 들여쓰기 계층 구조가 단순 텍스트로 평면화되어 청킹 시 문맥 상속 불가능.
+            </p>
+</div>
+<!-- Right Area: Card 4 (Unicode) Shape - Highlighted -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 430px; left: 865px; width: 335px; height: 225px; background: #FFFDF5; border: 1px solid #FFC759; border-top: 4px solid #FF7B9C; border-radius: 6px; z-index: 1;"></div>
+<!-- Right Area: Card 4 Content -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 455px; left: 890px; width: 285px; height: 175px; z-index: 10;">
+<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
+<div style="width: 40px; height: 40px; background: rgba(255, 123, 156, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+<i class="fa-solid fa-triangle-exclamation" style="font-size: 20px; color: #FF7B9C;"></i>
+</div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 700; color: #1F2937; margin: 0;">유니코드 깨짐 (PUA·NBSP)</p>
+</div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 400; color: #1F2937; margin: 0; line-height: 1.6; word-break: keep-all;">
+                아래아한글 고유의 <span style="font-weight: 700; color: #FF7B9C;">PUA(사용자 정의 영역) 문자</span>와 비표준 공백 기호가 다량 포함되어, 임베딩 시 형태소 오염 및 검색 누락 유발.
+            </p>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 685px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Footer Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 695px; left: 80px; width: 600px; height: 20px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 700; color: #FF7B9C; margin: 0;">
+<i class="fa-solid fa-circle-info" style="margin-right: 6px;"></i> 범용 PDF 추출기(PDFMiner 등)로는 4가지 파괴 유형 모두 해결 불가
+            </p>
+</div>
+<!-- Footer Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 695px; left: 600px; width: 600px; height: 20px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 500; color: #607196; margin: 0;">
+                RFP 포맷 특수성  ·  데이터 엔지니어링
+            </p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>3종 청킹 전략 벤치마크</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 400px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #607196; letter-spacing: 0.5px; margin: 0;">
+        기술표 · 청킹 전략
+    </p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #607196; letter-spacing: 0.5px; margin: 0;">
+        슬라이드 14
+    </p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 105px; left: 80px; width: 1120px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 40px; color: #1F2937; letter-spacing: -1px; margin: 0; line-height: 1.2;">
+        3종 청킹 전략 벤치마크
+    </p>
+</div>
+<!-- Highlight Column Shape (Paragraph) -->
+<!-- Width increased to 330px to prevent text clipping found in detection -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 180px; left: 475px; width: 330px; height: 382px; background: #FFF5F7; border: 1px solid #FF7B9C; border-left: 4px solid #FF7B9C; border-radius: 6px; z-index: 1; box-shadow: 0 4px 12px rgba(255, 123, 156, 0.08);"></div>
+<!-- Table Container -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 180px; left: 80px; width: 1120px; height: 382px; z-index: 10;">
+<!-- Grid columns adjusted to center the highlighted column over the shape -->
+<div style="display: grid; grid-template-columns: 140px 255px 330px 255px; grid-template-rows: 70px 70px 60px 60px 60px 60px; width: 1120px; height: 100%; font-family: 'Noto Sans KR', sans-serif; text-align: center; align-items: center;">
+<!-- Header Row -->
+<div></div>
+<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: #607196;">
+<i class="fas fa-align-justify" style="font-size: 20px; margin-bottom: 6px;"></i>
+<span style="font-size: 16px; font-weight: 700; color: #1F2937;">고정 크기 (Fixed)</span>
+</div>
+<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: #FF7B9C; position: relative;">
+<i class="fas fa-paragraph" style="font-size: 20px; margin-bottom: 6px;"></i>
+<span style="font-size: 16px; font-weight: 900; color: #1F2937;">단락 기반 (Paragraph)</span>
+<span style="position: absolute; top: 0px; right: 20px; background: #FFC759; color: #1F2937; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">채택안</span>
+</div>
+<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; color: #607196;">
+<i class="fas fa-project-diagram" style="font-size: 20px; margin-bottom: 6px;"></i>
+<span style="font-size: 16px; font-weight: 700; color: #1F2937;">Semantic Chunking</span>
+</div>
+<!-- Row 1: Parameter -->
+<div style="text-align: right; padding-right: 20px; font-size: 14px; font-weight: 700; color: #BABFD1; border-top: 1px solid #E8E9ED; display: flex; justify-content: flex-end; align-items: center; height: 100%;">파라미터</div>
+<div style="border-top: 1px solid #E8E9ED; font-size: 15px; color: #1F2937; font-weight: 500; display: flex; justify-content: center; align-items: center; height: 100%;">1024 tokens (overlap 200)</div>
+<div style="border-top: 1px solid rgba(255,123,156,0.3); font-size: 15px; color: #1F2937; font-weight: 700; display: flex; justify-content: center; align-items: center; height: 100%;">정규표현식 구분자 (\n\n 등)</div>
+<div style="border-top: 1px solid #E8E9ED; font-size: 15px; color: #1F2937; font-weight: 500; display: flex; justify-content: center; align-items: center; height: 100%;">의미 유사도 (cosine threshold)</div>
+<!-- Row 2: Pros -->
+<div style="text-align: right; padding-right: 20px; font-size: 14px; font-weight: 700; color: #BABFD1; border-top: 1px dashed #E8E9ED; display: flex; justify-content: flex-end; align-items: center; height: 100%;">장점</div>
+<div style="border-top: 1px dashed #E8E9ED; font-size: 14px; color: #607196; display: flex; justify-content: center; align-items: center; height: 100%;">구현 단순 / 연산 속도 매우 빠름</div>
+<div style="border-top: 1px dashed rgba(255,123,156,0.3); font-size: 14px; color: #1F2937; font-weight: 700; display: flex; justify-content: center; align-items: center; height: 100%;">원저자의 의도 보존 / 구조적 맥락 완벽</div>
+<div style="border-top: 1px dashed #E8E9ED; font-size: 14px; color: #607196; display: flex; justify-content: center; align-items: center; height: 100%;">의미적 완결성 단위 분할</div>
+<!-- Row 3: Cons -->
+<div style="text-align: right; padding-right: 20px; font-size: 14px; font-weight: 700; color: #BABFD1; border-top: 1px dashed #E8E9ED; display: flex; justify-content: flex-end; align-items: center; height: 100%;">단점</div>
+<div style="border-top: 1px dashed #E8E9ED; font-size: 14px; color: #FF7B9C; display: flex; justify-content: center; align-items: center; height: 100%;">문맥 중간 단절 / 의미 훼손 심각</div>
+<div style="border-top: 1px dashed rgba(255,123,156,0.3); font-size: 14px; color: #607196; display: flex; justify-content: center; align-items: center; height: 100%;">물리적 구분자 의존 (데이터 정제 필수)</div>
+<div style="border-top: 1px dashed #E8E9ED; font-size: 14px; color: #FF7B9C; display: flex; justify-content: center; align-items: center; height: 100%;">계산 비용 폭증 / 과도한 문장 병합 위험</div>
+<!-- Row 4: MRR -->
+<div style="text-align: right; padding-right: 20px; font-size: 14px; font-weight: 700; color: #BABFD1; border-top: 1px solid #E8E9ED; display: flex; justify-content: flex-end; align-items: center; height: 100%;">MRR</div>
+<div style="border-top: 1px solid #E8E9ED; font-size: 18px; color: #1F2937; font-weight: 700; display: flex; justify-content: center; align-items: center; height: 100%;">0.9578</div>
+<div style="border-top: 1px solid rgba(255,123,156,0.3); font-size: 20px; color: #1F2937; font-weight: 900; display: flex; justify-content: center; align-items: center; height: 100%;">0.9792</div>
+<div style="border-top: 1px solid #E8E9ED; font-size: 18px; color: #1F2937; font-weight: 700; display: flex; justify-content: center; align-items: center; height: 100%;">0.9792</div>
+<!-- Row 5: Faithfulness -->
+<div style="text-align: right; padding-right: 20px; font-size: 14px; font-weight: 700; color: #BABFD1; border-top: 1px dashed #E8E9ED; display: flex; justify-content: flex-end; align-items: center; height: 100%;">Faithfulness</div>
+<div style="border-top: 1px dashed #E8E9ED; font-size: 18px; color: #1F2937; font-weight: 700; display: flex; justify-content: center; align-items: center; height: 100%;">0.5823</div>
+<div style="border-top: 1px dashed rgba(255,123,156,0.3); font-size: 20px; color: #FF7B9C; font-weight: 900; display: flex; justify-content: center; align-items: center; height: 100%;">0.6906 <span style="font-size: 13px; color: #FFC759; margin-left: 6px;">★</span></div>
+<div style="border-top: 1px dashed #E8E9ED; font-size: 18px; color: #1F2937; font-weight: 700; display: flex; justify-content: center; align-items: center; height: 100%;">0.6719</div>
+</div>
+</div>
+<!-- Core Insight Banner Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 585px; left: 80px; width: 1120px; height: 80px; background: #F3F4F6; border-left: 4px solid #FF7B9C; border-radius: 4px; z-index: 1;"></div>
+<!-- Core Insight Banner Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 610px; left: 110px; width: 1060px; height: 30px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 500; color: #1F2937; margin: 0; line-height: 1.5;">
+<span style="font-weight: 900; color: #FF7B9C; margin-right: 12px;">Core Insight</span>
+<span style="font-weight: 700;">물리적 단락 구조 &gt; 의미 유사도</span> — RFP처럼 구조화된 문서에서는 원저자의 단락이 최적의 청크 경계다
+    </p>
+</div>
+<!-- Footer Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 685px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Footer Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 695px; left: 80px; width: 500px; height: 20px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 400; color: #BABFD1; margin: 0;">
+        bench-3905e4ce · 80문항 full · 2026-04-19
+    </p>
+</div>
+</div>
+</body>
+</html>

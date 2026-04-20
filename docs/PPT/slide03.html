@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>문제 제시 — 수작업 + 슬래시 커맨드 그리드</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;family=Nanum+Gothic+Coding:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 400px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #607196; letter-spacing: 0.5px; margin: 0;">
+            문제 · 섹션 ①
+        </p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #607196; letter-spacing: 0.5px; margin: 0;">
+            슬라이드 3
+        </p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 100px; left: 80px; width: 1120px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 52px; color: #1F2937; letter-spacing: -1.5px; margin: 0; line-height: 1.1;">
+            컨설턴트의 수작업 지옥
+        </p>
+</div>
+<!-- Left Column Background (Pain Points) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 190px; left: 80px; width: 480px; height: 380px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1; box-shadow: 0 2px 10px rgba(0,0,0,0.02);"></div>
+<!-- Left Column Text (Pain Points) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 220px; left: 110px; width: 420px; height: 320px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 700; color: #FF7B9C; margin: 0 0 30px 0;">
+            RFP 분석의 구조적 한계
+        </p>
+<div style="display: flex; flex-direction: column; gap: 32px;">
+<div style="display: flex; align-items: flex-start; gap: 16px;">
+<div style="width: 32px; height: 32px; background: #F3F4F6; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+<i class="fa-solid fa-file-pdf" style="color: #607196; font-size: 14px;"></i>
+</div>
+<div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0;">수백 페이지 방대한 분량</p>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #607196; margin: 0; line-height: 1.5;">HWP, PDF 등이 혼재된 비정형 데이터 더미</p>
+</div>
+</div>
+<div style="display: flex; align-items: flex-start; gap: 16px;">
+<div style="width: 32px; height: 32px; background: #F3F4F6; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+<i class="fa-solid fa-person-digging" style="color: #607196; font-size: 14px;"></i>
+</div>
+<div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0;">비효율적인 수작업 발췌</p>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #607196; margin: 0; line-height: 1.5;">컨설턴트가 일일이 읽고 요약·자격요건·평가기준·리스크를 파악해야 하는 고역</p>
+</div>
+</div>
+<div style="display: flex; align-items: flex-start; gap: 16px;">
+<div style="width: 32px; height: 32px; background: #F3F4F6; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+<i class="fa-solid fa-magnifying-glass-minus" style="color: #607196; font-size: 14px;"></i>
+</div>
+<div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0;">단순 키워드 검색의 한계</p>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #607196; margin: 0; line-height: 1.5;">Ctrl+F로는 문맥을 파악할 수 없어 잦은 누락 발생</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column Background (Slash Commands) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 190px; left: 580px; width: 620px; height: 380px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1; box-shadow: 0 2px 10px rgba(0,0,0,0.02);"></div>
+<!-- Right Column Text (Slash Commands Grid) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 220px; left: 610px; width: 560px; height: 320px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 700; color: #607196; margin: 0 0 25px 0;">
+            현장의 요구사항: 즉각적인 정보 접근
+        </p>
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+<!-- Row 1 -->
+<div style="background: #FAFAFA; border: 1px solid #E8E9ED; border-radius: 6px; padding: 12px 10px; display: flex; align-items: center; justify-content: center;">
+<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 20px; font-weight: 700; color: #1F2937;">/요약</span>
+</div>
+<div style="background: #FAFAFA; border: 1px solid #E8E9ED; border-radius: 6px; padding: 12px 10px; display: flex; align-items: center; justify-content: center;">
+<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 20px; font-weight: 700; color: #1F2937;">/예산</span>
+</div>
+<div style="background: #FAFAFA; border: 1px solid #E8E9ED; border-radius: 6px; padding: 12px 10px; display: flex; align-items: center; justify-content: center;">
+<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 20px; font-weight: 700; color: #1F2937;">/자격요건</span>
+</div>
+<!-- Row 2 -->
+<div style="background: #FAFAFA; border: 1px solid #E8E9ED; border-radius: 6px; padding: 12px 10px; display: flex; align-items: center; justify-content: center;">
+<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 20px; font-weight: 700; color: #1F2937;">/평가기준</span>
+</div>
+<div style="background: #FAFAFA; border: 1px solid #E8E9ED; border-radius: 6px; padding: 12px 10px; display: flex; align-items: center; justify-content: center;">
+<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 20px; font-weight: 700; color: #1F2937;">/리스크</span>
+</div>
+<div style="background: #FAFAFA; border: 1px solid #E8E9ED; border-radius: 6px; padding: 12px 10px; display: flex; align-items: center; justify-content: center;">
+<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 20px; font-weight: 700; color: #1F2937;">/일정</span>
+</div>
+<!-- Row 3 -->
+<div style="background: #FAFAFA; border: 1px solid #E8E9ED; border-radius: 6px; padding: 12px 10px; display: flex; align-items: center; justify-content: center;">
+<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 20px; font-weight: 700; color: #1F2937;">/제안방법</span>
+</div>
+<div style="background: #FAFAFA; border: 1px solid #E8E9ED; border-radius: 6px; padding: 12px 10px; display: flex; align-items: center; justify-content: center;">
+<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 20px; font-weight: 700; color: #1F2937;">/계약</span>
+</div>
+<div style="background: #FAFAFA; border: 1px solid #E8E9ED; border-radius: 6px; padding: 12px 10px; display: flex; align-items: center; justify-content: center;">
+<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 20px; font-weight: 700; color: #1F2937;">/납품</span>
+</div>
+<!-- Row 4 -->
+<div style="background: #FAFAFA; border: 1px solid #E8E9ED; border-radius: 6px; padding: 12px 10px; display: flex; align-items: center; justify-content: center;">
+<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 20px; font-weight: 700; color: #1F2937;">/산출물</span>
+</div>
+<div style="background: #FAFAFA; border: 1px solid #E8E9ED; border-radius: 6px; padding: 12px 10px; display: flex; align-items: center; justify-content: center;">
+<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 20px; font-weight: 700; color: #1F2937;">/참여인력</span>
+</div>
+<div style="background: #FAFAFA; border: 1px solid #E8E9ED; border-radius: 6px; padding: 12px 10px; display: flex; align-items: center; justify-content: center;">
+<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 20px; font-weight: 700; color: #1F2937;">/기타</span>
+</div>
+</div>
+</div>
+<!-- Bottom Banner Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 600px; left: 80px; width: 1120px; height: 75px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 5px solid #FF7B9C; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); z-index: 1;"></div>
+<!-- Bottom Banner Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 618px; left: 110px; width: 1060px; height: 40px; z-index: 10;">
+<div style="display: flex; align-items: center; gap: 16px;">
+<div style="width: 32px; height: 32px; background: #FFF1F2; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+<i class="fa-solid fa-bullseye" style="color: #FF7B9C; font-size: 16px;"></i>
+</div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 22px; font-weight: 700; color: #1F2937; margin: 0;">
+                프로젝트 목표 <span style="color: #BABFD1; margin: 0 12px; font-weight: 400;">|</span> 근거까지 명시하며 정확하게 답하는 RAG 시스템
+            </p>
+</div>
+</div>
+</div>
+</body>
+</html>

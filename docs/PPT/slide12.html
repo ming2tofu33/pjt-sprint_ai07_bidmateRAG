@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>데이터 클리닝 한 방에 청킹 차이가 사라졌다</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;display=swap" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 45px; left: 80px; width: 400px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #607196; letter-spacing: 0.5px; margin: 0;">
+<span style="color: #FF7B9C;">반전 포인트</span> · 데이터 엔지니어링
+    </p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 45px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #607196; letter-spacing: 0.5px; margin: 0;">
+        슬라이드 12
+    </p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 80px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 110px; left: 80px; width: 1120px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 52px; color: #1F2937; letter-spacing: -1.5px; margin: 0; line-height: 1;">
+        데이터 클리닝 한 방에 청킹 전략의 차이가 사라졌다
+    </p>
+</div>
+<!-- Hook Box Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 190px; left: 80px; width: 1120px; height: 90px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 4px solid #FF7B9C; border-radius: 4px; z-index: 1;"></div>
+<!-- Hook Box Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 202px; left: 104px; width: 1072px; height: 70px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 500; color: #1F2937; margin: 0; line-height: 1.6;">
+        "모델/청킹보다 <span style="color: #FF7B9C; font-weight: 700;">데이터 품질</span>이 RAG 성능의 핵심. <br/>
+        단 한 번의 데이터 클리닝으로 청킹 전략 4종의 차이가 사라짐"
+    </p>
+</div>
+<!-- Card 1 Shape (Chunk Count) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 300px; left: 80px; width: 300px; height: 165px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<!-- Card 1 Content -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 320px; left: 100px; width: 260px; height: 130px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #607196; margin: 0;">청크 수 변화</p>
+<div style="display: flex; align-items: center; gap: 12px; margin-top: 12px;">
+<span style="font-family: 'Black Han Sans', sans-serif; font-size: 56px; color: #1F2937; line-height: 1;">7,943</span>
+<span style="background: #FFC759; color: #1F2937; font-family: 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; padding: 4px 8px; border-radius: 4px;">+26%</span>
+</div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #BABFD1; margin: 10px 0 0 0;">6,310 → 7,943</p>
+</div>
+<!-- Card 2 Shape (Hit@5) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 485px; left: 80px; width: 300px; height: 165px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<!-- Card 2 Content -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 505px; left: 100px; width: 260px; height: 130px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #607196; margin: 0;">Hit@5</p>
+<div style="display: flex; align-items: center; gap: 12px; margin-top: 12px;">
+<span style="font-family: 'Black Han Sans', sans-serif; font-size: 56px; color: #1F2937; line-height: 1;">1.000</span>
+<span style="background: #FFC759; color: #1F2937; font-family: 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; padding: 4px 8px; border-radius: 4px;">+2.7%</span>
+</div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #BABFD1; margin: 10px 0 0 0;">0.9733 → 1.0000</p>
+</div>
+<!-- Chart Area Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 300px; left: 400px; width: 520px; height: 350px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<!-- Chart Area Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 320px; left: 424px; width: 472px; height: 30px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin: 0;">4지표 Before/After 비교</p>
+</div>
+<!-- Chart Canvas -->
+<div data-object="true" data-object-type="chart" style="position: absolute; top: 360px; left: 420px; width: 480px; height: 270px; z-index: 10;">
+<canvas id="beforeAfterChart"></canvas>
+</div>
+<!-- Card 3 Shape (Faithfulness) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 300px; left: 940px; width: 260px; height: 165px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<!-- Card 3 Content -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 315px; left: 960px; width: 220px; height: 135px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937;">Faithfulness</span>
+<span style="background: #FFC759; color: #1F2937; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; padding: 4px 8px; border-radius: 4px;">+8.1%</span>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed #E8E9ED;">
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; color: #BABFD1;">Before</span>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 500; color: #BABFD1;">0.6094</span>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #607196;">After</span>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 22px; font-weight: 900; color: #607196;">0.6906</span>
+</div>
+</div>
+<!-- Card 4 Shape (Answer Relevance) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 485px; left: 940px; width: 260px; height: 165px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<!-- Card 4 Content -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 500px; left: 960px; width: 220px; height: 135px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937;">Answer Relevance</span>
+<span style="background: #FFC759; color: #1F2937; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; padding: 4px 8px; border-radius: 4px;">+10.3%</span>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed #E8E9ED;">
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; color: #BABFD1;">Before</span>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 500; color: #BABFD1;">0.6344</span>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #607196;">After</span>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 22px; font-weight: 900; color: #607196;">0.7375</span>
+</div>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 670px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Footer Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 685px; left: 80px; width: 600px; height: 20px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 400; color: #BABFD1; margin: 0;">
+        bench-ab9d9247 vs bench-61048278  ·  시나리오 B, eval_batch_35, 80문항
+    </p>
+</div>
+<!-- Footer Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 685px; left: 600px; width: 600px; height: 20px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 500; color: #607196; margin: 0;">
+        데이터 품질이 청킹보다 지배적  ·  Apr 16
+    </p>
+</div>
+<script>
+    const ctx = document.getElementById('beforeAfterChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Hit@5', 'MRR', 'Faithfulness', 'Answer Rel.'],
+            datasets: [
+                {
+                    label: 'Before',
+                    data: [0.9733, 0.9578, 0.6094, 0.6344],
+                    backgroundColor: '#BABFD1',
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.6
+                },
+                {
+                    label: 'After',
+                    data: [1.0000, 0.9792, 0.6906, 0.7375],
+                    backgroundColor: '#607196',
+                    borderRadius: 4,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.6
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { 
+                    position: 'top',
+                    align: 'end',
+                    labels: {
+                        color: '#607196',
+                        font: { family: "'Noto Sans KR', sans-serif", size: 12 },
+                        boxWidth: 12,
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#1F2937',
+                    titleColor: '#FAFAFA',
+                    bodyColor: '#FAFAFA',
+                    padding: 10,
+                    cornerRadius: 6
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 1.1,
+                    grid: { color: '#E8E9ED', drawBorder: false },
+                    ticks: { color: '#9BA1A6', font: { family: "'Noto Sans KR', sans-serif", size: 11 } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#1F2937', font: { family: "'Noto Sans KR', sans-serif", size: 12, weight: 'bold' } }
+                }
+            }
+        }
+    });
+</script>
+</div>
+</body>
+</html>

@@ -82,9 +82,24 @@ def test_cross_encoder_rerank_sorts_by_score_and_trims() -> None:
     results = cross_encoder_rerank(reranker, "질문", chunks, top_k=2)
 
     assert [r.chunk.chunk_id for r in results] == ["c2", "c3"]
-    assert [r.score for r in results] == [0.4, 0.3]
+    # CE 점수가 score에 반영돼 후속 boost가 CE 기준으로 재정렬한다.
+    assert [r.score for r in results] == [0.9, 0.5]
     assert [r.rerank_score for r in results] == [0.9, 0.5]
     assert [r.rank for r in results] == [1, 2]
+
+
+def test_cross_encoder_rerank_keeps_full_pool_when_top_k_is_none() -> None:
+    chunks = [
+        _make_chunk("c1", 0.5),
+        _make_chunk("c2", 0.4),
+        _make_chunk("c3", 0.3),
+    ]
+    reranker = FakeReranker([0.1, 0.9, 0.5])
+
+    results = cross_encoder_rerank(reranker, "질문", chunks, top_k=None)
+
+    assert [r.chunk.chunk_id for r in results] == ["c2", "c3", "c1"]
+    assert [r.score for r in results] == [0.9, 0.5, 0.1]
 
 
 def test_cross_encoder_rerank_returns_as_is_when_no_reranker() -> None:

@@ -319,8 +319,12 @@ class RAGRetriever:
         )
 
     def _apply_experimental_rerank(self, query: str, results: list, top_k: int) -> list:
-        """선택적으로 유지 중인 실험용 Cross-Encoder 리랭킹 단계."""
-        return cross_encoder_rerank(self.reranker, query, results, top_k)
+        """Cross-Encoder 리랭킹. 풀 전체를 유지해 후속 boost가 CE 점수 기반으로
+        전체 후보에 대해 재정렬할 수 있도록 한다. 최종 top_k 트리밍은
+        retrieve() 말미의 ``reranked[:final_top_k]``에서 일괄 수행한다.
+        """
+        _ = top_k  # pool 전체 유지 — 트리밍은 파이프라인 마지막 단계에서만.
+        return cross_encoder_rerank(self.reranker, query, results, top_k=None)
 
     def retrieve(
         self,

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>어디까지 왔고, 어디로 가나</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 400px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #607196; letter-spacing: 0.5px; margin: 0;">
+                마무리 · 현재 상태 &amp; 로드맵
+            </p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #607196; letter-spacing: 0.5px; margin: 0;">
+                슬라이드 30
+            </p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 105px; left: 80px; width: 800px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 40px; color: #1F2937; letter-spacing: -1px; margin: 0; line-height: 1.2;">
+                어디까지 왔고, 어디로 가나
+            </p>
+</div>
+<!-- D-1 Update Badge -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 110px; left: 1020px; width: 180px; height: 36px; z-index: 10; text-align: right;">
+<span style="display: inline-block; font-family: 'Noto Sans KR', sans-serif; background: #FFC759; color: #1F2937; font-size: 15px; font-weight: 900; padding: 8px 16px; border-radius: 6px;">
+                🚧 D-1 갱신 예정
+            </span>
+</div>
+<!-- ===================================================================== -->
+<!-- Left Column: Current Bottleneck (Width: 540px, Left: 80px)             -->
+<!-- ===================================================================== -->
+<!-- Left Section Title Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 190px; left: 80px; width: 540px; height: 32px; border-left: 4px solid #FF7B9C; z-index: 1;"></div>
+<!-- Left Section Title Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 194px; left: 96px; width: 520px; height: 26px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 900; color: #1F2937; margin: 0;">현재 병목 · 시나리오 A/B 비교</p>
+</div>
+<!-- Comparison Table Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 240px; left: 80px; width: 542px; height: 252px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<!-- Comparison Table Header -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 240px; left: 81px; width: 540px; height: 40px; z-index: 10;">
+<div style="display: flex; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #607196; background: #F8F9FA; border-bottom: 1px solid #E8E9ED; border-radius: 6px 6px 0 0; padding: 10px 0;">
+<div style="width: 30%; text-align: center;">지표명</div>
+<div style="width: 35%; text-align: center;">시나리오 A</div>
+<div style="width: 35%; text-align: center;">시나리오 B</div>
+</div>
+</div>
+<!-- Comparison Table Row 1 -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 280px; left: 81px; width: 540px; height: 42px; z-index: 10;">
+<div style="display: flex; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; color: #1F2937; border-bottom: 1px solid #E8E9ED; padding: 11px 0;">
+<div style="width: 30%; text-align: center; font-weight: 700; color: #607196;">MRR</div>
+<div style="width: 35%; text-align: center; font-weight: 500;">0.95 - 1.00</div>
+<div style="width: 35%; text-align: center; font-weight: 500;">1.00</div>
+</div>
+</div>
+<!-- Comparison Table Row 2 -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 322px; left: 81px; width: 540px; height: 42px; z-index: 10;">
+<div style="display: flex; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; color: #1F2937; border-bottom: 1px solid #E8E9ED; padding: 11px 0;">
+<div style="width: 30%; text-align: center; font-weight: 700; color: #607196;">Faithfulness</div>
+<div style="width: 35%; text-align: center; font-weight: 500;">0.51 - 0.75</div>
+<div style="width: 35%; text-align: center; font-weight: 500;">0.81</div>
+</div>
+</div>
+<!-- Comparison Table Row 3 -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 364px; left: 81px; width: 540px; height: 42px; z-index: 10;">
+<div style="display: flex; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; color: #1F2937; border-bottom: 1px solid #E8E9ED; padding: 11px 0;">
+<div style="width: 30%; text-align: center; font-weight: 700; color: #607196;">Latency</div>
+<div style="width: 35%; text-align: center; font-weight: 500;">11.6s</div>
+<div style="width: 35%; text-align: center; font-weight: 500;">20.7s</div>
+</div>
+</div>
+<!-- Comparison Table Row 4 -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 406px; left: 81px; width: 540px; height: 42px; z-index: 10;">
+<div style="display: flex; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; color: #1F2937; border-bottom: 1px solid #E8E9ED; padding: 11px 0;">
+<div style="width: 30%; text-align: center; font-weight: 700; color: #607196;">Cost/query</div>
+<div style="width: 35%; text-align: center; font-weight: 500;">$0.0007</div>
+<div style="width: 35%; text-align: center; font-weight: 500;">$0.008</div>
+</div>
+</div>
+<!-- Comparison Table Row 5 (Highlight) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 448px; left: 81px; width: 540px; height: 43px; z-index: 10;">
+<div style="display: flex; font-family: 'Noto Sans KR', sans-serif; font-size: 15px; color: #1F2937; background: #FFF5F7; border-radius: 0 0 6px 6px; padding: 10px 0;">
+<div style="width: 30%; text-align: center; font-weight: 900; color: #FF7B9C;">현재 병목</div>
+<div style="width: 35%; text-align: center; font-weight: 700;">프롬프트 재설계</div>
+<div style="width: 35%; text-align: center; font-weight: 700;">문서·해석</div>
+</div>
+</div>
+<!-- Left Conclusion Box Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 510px; left: 80px; width: 542px; height: 50px; background: #FFFFFF; border: 1px solid #607196; border-radius: 6px; z-index: 1;"></div>
+<!-- Left Conclusion Box Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 524px; left: 91px; width: 520px; height: 22px; z-index: 10; text-align: center;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0;">시나리오별 병목이 다르다 — 공통 해법이 아닌 맞춤 해법 필요</p>
+</div>
+<!-- ===================================================================== -->
+<!-- Vertical Divider -->
+<!-- ===================================================================== -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 190px; left: 660px; width: 1px; height: 370px; background: #E8E9ED; z-index: 1;"></div>
+<!-- ===================================================================== -->
+<!-- Right Column: Roadmap (Width: 540px, Left: 700px)                      -->
+<!-- ===================================================================== -->
+<!-- Right Section Title Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 190px; left: 700px; width: 540px; height: 32px; border-left: 4px solid #FF7B9C; z-index: 1;"></div>
+<!-- Right Section Title Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 194px; left: 716px; width: 520px; height: 26px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 900; color: #1F2937; margin: 0;">로드맵 · 3단계 Phase</p>
+</div>
+<!-- Phase 1 Timeline Box Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 240px; left: 700px; width: 540px; height: 96px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 4px solid #FFC759; border-radius: 6px; box-shadow: 0 4px 6px rgba(255, 199, 89, 0.05); z-index: 1;"></div>
+<!-- Phase 1 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 250px; left: 720px; width: 500px; height: 80px; z-index: 10;">
+<div style="font-family: 'Noto Sans KR', sans-serif;">
+<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+<p style="font-size: 14px; font-weight: 900; color: #1F2937; margin: 0;">Phase 1 <span style="font-weight: 500; color: #BABFD1; margin-left: 4px;">(단기)</span></p>
+<span style="background: #FFC759; color: #1F2937; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">진행중</span>
+</div>
+<p style="font-size: 15px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0; line-height: 1.4;">프롬프트 20종 실험 · 컴포넌트 재설계 (P4-R, C2-R, F4-Lite, S3-R, T4-R)</p>
+<p style="font-size: 13px; font-weight: 500; color: #607196; margin: 0;">2026-04-20 ~ 04-30</p>
+</div>
+</div>
+<!-- Arrow 1-2 -->
+<div data-object="true" data-object-type="icon" style="position: absolute; top: 338px; left: 730px; width: 20px; height: 16px; z-index: 10; text-align: center;">
+<i class="fas fa-arrow-down" style="color: #BABFD1; font-size: 14px;"></i>
+</div>
+<!-- Phase 2 Timeline Box Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 356px; left: 700px; width: 540px; height: 88px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 4px solid #607196; border-radius: 6px; z-index: 1;"></div>
+<!-- Phase 2 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 366px; left: 720px; width: 500px; height: 70px; z-index: 10;">
+<div style="font-family: 'Noto Sans KR', sans-serif;">
+<p style="font-size: 14px; font-weight: 900; color: #1F2937; margin: 0 0 6px 0;">Phase 2 <span style="font-weight: 500; color: #BABFD1; margin-left: 4px;">(중기)</span></p>
+<p style="font-size: 15px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0; line-height: 1.3;">시나리오 A 80문항 full 벤치마크 · 영어 CoT 하이브리드 비교</p>
+<p style="font-size: 13px; font-weight: 500; color: #607196; margin: 0;">2026-05 ~ 06</p>
+</div>
+</div>
+<!-- Arrow 2-3 -->
+<div data-object="true" data-object-type="icon" style="position: absolute; top: 446px; left: 730px; width: 20px; height: 16px; z-index: 10; text-align: center;">
+<i class="fas fa-arrow-down" style="color: #BABFD1; font-size: 14px;"></i>
+</div>
+<!-- Phase 3 Timeline Box Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 464px; left: 700px; width: 540px; height: 88px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 4px solid #BABFD1; border-radius: 6px; z-index: 1;"></div>
+<!-- Phase 3 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 474px; left: 720px; width: 500px; height: 70px; z-index: 10;">
+<div style="font-family: 'Noto Sans KR', sans-serif;">
+<p style="font-size: 14px; font-weight: 900; color: #1F2937; margin: 0 0 6px 0;">Phase 3 <span style="font-weight: 500; color: #BABFD1; margin-left: 4px;">(장기)</span></p>
+<p style="font-size: 15px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0; line-height: 1.3;">도메인 특화 PEFT 파인튜닝 · Next.js UI 프로덕션 배포</p>
+<p style="font-size: 13px; font-weight: 500; color: #607196; margin: 0;">2026-07+</p>
+</div>
+</div>
+<!-- ===================================================================== -->
+<!-- Bottom Core Banner -->
+<!-- ===================================================================== -->
+<!-- Core Insight Banner Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 590px; left: 80px; width: 1120px; height: 70px; background: #EAECEF; border-left: 4px solid #FF7B9C; border-radius: 4px; z-index: 1;"></div>
+<!-- Core Insight Banner Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 613px; left: 110px; width: 1060px; height: 30px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 700; color: #1F2937; margin: 0;">
+<span style="font-weight: 900; color: #FF7B9C; margin-right: 12px;">Core Message</span>측정 → 분석 → 재설계의 사이클이 RAG 개선의 유일한 왕도
+            </p>
+</div>
+<!-- Footer Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 685px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Footer Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 695px; left: 80px; width: 600px; height: 20px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 400; color: #BABFD1; margin: 0;">
+                2026-04-19 현재 · D-1에 Phase 1 최신 실측으로 갱신 예정
+            </p>
+</div>
+</div>
+</body>
+</html>

@@ -722,7 +722,8 @@ def test_retriever_applies_cross_encoder_after_multi_agency_fan_out_merge() -> N
     ]
     assert [result.chunk.chunk_id for result in results] == ["ibs-1", "nps-2"]
     assert [result.rank for result in results] == [1, 2]
-    assert [result.score for result in results] == [0.97, 0.98]
+    # CE 점수가 score에 반영돼 boost가 CE 기준으로 재정렬한다.
+    assert [result.score for result in results] == [0.95, 0.9]
     assert [result.rerank_score for result in results] == [0.95, 0.9]
 
 

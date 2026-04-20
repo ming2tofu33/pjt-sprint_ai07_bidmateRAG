@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>지금 여기: 파싱·정제 (Visual Spine)</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 400px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #607196; letter-spacing: 0.5px; margin: 0;">
+            지금 여기 · 섹션 ②
+        </p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #607196; letter-spacing: 0.5px; margin: 0;">
+            슬라이드 8
+        </p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Main Hook Quote -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 180px; left: 80px; width: 1120px; height: 80px; text-align: center; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 56px; color: #1F2937; letter-spacing: -1.5px; margin: 0; line-height: 1.2;">
+<span style="color: #FF7B9C;">"</span> 쓰레기 들어가면 천장이 낮아진다 <span style="color: #FF7B9C;">"</span>
+</p>
+</div>
+<!-- Current Location Marker -->
+<!-- Fixed content overflow by increasing height from 40 to 45 -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 310px; left: 80px; width: 140px; height: 45px; text-align: center; z-index: 10;">
+<i class="fa-solid fa-location-dot" style="color: #FF7B9C; font-size: 18px; margin-bottom: 4px;"></i><br/>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #FF7B9C;">현재 위치</span>
+</div>
+<!-- Pipeline Step 1: Parsing (Highlighted) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 370px; left: 80px; width: 140px; height: 90px; background: #607196; border-radius: 8px; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 6px 12px rgba(96, 113, 150, 0.25);">
+<i class="fa-solid fa-file-code" style="color: #A7CCED; font-size: 22px; margin-bottom: 6px;"></i>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #FFFFFF; margin-bottom: 2px;">파싱·정제</span>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 11px; font-weight: 500; color: #E8E9ED;">Parsing &amp; Cleaning</span>
+</div>
+<!-- Arrow 1 -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 370px; left: 220px; width: 56px; height: 90px; z-index: 10; display: flex; align-items: center; justify-content: center;">
+<i class="fa-solid fa-chevron-right" style="color: #E8E9ED; font-size: 18px;"></i>
+</div>
+<!-- Pipeline Step 2: Chunking (Dimmed) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 370px; left: 276px; width: 140px; height: 90px; background: #FFFFFF; border: 2px solid #E8E9ED; border-radius: 8px; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+<i class="fa-solid fa-scissors" style="color: #BABFD1; font-size: 22px; margin-bottom: 6px;"></i>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #BABFD1; margin-bottom: 2px;">청킹</span>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 11px; font-weight: 500; color: #E8E9ED;">Chunking</span>
+</div>
+<!-- Arrow 2 -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 370px; left: 416px; width: 56px; height: 90px; z-index: 10; display: flex; align-items: center; justify-content: center;">
+<i class="fa-solid fa-chevron-right" style="color: #E8E9ED; font-size: 18px;"></i>
+</div>
+<!-- Pipeline Step 3: Embedding (Dimmed) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 370px; left: 472px; width: 140px; height: 90px; background: #FFFFFF; border: 2px solid #E8E9ED; border-radius: 8px; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+<i class="fa-solid fa-layer-group" style="color: #BABFD1; font-size: 22px; margin-bottom: 6px;"></i>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #BABFD1; margin-bottom: 2px;">임베딩</span>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 11px; font-weight: 500; color: #E8E9ED;">Embedding</span>
+</div>
+<!-- Arrow 3 -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 370px; left: 612px; width: 56px; height: 90px; z-index: 10; display: flex; align-items: center; justify-content: center;">
+<i class="fa-solid fa-chevron-right" style="color: #E8E9ED; font-size: 18px;"></i>
+</div>
+<!-- Pipeline Step 4: Retrieval (Dimmed) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 370px; left: 668px; width: 140px; height: 90px; background: #FFFFFF; border: 2px solid #E8E9ED; border-radius: 8px; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+<i class="fa-solid fa-magnifying-glass" style="color: #BABFD1; font-size: 22px; margin-bottom: 6px;"></i>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #BABFD1; margin-bottom: 2px;">검색</span>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 11px; font-weight: 500; color: #E8E9ED;">Retrieval</span>
+</div>
+<!-- Arrow 4 -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 370px; left: 808px; width: 56px; height: 90px; z-index: 10; display: flex; align-items: center; justify-content: center;">
+<i class="fa-solid fa-chevron-right" style="color: #E8E9ED; font-size: 18px;"></i>
+</div>
+<!-- Pipeline Step 5: Generation (Dimmed) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 370px; left: 864px; width: 140px; height: 90px; background: #FFFFFF; border: 2px solid #E8E9ED; border-radius: 8px; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+<i class="fa-solid fa-wand-magic-sparkles" style="color: #BABFD1; font-size: 22px; margin-bottom: 6px;"></i>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #BABFD1; margin-bottom: 2px;">생성</span>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 11px; font-weight: 500; color: #E8E9ED;">Generation</span>
+</div>
+<!-- Arrow 5 -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 370px; left: 1004px; width: 56px; height: 90px; z-index: 10; display: flex; align-items: center; justify-content: center;">
+<i class="fa-solid fa-chevron-right" style="color: #E8E9ED; font-size: 18px;"></i>
+</div>
+<!-- Pipeline Step 6: Evaluation (Dimmed) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 370px; left: 1060px; width: 140px; height: 90px; background: #FFFFFF; border: 2px solid #E8E9ED; border-radius: 8px; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+<i class="fa-solid fa-clipboard-check" style="color: #BABFD1; font-size: 22px; margin-bottom: 6px;"></i>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #BABFD1; margin-bottom: 2px;">평가</span>
+<span style="font-family: 'Noto Sans KR', sans-serif; font-size: 11px; font-weight: 500; color: #E8E9ED;">Evaluation</span>
+</div>
+<!-- Section Summary Cards (Repositioned to reduce tail strip and balanced height) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 520px; left: 80px; width: 1120px; height: 130px; z-index: 10;">
+<div style="display: flex; gap: 20px; height: 100%;">
+<div style="flex: 1; background: #FFFFFF; border: 1px solid #E8E9ED; border-top: 4px solid #607196; border-radius: 4px; padding: 20px 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+<div style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #607196; margin-bottom: 8px;">역할</div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 15px; color: #1F2937; margin: 0; line-height: 1.5; word-break: keep-all;">
+                    파이프라인의 가장 앞단 — 원본 문서에서 깨끗한 텍스트를 뽑아내는 첫 단계
+                </p>
+</div>
+<div style="flex: 1; background: #FFFFFF; border: 1px solid #E8E9ED; border-top: 4px solid #FFC759; border-radius: 4px; padding: 20px 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+<div style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #D49B25; margin-bottom: 8px;">리스크</div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 15px; color: #1F2937; margin: 0; line-height: 1.5; word-break: keep-all;">
+                    여기서 손실되거나 훼손된 정보는 뒤이은 어떤 단계에서도 절대 회복되지 않음
+                </p>
+</div>
+<div style="flex: 1; background: #FFFFFF; border: 1px solid #E8E9ED; border-top: 4px solid #FF7B9C; border-radius: 4px; padding: 20px 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+<div style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #FF7B9C; margin-bottom: 8px;">핵심 가치</div>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0; line-height: 1.5; word-break: keep-all;">
+                    결국 데이터 품질이 RAG 시스템 전체 성능의 상한선(천장)을 지배적으로 결정함
+                </p>
+</div>
+</div>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 685px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Footer Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 695px; left: 80px; width: 500px; height: 20px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 400; color: #BABFD1; margin: 0;">
+            Visual Spine 재등장
+        </p>
+</div>
+<!-- Footer Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 695px; left: 700px; width: 500px; height: 20px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #607196; margin: 0;">
+            데이터 엔지니어링 파트 시작
+        </p>
+</div>
+</div>
+</body>
+</html>

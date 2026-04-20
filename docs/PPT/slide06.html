@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Judge v2 드라마 &amp; 구조</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.1.0"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;display=swap" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 400px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #607196; letter-spacing: 0.5px; margin: 0;">
+<span style="color: #FF7B9C; margin-right: 8px;">★ 임팩트</span>· 섹션 ①
+            </p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #607196; letter-spacing: 0.5px; margin: 0;">
+                슬라이드 6
+            </p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 105px; left: 80px; width: 1120px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #1F2937; letter-spacing: -1.5px; margin: 0; line-height: 1.2;">
+                "MRR 0.000 → 1.000" Judge v2 드라마 &amp; 구조
+            </p>
+</div>
+<!-- Hook Box Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 180px; left: 80px; width: 1120px; height: 70px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 4px solid #FF7B9C; border-radius: 4px; z-index: 1;"></div>
+<!-- Hook Box Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 202px; left: 104px; width: 1072px; height: 35px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 20px; font-weight: 500; color: #1F2937; margin: 0; line-height: 1.5;">
+                "<span style="color: #FF7B9C; font-weight: 700;">측정 도구의 신뢰성</span>이 곧 성능 지표의 신뢰성 — 파이프라인이 아니라 측정 도구가 문제였다"
+            </p>
+</div>
+<!-- Left Shape (Chart Area) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 280px; left: 80px; width: 540px; height: 380px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<!-- Left Chart Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 300px; left: 104px; width: 490px; height: 30px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin: 0;">
+                MRR 시계열 변화 <span style="font-weight: 500; font-size: 13px; color: #BABFD1; margin-left: 8px;">(4회 연속 0.000 기록 후 정상화)</span>
+</p>
+</div>
+<!-- Left Chart Canvas -->
+<div data-object="true" data-object-type="chart" style="position: absolute; top: 340px; left: 104px; width: 490px; height: 280px; z-index: 10;">
+<canvas id="mrrTimelineChart"></canvas>
+</div>
+<!-- Right Shape (Table Area) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 280px; left: 650px; width: 550px; height: 380px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<!-- Right Table Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 300px; left: 675px; width: 500px; height: 30px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin: 0;">
+                v1 vs v2 구조 대비 <span style="font-weight: 500; font-size: 13px; color: #FF7B9C; margin-left: 8px;">투명한 5단계 비율제 도입</span>
+</p>
+</div>
+<!-- Right Table - Increased height to prevent overflow -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 350px; left: 675px; width: 500px; height: 300px; z-index: 10;">
+<table style="width: 100%; border-collapse: collapse; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; text-align: left;">
+<thead>
+<tr style="border-bottom: 2px solid #E8E9ED;">
+<th style="padding: 10px 8px; color: #607196; width: 20%;">항목</th>
+<th style="padding: 10px 8px; color: #BABFD1; width: 35%;">v1 (이전)</th>
+<th style="padding: 10px 8px; color: #1F2937; width: 45%;">v2 (채택)</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom: 1px solid #E8E9ED;">
+<td style="padding: 12px 8px; font-weight: 700; color: #1F2937;">채점 방식</td>
+<td style="padding: 12px 8px; color: #BABFD1; text-decoration: line-through;">LLM 주관 점수</td>
+<td style="padding: 12px 8px; font-weight: 700; color: #607196; background: rgba(96, 113, 150, 0.05);">코드 비율제 계산</td>
+</tr>
+<tr style="border-bottom: 1px solid #E8E9ED;">
+<td style="padding: 12px 8px; font-weight: 700; color: #1F2937;">지표</td>
+<td style="padding: 12px 8px; color: #BABFD1;">Pass / Fail</td>
+<td style="padding: 12px 8px; font-weight: 700; color: #607196; background: rgba(96, 113, 150, 0.05);">5대 ratio score</td>
+</tr>
+<tr style="border-bottom: 1px solid #E8E9ED;">
+<td style="padding: 12px 8px; font-weight: 700; color: #1F2937;">결과</td>
+<td style="padding: 12px 8px; color: #BABFD1;">4회 연속 MRR 0.000</td>
+<td style="padding: 12px 8px; font-weight: 900; color: #FFC759; background: rgba(255, 199, 89, 0.1);">즉시 MRR 1.000</td>
+</tr>
+<tr>
+<td style="padding: 12px 8px; font-weight: 700; color: #1F2937;">투명성</td>
+<td style="padding: 12px 8px; color: #BABFD1;">불가 (블랙박스)</td>
+<td style="padding: 12px 8px; font-weight: 700; color: #607196; background: rgba(96, 113, 150, 0.05);">채점 과정 로깅</td>
+</tr>
+</tbody>
+</table>
+<p style="font-size: 12px; color: #BABFD1; margin: 12px 0 0 0; line-height: 1.4;">
+                * v2 구조: LLM은 근거(Evidence)와 추론(Reasoning)만 추출하고,<br/>최종 점수는 정해진 규칙(0/0.25/0.5/0.75/1.0)에 따라 코드가 계산
+            </p>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 685px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Footer Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 695px; left: 80px; width: 800px; height: 20px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 400; color: #BABFD1; margin: 0; font-family: monospace;">
+                커밋 4867df2 <code>feat: add LLM judge v2 with evidence-based ratio scores</code>
+</p>
+</div>
+<script>
+            const ctx = document.getElementById('mrrTimelineChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Trial #1', 'Trial #2', 'Trial #3', 'Trial #4', 'v2 적용', '최종'],
+                    datasets: [{
+                        label: 'MRR',
+                        data: [0, 0, 0, 0, 1.0, 1.0],
+                        borderColor: (context) => {
+                            const index = context.dataIndex;
+                            return index >= 4 ? '#607196' : '#BABFD1';
+                        },
+                        segment: {
+                            borderColor: ctx => ctx.p1DataIndex >= 4 ? '#607196' : '#BABFD1',
+                            borderDash: ctx => ctx.p0DataIndex === 3 ? [5, 5] : undefined
+                        },
+                        backgroundColor: 'rgba(96, 113, 150, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: (context) => {
+                            const index = context.dataIndex;
+                            return index >= 4 ? '#FFC759' : '#BABFD1';
+                        },
+                        pointBorderColor: '#FFFFFF',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        fill: false,
+                        tension: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#FFFFFF',
+                            titleColor: '#1F2937',
+                            bodyColor: '#607196',
+                            borderColor: '#E8E9ED',
+                            borderWidth: 1,
+                            padding: 10,
+                            cornerRadius: 4,
+                            titleFont: { family: "'Noto Sans KR', sans-serif", size: 13, weight: 'bold' },
+                            bodyFont: { family: "'Noto Sans KR', sans-serif", size: 12 }
+                        },
+                        annotation: {
+                            annotations: {
+                                line1: {
+                                    type: 'line',
+                                    xMin: 3.5,
+                                    xMax: 3.5,
+                                    borderColor: '#FF7B9C',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        content: 'v2 전환',
+                                        display: true,
+                                        position: 'start',
+                                        color: '#FFFFFF',
+                                        backgroundColor: '#FF7B9C',
+                                        borderRadius: 4,
+                                        font: { family: "'Noto Sans KR', sans-serif", size: 11, weight: 'bold' }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1.2,
+                            grid: { color: '#E8E9ED', drawBorder: false },
+                            ticks: { 
+                                color: '#BABFD1', 
+                                font: { family: "'Noto Sans KR', sans-serif", size: 11 },
+                                stepSize: 0.2
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { 
+                                color: '#1F2937', 
+                                font: { family: "'Noto Sans KR', sans-serif", size: 12, weight: 'bold' }, 
+                                padding: 10 
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+</div>
+</body>
+</html>

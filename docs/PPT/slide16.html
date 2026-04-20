@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dense vs Hybrid 임베딩 실험 플로우차트</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 400px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #607196; letter-spacing: 0.5px; margin: 0;">
+        기술표 · 임베딩 실험
+    </p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #607196; letter-spacing: 0.5px; margin: 0;">
+        슬라이드 16
+    </p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 105px; left: 80px; width: 680px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #1F2937; letter-spacing: -1.5px; margin: 0; line-height: 60px;">
+        Dense 단독 채택, 왜?
+    </p>
+</div>
+<!-- Conclusion Box Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 105px; left: 780px; width: 420px; height: 60px; background: #F3F4F6; border: 1px solid #BABFD1; border-radius: 6px; z-index: 1;"></div>
+<!-- Conclusion Box Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 115px; left: 800px; width: 380px; height: 42px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0; line-height: 1.4; text-align: center;">
+        "한국어 특화 Dense 임베딩이 이미 충분<br/>
+<span style="color: #FF7B9C;">Sparse는 RFP에서 오히려 노이즈</span>"
+    </p>
+</div>
+<!-- Step 1 (가설) Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 205px; left: 240px; width: 800px; height: 75px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 6px solid #607196; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); z-index: 1;"></div>
+<!-- Step 1 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 218px; left: 265px; width: 750px; height: 50px; z-index: 10;">
+<div style="display: flex; align-items: center; font-family: 'Noto Sans KR', sans-serif;">
+<div style="width: 80px; font-size: 16px; font-weight: 900; color: #607196;">① 가설</div>
+<div style="flex: 1;">
+<p style="font-size: 18px; font-weight: 700; color: #1F2937; margin: 0 0 2px 0;">BM25 하이브리드가 도메인 용어에 강할 것</p>
+<p style="font-size: 13px; font-weight: 500; color: #BABFD1; margin: 0;">전제: RFP에 전문 용어 다수 포진</p>
+</div>
+</div>
+</div>
+<!-- Arrow 1 -->
+<div data-object="true" data-object-type="icon" style="position: absolute; top: 280px; left: 630px; width: 20px; height: 25px; z-index: 10; text-align: center;">
+<i class="fas fa-arrow-down" style="color: #BABFD1; font-size: 16px; line-height: 25px;"></i>
+</div>
+<!-- Step 2 (실험) Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 305px; left: 240px; width: 800px; height: 75px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 6px solid #607196; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); z-index: 1;"></div>
+<!-- Step 2 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 318px; left: 265px; width: 750px; height: 50px; z-index: 10;">
+<div style="display: flex; align-items: center; font-family: 'Noto Sans KR', sans-serif;">
+<div style="width: 80px; font-size: 16px; font-weight: 900; color: #607196;">② 실험</div>
+<div style="flex: 1;">
+<p style="font-size: 18px; font-weight: 700; color: #1F2937; margin: 0 0 2px 0;">임베딩 3종 실측 비교 — KURE-v1 / KURE-v1+BM25 / BGE-M3</p>
+<p style="font-size: 13px; font-weight: 500; color: #BABFD1; margin: 0;">80문항 full · Top-5 · 동일 청킹 적용</p>
+</div>
+</div>
+</div>
+<!-- Arrow 2 -->
+<div data-object="true" data-object-type="icon" style="position: absolute; top: 380px; left: 630px; width: 20px; height: 25px; z-index: 10; text-align: center;">
+<i class="fas fa-arrow-down" style="color: #BABFD1; font-size: 16px; line-height: 25px;"></i>
+</div>
+<!-- Step 3 (결과) Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 405px; left: 240px; width: 800px; height: 160px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 6px solid #607196; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); z-index: 1;"></div>
+<!-- Step 3 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 415px; left: 265px; width: 750px; height: 140px; z-index: 10;">
+<div style="display: flex; align-items: flex-start; font-family: 'Noto Sans KR', sans-serif; height: 100%;">
+<div style="width: 80px; font-size: 16px; font-weight: 900; color: #607196; padding-top: 5px;">③ 결과</div>
+<div style="flex: 1; display: flex; flex-direction: column;">
+<table style="width: 100%; border-collapse: collapse; font-size: 14px; text-align: left;">
+<thead>
+<tr style="border-bottom: 2px solid #E8E9ED; color: #607196;">
+<th style="padding: 4px 8px; font-weight: 700; width: 40%;">모델</th>
+<th style="padding: 4px 8px; font-weight: 700; width: 30%;">MRR</th>
+<th style="padding: 4px 8px; font-weight: 700; width: 30%;">Faithfulness</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom: 1px solid #F3F4F6;">
+<td style="padding: 8px 8px; font-weight: 700; color: #1F2937;">KURE-v1 단독</td>
+<td style="padding: 8px 8px; font-weight: 700; color: #1F2937;">0.9733</td>
+<td style="padding: 8px 8px; font-weight: 700; color: #1F2937;">0.6094</td>
+</tr>
+<tr style="border-bottom: 1px solid #F3F4F6;">
+<td style="padding: 8px 8px; color: #607196;">KURE-v1 + BM25</td>
+<td style="padding: 8px 8px; color: #607196;">0.9708 <span style="font-size: 12px; color: #FF7B9C;">(↓ 미미)</span></td>
+<td style="padding: 8px 8px; color: #607196;">0.6012</td>
+</tr>
+<tr>
+<td style="padding: 8px 8px; color: #BABFD1;">BGE-M3</td>
+<td style="padding: 8px 8px; color: #BABFD1;">0.9542</td>
+<td style="padding: 8px 8px; color: #BABFD1;">0.5823</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Arrow 3 -->
+<div data-object="true" data-object-type="icon" style="position: absolute; top: 565px; left: 630px; width: 20px; height: 25px; z-index: 10; text-align: center;">
+<i class="fas fa-arrow-down" style="color: #BABFD1; font-size: 16px; line-height: 25px;"></i>
+</div>
+<!-- Step 4 (채택) Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 590px; left: 240px; width: 800px; height: 80px; background: #FFF5F7; border: 1px solid #FF7B9C; border-left: 6px solid #FF7B9C; border-radius: 6px; box-shadow: 0 4px 6px rgba(255,123,156,0.1); z-index: 1;"></div>
+<!-- Step 4 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 605px; left: 265px; width: 750px; height: 50px; z-index: 10;">
+<div style="display: flex; align-items: center; font-family: 'Noto Sans KR', sans-serif;">
+<div style="width: 80px; font-size: 16px; font-weight: 900; color: #FF7B9C;">④ 결론</div>
+<div style="flex: 1; display: flex; align-items: center; gap: 12px;">
+<span style="background: #FFC759; color: #1F2937; font-size: 14px; font-weight: 700; padding: 4px 10px; border-radius: 4px;">채택</span>
+<div>
+<p style="font-size: 18px; font-weight: 700; color: #1F2937; margin: 0 0 2px 0;">KURE-v1 단독</p>
+<p style="font-size: 14px; font-weight: 500; color: #607196; margin: 0;">하이브리드 이득 미미, 파이프라인 복잡도만 증가</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 685px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Footer Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 695px; left: 80px; width: 600px; height: 20px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 400; color: #BABFD1; margin: 0;">
+        emb_bench_0416.csv · KURE-v1 8191 dim
+    </p>
+</div>
+<!-- Footer Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 695px; left: 680px; width: 520px; height: 20px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #607196; margin: 0;">
+        기술표 · 임베딩 실험
+    </p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MRR 0.50 → 1.00, 단계별 누적 상승</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;display=swap" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 400px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #607196; letter-spacing: 0.5px; margin: 0;">
+<span style="color: #FF7B9C;">★ 임팩트</span> · 청킹 · 메타데이터
+        </p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #607196; letter-spacing: 0.5px; margin: 0;">
+            슬라이드 15
+        </p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 105px; left: 80px; width: 1120px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #1F2937; letter-spacing: -1.5px; margin: 0; line-height: 1.2;">
+            MRR 0.50 → 1.00, 단계별 누적 상승
+        </p>
+</div>
+<!-- Hook Box Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 180px; left: 80px; width: 1120px; height: 70px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 4px solid #FF7B9C; border-radius: 4px; z-index: 1;"></div>
+<!-- Hook Box Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 202px; left: 104px; width: 1072px; height: 35px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 20px; font-weight: 500; color: #1F2937; margin: 0; line-height: 1.5;">
+            "<span style="color: #FF7B9C; font-weight: 700;">데이터 품질 + 단락 청킹 + 메타데이터 필터</span>의 3단 콤보"
+        </p>
+</div>
+<!-- Chart Area Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 280px; left: 80px; width: 740px; height: 380px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<!-- Chart Canvas -->
+<div data-object="true" data-object-type="chart" style="position: absolute; top: 310px; left: 100px; width: 700px; height: 320px; z-index: 10;">
+<canvas id="mrrCumulativeChart"></canvas>
+</div>
+<!-- HTML Badge on Chart for final bar: Increased height to fix overflow detected -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 300px; left: 635px; width: 140px; height: 40px; text-align: center; z-index: 20;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #1F2937; background: #FFC759; margin: 0; padding: 6px 12px; border-radius: 20px; display: inline-block; box-shadow: 0 4px 6px rgba(255, 199, 89, 0.3);">
+            +0.50 (100% ↑)
+        </p>
+</div>
+<!-- Insight Card 1 Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 280px; left: 860px; width: 340px; height: 110px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 4px solid #BABFD1; border-radius: 6px; z-index: 1;"></div>
+<!-- Insight Card 1 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 300px; left: 884px; width: 296px; height: 70px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; font-family: 'Noto Sans KR', sans-serif;">
+<div style="flex: 1;">
+<p style="font-size: 14px; font-weight: 700; color: #BABFD1; margin: 0 0 6px 0;">① 베이스라인 → 데이터 정제</p>
+<p style="font-size: 16px; font-weight: 700; color: #1F2937; margin: 0;">가장 큰 한 방</p>
+</div>
+<div style="text-align: right; min-width: 60px;">
+<p style="font-size: 24px; font-weight: 900; color: #607196; margin: 0;">+0.28</p>
+</div>
+</div>
+</div>
+<!-- Insight Card 2 Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 415px; left: 860px; width: 340px; height: 110px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 4px solid #8B99B6; border-radius: 6px; z-index: 1;"></div>
+<!-- Insight Card 2 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 435px; left: 884px; width: 296px; height: 70px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; font-family: 'Noto Sans KR', sans-serif;">
+<div style="flex: 1;">
+<p style="font-size: 14px; font-weight: 700; color: #8B99B6; margin: 0 0 6px 0;">② 데이터 정제 → 단락 청킹</p>
+<p style="font-size: 16px; font-weight: 700; color: #1F2937; margin: 0;">예상외의 기여</p>
+</div>
+<div style="text-align: right; min-width: 60px;">
+<p style="font-size: 24px; font-weight: 900; color: #607196; margin: 0;">+0.14</p>
+</div>
+</div>
+</div>
+<!-- Insight Card 3 Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 550px; left: 860px; width: 340px; height: 110px; background: #FFFDF5; border: 1px solid #FFC759; border-left: 4px solid #FFC759; border-radius: 6px; z-index: 1;"></div>
+<!-- Insight Card 3 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 570px; left: 884px; width: 296px; height: 70px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; font-family: 'Noto Sans KR', sans-serif;">
+<div style="flex: 1;">
+<p style="font-size: 14px; font-weight: 700; color: #D49B25; margin: 0 0 6px 0;">③ 단락 청킹 → 메타데이터</p>
+<p style="font-size: 16px; font-weight: 700; color: #1F2937; margin: 0;">최종 1.00 달성 (완성)</p>
+</div>
+<div style="text-align: right; min-width: 60px;">
+<p style="font-size: 24px; font-weight: 900; color: #FFC759; margin: 0;">+0.08</p>
+</div>
+</div>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 685px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Footer Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 695px; left: 80px; width: 500px; height: 20px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 400; color: #BABFD1; margin: 0;">
+            bench-3905e4ce · Scenario B · 2026-04-19
+        </p>
+</div>
+<!-- Footer Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 695px; left: 700px; width: 500px; height: 20px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #607196; margin: 0;">
+            단계별 누적 상승 추이
+        </p>
+</div>
+<script>
+        const ctx = document.getElementById('mrrCumulativeChart').getContext('2d');
+        
+        const dataLabelsPlugin = {
+            id: 'dataLabels',
+            afterDatasetsDraw(chart, args, pluginOptions) {
+                const { ctx, data } = chart;
+                ctx.save();
+                ctx.font = "bold 16px 'Noto Sans KR', sans-serif";
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                
+                chart.getDatasetMeta(0).data.forEach((bar, index) => {
+                    const value = data.datasets[0].data[index];
+                    ctx.fillStyle = index === 3 ? '#FFC759' : '#607196'; 
+                    ctx.fillText(value.toFixed(2), bar.x, bar.y - 10);
+                });
+                ctx.restore();
+            }
+        };
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['베이스라인', '+데이터 정제', '+단락 청킹', '+메타데이터 필터'],
+                datasets: [{
+                    label: 'MRR',
+                    data: [0.50, 0.78, 0.92, 1.00],
+                    backgroundColor: [
+                        '#BABFD1', 
+                        '#8B99B6', 
+                        '#607196', 
+                        '#FFC759'  
+                    ],
+                    borderRadius: 6,
+                    barPercentage: 0.5,
+                    categoryPercentage: 0.8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: { top: 30 }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: true
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 1.1,
+                        grid: { color: '#E8E9ED', drawBorder: false },
+                        ticks: { 
+                            color: '#9BA1A6', 
+                            font: { family: "'Noto Sans KR', sans-serif", size: 12 },
+                            stepSize: 0.2
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { 
+                            color: '#1F2937', 
+                            font: { family: "'Noto Sans KR', sans-serif", size: 14, weight: 'bold' },
+                            padding: 10
+                        }
+                    }
+                }
+            },
+            plugins: [dataLabelsPlugin]
+        });
+    </script>
+</div>
+</body>
+</html>

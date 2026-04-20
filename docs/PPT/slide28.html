@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>베이스라인 대비 전체 개선 임팩트</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 400px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #607196; letter-spacing: 0.5px; margin: 0;">
+<span style="color: #FF7B9C;">★ 임팩트</span> · 전체 개선 요약
+    </p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #607196; letter-spacing: 0.5px; margin: 0;">
+        슬라이드 28
+    </p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 105px; left: 80px; width: 1120px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #1F2937; letter-spacing: -1.5px; margin: 0; line-height: 1.2;">
+        베이스라인 대비 전체 개선 임팩트
+    </p>
+</div>
+<!-- Hook Box Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 180px; left: 80px; width: 1120px; height: 70px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 4px solid #FF7B9C; border-radius: 4px; z-index: 1;"></div>
+<!-- Hook Box Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 202px; left: 104px; width: 1072px; height: 35px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 20px; font-weight: 500; color: #1F2937; margin: 0; line-height: 1.5;">
+        "<span style="color: #FF7B9C; font-weight: 700;">4개 지표 모두 목표치 돌파 또는 근접 — 측정 가능한 성장</span>"
+    </p>
+</div>
+<!-- ==================== Chart 1: MRR ==================== -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 275px; left: 80px; width: 540px; height: 160px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 290px; left: 100px; width: 500px; height: 30px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; align-items: center; font-family: 'Noto Sans KR', sans-serif;">
+<span style="font-size: 16px; font-weight: 900; color: #1F2937;">MRR (검색 정확도)</span>
+<span style="background: #FFC759; color: #1F2937; font-size: 13px; font-weight: 700; padding: 4px 8px; border-radius: 4px;">+100% (2배) ↑</span>
+</div>
+</div>
+<div data-object="true" data-object-type="chart" style="position: absolute; top: 330px; left: 100px; width: 500px; height: 90px; z-index: 10;">
+<canvas id="chart1"></canvas>
+</div>
+<!-- ==================== Chart 2: Faithfulness ==================== -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 275px; left: 660px; width: 540px; height: 160px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 290px; left: 680px; width: 500px; height: 30px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; align-items: center; font-family: 'Noto Sans KR', sans-serif;">
+<span style="font-size: 16px; font-weight: 900; color: #1F2937;">Faithfulness (환각 방어)</span>
+<span style="background: #FFC759; color: #1F2937; font-size: 13px; font-weight: 700; padding: 4px 8px; border-radius: 4px;">+35% ↑</span>
+</div>
+</div>
+<div data-object="true" data-object-type="chart" style="position: absolute; top: 330px; left: 680px; width: 500px; height: 90px; z-index: 10;">
+<canvas id="chart2"></canvas>
+</div>
+<!-- ==================== Chart 3: Latency ==================== -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 450px; left: 80px; width: 540px; height: 160px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 465px; left: 100px; width: 500px; height: 30px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; align-items: center; font-family: 'Noto Sans KR', sans-serif;">
+<span style="font-size: 16px; font-weight: 900; color: #1F2937;">Latency (지연 시간)</span>
+<span style="background: #FFC759; color: #1F2937; font-size: 13px; font-weight: 700; padding: 4px 8px; border-radius: 4px;"><i class="fas fa-arrow-down" style="margin-right: 4px;"></i>-62% (개선)</span>
+</div>
+</div>
+<div data-object="true" data-object-type="chart" style="position: absolute; top: 505px; left: 100px; width: 500px; height: 90px; z-index: 10;">
+<canvas id="chart3"></canvas>
+</div>
+<!-- ==================== Chart 4: Cost ==================== -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 450px; left: 660px; width: 540px; height: 160px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 465px; left: 680px; width: 500px; height: 30px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; align-items: center; font-family: 'Noto Sans KR', sans-serif;">
+<span style="font-size: 16px; font-weight: 900; color: #1F2937;">Cost (비용)</span>
+<span style="background: #FFC759; color: #1F2937; font-size: 13px; font-weight: 700; padding: 4px 8px; border-radius: 4px;"><i class="fas fa-arrow-down" style="margin-right: 4px;"></i>-87% (개선)</span>
+</div>
+</div>
+<div data-object="true" data-object-type="chart" style="position: absolute; top: 505px; left: 680px; width: 500px; height: 90px; z-index: 10;">
+<canvas id="chart4"></canvas>
+</div>
+<!-- Core Banner -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 625px; left: 80px; width: 1120px; height: 50px; background: #EAECEF; border-left: 4px solid #FF7B9C; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 640px; left: 100px; width: 1080px; height: 25px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin: 0; text-align: center;">
+        14일 동안 검색 정확도 2배, 환각 방어 35% 향상, 지연 62% 단축, 비용 87% 절감 — 측정 가능한 모든 축에서 개선
+    </p>
+</div>
+<!-- Footer Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 685px; left: 80px; width: 600px; height: 20px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 400; color: #BABFD1; margin: 0;">
+        D-14 baseline vs D-1 final · bench-3905e4ce · 80문항 full
+    </p>
+</div>
+<script>
+    const commonOptions = {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false }
+        },
+        scales: {
+            x: { display: false, beginAtZero: true },
+            y: { 
+                grid: { display: false },
+                border: { display: false },
+                ticks: { color: '#1F2937', font: { family: "'Noto Sans KR', sans-serif", size: 14, weight: 'bold' } }
+            }
+        },
+        layout: { padding: { right: 80 } },
+        animation: {
+            onComplete: function() {
+                var ctx = this.ctx;
+                ctx.font = "bold 14px 'Noto Sans KR'";
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                
+                this.data.datasets.forEach(function(dataset, i) {
+                    var meta = this.getDatasetMeta(i);
+                    meta.data.forEach(function(bar, index) {
+                        var data = dataset.data[index];
+                        var valueStr = data.toString();
+                        if (dataset.label === 'Latency') valueStr += 's';
+                        if (dataset.label === 'Cost') valueStr = '$' + valueStr;
+                        
+                        // Rule: Before is #BABFD1, After for MRR/Faith/Lat is #607196, After for Cost is #FFC759
+                        if (index === 0) {
+                            ctx.fillStyle = '#BABFD1';
+                        } else {
+                            ctx.fillStyle = (dataset.label === 'Cost') ? '#FFC759' : '#607196';
+                        }
+                        
+                        ctx.fillText(valueStr, bar.x + 10, bar.y);
+                    });
+                }, this);
+            }
+        }
+    };
+
+    new Chart(document.getElementById('chart1').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Before', 'After'],
+            datasets: [{
+                label: 'MRR',
+                data: [0.5, 1],
+                backgroundColor: ['#BABFD1', '#607196'],
+                borderRadius: 4,
+                barThickness: 18
+            }]
+        },
+        options: { ...commonOptions, scales: { ...commonOptions.scales, x: { display: false, max: 1.1 } } }
+    });
+
+    new Chart(document.getElementById('chart2').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Before', 'After'],
+            datasets: [{
+                label: 'Faithfulness',
+                data: [0.6, 0.81],
+                backgroundColor: ['#BABFD1', '#607196'],
+                borderRadius: 4,
+                barThickness: 18
+            }]
+        },
+        options: { ...commonOptions, scales: { ...commonOptions.scales, x: { display: false, max: 0.95 } } }
+    });
+
+    new Chart(document.getElementById('chart3').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Before', 'After'],
+            datasets: [{
+                label: 'Latency',
+                data: [54.2, 20.7],
+                backgroundColor: ['#BABFD1', '#607196'],
+                borderRadius: 4,
+                barThickness: 18
+            }]
+        },
+        options: { ...commonOptions, scales: { ...commonOptions.scales, x: { display: false, max: 62 } } }
+    });
+
+    new Chart(document.getElementById('chart4').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Before', 'After'],
+            datasets: [{
+                label: 'Cost',
+                data: [0.063, 0.008],
+                backgroundColor: ['#BABFD1', '#FFC759'],
+                borderRadius: 4,
+                barThickness: 18
+            }]
+        },
+        options: { ...commonOptions, scales: { ...commonOptions.scales, x: { display: false, max: 0.075 } } }
+    });
+</script>
+</div>
+</body>
+</html>

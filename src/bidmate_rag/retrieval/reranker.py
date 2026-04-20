@@ -88,18 +88,26 @@ def build_reranker_text(result) -> str:
     return result.chunk.text
 
 
-def cross_encoder_rerank(reranker, query: str, results: list, top_k: int) -> list:
+def cross_encoder_rerank(
+    reranker, query: str, results: list, top_k: int | None = None
+) -> list:
     """Cross-Encoder 모델로 질문-청크 쌍의 관련성을 판단하여 재정렬한다.
 
     Args:
         reranker: Cross-Encoder 모델 인스턴스.
         query: 사용자 질의 문자열.
         results: 벡터 검색으로 가져온 후보 청크 리스트.
-        top_k: 최종 반환할 청크 수.
+        top_k: 유지할 청크 수. None이면 풀 전체를 유지해 downstream boost가
+            전체 후보에 대해 재정렬하도록 한다.
 
     Returns:
-        관련성 높은 순으로 정렬된 상위 top_k개 RetrievedChunk 리스트.
+        관련성 높은 순으로 정렬된 RetrievedChunk 리스트.
         reranker가 None이면 입력 그대로 반환.
+
+    Note:
+        CE 점수를 ``result.score``와 ``result.rerank_score`` 양쪽에 기록한다.
+        이후 ``rerank_with_boost``가 CE 점수에 섹션/테이블 가산점을 더해
+        일관된 기준으로 재정렬하기 위함이다.
     """
     if not reranker or not results:
         return results
@@ -108,9 +116,12 @@ def cross_encoder_rerank(reranker, query: str, results: list, top_k: int) -> lis
     scores = reranker.predict(pairs)
 
     scored = sorted(zip(results, scores), key=lambda x: x[1], reverse=True)
+    limit = len(scored) if top_k is None else top_k
     reranked = []
-    for rank, (result, ce_score) in enumerate(scored[:top_k], start=1):
-        result.rerank_score = float(ce_score)
+    for rank, (result, ce_score) in enumerate(scored[:limit], start=1):
+        ce_value = float(ce_score)
+        result.rerank_score = ce_value
+        result.score = ce_value
         result.rank = rank
         reranked.append(result)
 

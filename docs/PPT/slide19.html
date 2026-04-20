@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>2단계 검색 아키텍처</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 400px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #607196; letter-spacing: 0.5px; margin: 0;">
+        기술 아키텍처 · 검색 전략
+    </p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #607196; letter-spacing: 0.5px; margin: 0;">
+        슬라이드 19
+    </p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 105px; left: 80px; width: 350px; height: 50px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 40px; color: #1F2937; letter-spacing: -1.5px; margin: 0; line-height: 1.2;">
+        2단계 검색 아키텍처
+    </p>
+</div>
+<!-- Sub Headline -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 115px; left: 450px; width: 500px; height: 30px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 20px; font-weight: 700; color: #FF7B9C; margin: 0;">
+        Retrieve → Rerank · 정밀도와 속도의 균형
+    </p>
+</div>
+<!-- Flow: Query Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 170px; left: 80px; width: 260px; height: 200px; background: #FFFFFF; border: 2px solid #607196; border-radius: 8px; z-index: 1;"></div>
+<!-- Flow: Query Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 190px; left: 100px; width: 220px; height: 160px; z-index: 10;">
+<div style="font-family: 'Noto Sans KR', sans-serif; text-align: center;">
+<i class="fas fa-comment-dots" style="font-size: 32px; color: #607196; margin-bottom: 12px;"></i>
+<p style="font-size: 18px; font-weight: 900; color: #1F2937; margin: 0 0 8px 0;">사용자 질문 (Query)</p>
+<div style="background: #F3F4F6; padding: 12px; border-radius: 6px;">
+<p style="font-family: 'Nanum Gothic Coding', monospace; font-size: 14px; font-weight: 500; color: #607196; margin: 0;">"벤처기업협회의<br/>총 예산은?"</p>
+</div>
+</div>
+</div>
+<!-- Arrow 1 (Corrected Top/Height) -->
+<div data-object="true" data-object-type="icon" style="position: absolute; top: 255px; left: 350px; width: 40px; height: 40px; z-index: 10; text-align: center; display: flex; align-items: center; justify-content: center;">
+<i class="fas fa-arrow-right" style="font-size: 24px; color: #BABFD1;"></i>
+</div>
+<!-- Flow: Retrieval Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 170px; left: 400px; width: 380px; height: 90px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 6px solid #607196; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); z-index: 1;"></div>
+<!-- Flow: Retrieval Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 185px; left: 420px; width: 340px; height: 60px; z-index: 10;">
+<div style="font-family: 'Noto Sans KR', sans-serif;">
+<p style="font-size: 14px; font-weight: 900; color: #607196; margin: 0 0 4px 0;">① 단계: Dense Retrieval</p>
+<p style="font-size: 18px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0;">KURE-v1 임베딩 · Top-20 추출</p>
+</div>
+</div>
+<!-- Arrow 2 (Corrected Top/Height) -->
+<div data-object="true" data-object-type="icon" style="position: absolute; top: 260px; left: 575px; width: 30px; height: 30px; z-index: 10; text-align: center; display: flex; align-items: center; justify-content: center;">
+<i class="fas fa-arrow-down" style="font-size: 20px; color: #BABFD1;"></i>
+</div>
+<!-- Flow: Rerank Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 280px; left: 400px; width: 380px; height: 90px; background: #FFF5F7; border: 1px solid #FF7B9C; border-left: 6px solid #FF7B9C; border-radius: 8px; box-shadow: 0 4px 12px rgba(255,123,156,0.08); z-index: 1;"></div>
+<!-- Flow: Rerank Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 295px; left: 420px; width: 340px; height: 60px; z-index: 10;">
+<div style="font-family: 'Noto Sans KR', sans-serif;">
+<p style="font-size: 14px; font-weight: 900; color: #FF7B9C; margin: 0 0 4px 0;">② 단계: Reranker</p>
+<p style="font-size: 18px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0;">BGE-Reranker-v2-m3 · Top-5 재정렬</p>
+</div>
+</div>
+<!-- Arrow 3 (Corrected Top/Height) -->
+<div data-object="true" data-object-type="icon" style="position: absolute; top: 310px; left: 790px; width: 40px; height: 40px; z-index: 10; text-align: center; display: flex; align-items: center; justify-content: center;">
+<i class="fas fa-arrow-right" style="font-size: 24px; color: #BABFD1;"></i>
+</div>
+<!-- Flow: Context Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 170px; left: 840px; width: 360px; height: 200px; background: #FFFFFF; border: 2px solid #FFC759; border-radius: 8px; z-index: 1;"></div>
+<!-- Flow: Context Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 190px; left: 860px; width: 320px; height: 160px; z-index: 10;">
+<div style="font-family: 'Noto Sans KR', sans-serif; text-align: center;">
+<div style="margin-bottom: 12px;">
+<span style="background: #FFC759; color: #1F2937; font-size: 13px; font-weight: 900; padding: 4px 10px; border-radius: 12px;">최종 Context</span>
+</div>
+<i class="fas fa-layer-group" style="font-size: 32px; color: #FFC759; margin-bottom: 12px;"></i>
+<p style="font-size: 18px; font-weight: 900; color: #1F2937; margin: 0 0 8px 0;">Top-5 청크 → LLM 주입</p>
+<p style="font-size: 14px; font-weight: 500; color: #607196; margin: 0;">노이즈 최소화, 응답 품질 극대화</p>
+</div>
+</div>
+<!-- Tradeoff Cards -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 400px; left: 80px; width: 265px; height: 130px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 420px; left: 95px; width: 235px; height: 95px; z-index: 10;">
+<div style="font-family: 'Noto Sans KR', sans-serif;">
+<div style="display: flex; align-items: center; margin-bottom: 8px;">
+<i class="fas fa-bolt" style="color: #607196; margin-right: 8px;"></i>
+<span style="font-size: 14px; font-weight: 700; color: #1F2937;">속도 vs 정확도</span>
+</div>
+<p style="font-size: 13px; font-weight: 500; color: #607196; margin: 0; line-height: 1.5;">2단계로 나누어 초기 검색은 빠르게, 정렬은 정밀하게 처리</p>
+</div>
+</div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 400px; left: 365px; width: 265px; height: 130px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 420px; left: 380px; width: 235px; height: 95px; z-index: 10;">
+<div style="font-family: 'Noto Sans KR', sans-serif;">
+<div style="display: flex; align-items: center; margin-bottom: 8px;">
+<i class="fas fa-bullseye" style="color: #FF7B9C; margin-right: 8px;"></i>
+<span style="font-size: 14px; font-weight: 700; color: #1F2937;">Recall vs Precision</span>
+</div>
+<p style="font-size: 13px; font-weight: 500; color: #607196; margin: 0; line-height: 1.5;">1단계로 Recall 확보, 2단계 Cross-Encoder로 Precision 확보</p>
+</div>
+</div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 400px; left: 650px; width: 265px; height: 130px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 420px; left: 665px; width: 235px; height: 95px; z-index: 10;">
+<div style="font-family: 'Noto Sans KR', sans-serif;">
+<div style="display: flex; align-items: center; margin-bottom: 8px;">
+<i class="fas fa-coins" style="color: #FFC759; margin-right: 8px;"></i>
+<span style="font-size: 14px; font-weight: 700; color: #1F2937;">비용 vs 성능</span>
+</div>
+<p style="font-size: 13px; font-weight: 500; color: #607196; margin: 0; line-height: 1.5;">LLM에 넘기는 Context를 최소화하여 토큰 비용 절감 및 MRR 상승</p>
+</div>
+</div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 400px; left: 935px; width: 265px; height: 130px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 420px; left: 950px; width: 235px; height: 95px; z-index: 10;">
+<div style="font-family: 'Noto Sans KR', sans-serif;">
+<div style="display: flex; align-items: center; margin-bottom: 8px;">
+<i class="fas fa-sitemap" style="color: #BABFD1; margin-right: 8px;"></i>
+<span style="font-size: 14px; font-weight: 700; color: #1F2937;">단순성 vs 최적화</span>
+</div>
+<p style="font-size: 13px; font-weight: 500; color: #607196; margin: 0; line-height: 1.5;">파이프라인 복잡도는 증가하지만, 성능 이득이 압도적으로 큼</p>
+</div>
+</div>
+<!-- Core Banner -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 555px; left: 80px; width: 1120px; height: 60px; background: #F1F2F4; border-left: 4px solid #FF7B9C; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 572px; left: 100px; width: 1080px; height: 30px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 19px; font-weight: 700; color: #1F2937; margin: 0;">
+<span style="color: #FF7B9C; margin-right: 12px;">Core Insight</span> 2단계 구조가 단일 검색보다 MRR +0.18 — 속도와 정확도를 동시에
+    </p>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 680px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Footer Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 690px; left: 80px; width: 500px; height: 20px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 400; color: #BABFD1; margin: 0;">
+        retrieval_pipeline.py · 2026-04-19
+    </p>
+</div>
+</div>
+</body>
+</html>

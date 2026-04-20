@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Top-K = 5, 비용과 정확도의 변곡점</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.1.0"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;display=swap" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 400px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #607196; letter-spacing: 0.5px; margin: 0;">
+<span style="color: #FF7B9C;">★ 임팩트</span> · 검색 최적화
+    </p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #607196; letter-spacing: 0.5px; margin: 0;">
+        슬라이드 20
+    </p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 105px; left: 80px; width: 1120px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #1F2937; letter-spacing: -1.5px; margin: 0; line-height: 1.2;">
+        Top-K = 5, 비용과 정확도의 변곡점
+    </p>
+</div>
+<!-- Hook Box Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 180px; left: 80px; width: 1120px; height: 70px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 4px solid #FF7B9C; border-radius: 4px; z-index: 1;"></div>
+<!-- Hook Box Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 202px; left: 104px; width: 1072px; height: 35px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 20px; font-weight: 500; color: #1F2937; margin: 0; line-height: 1.5;">
+        "<span style="color: #FF7B9C; font-weight: 700;">더 많이 가져오는 것이 항상 더 좋은 것은 아니다</span>"
+    </p>
+</div>
+<!-- Chart Area Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 280px; left: 80px; width: 780px; height: 380px; background: #FFFFFF; border: 1px solid #E8E9ED; border-radius: 6px; z-index: 1;"></div>
+<!-- Legend -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 300px; left: 100px; width: 740px; height: 30px; z-index: 10;">
+<div style="display: flex; justify-content: flex-end; align-items: center; gap: 16px; font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 700; color: #607196;">
+<div style="display: flex; align-items: center; gap: 6px;"><div style="width: 12px; height: 12px; background: #607196; border-radius: 2px;"></div>MRR</div>
+<div style="display: flex; align-items: center; gap: 6px;"><div style="width: 12px; height: 12px; background: #FF7B9C; border-radius: 2px;"></div>Faithfulness</div>
+<div style="display: flex; align-items: center; gap: 6px;"><div style="width: 12px; height: 12px; background: #FFC759; border-radius: 2px;"></div>Cost (USD)</div>
+</div>
+</div>
+<!-- Chart Canvas -->
+<div data-object="true" data-object-type="chart" style="position: absolute; top: 330px; left: 100px; width: 740px; height: 310px; z-index: 10;">
+<canvas id="topkLineChart"></canvas>
+</div>
+<!-- Decision Box 1 Background (K=3) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 280px; left: 890px; width: 310px; height: 110px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 4px solid #BABFD1; border-radius: 6px; z-index: 1;"></div>
+<!-- Decision Box 1 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 295px; left: 914px; width: 266px; height: 80px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #BABFD1; margin: 0 0 6px 0;">① K=3</p>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin: 0; line-height: 1.4;">검색 범위 부족<br/>Faithfulness <span style="color: #607196;">0.5969</span></p>
+</div>
+<!-- Decision Box 2 Background (K=5) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 415px; left: 890px; width: 310px; height: 110px; background: #FFFDF5; border: 1px solid #FFC759; border-left: 4px solid #FF7B9C; border-radius: 6px; box-shadow: 0 4px 6px rgba(255, 123, 156, 0.05); z-index: 1;"></div>
+<!-- Decision Box 2 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 430px; left: 914px; width: 266px; height: 80px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; font-family: 'Noto Sans KR', sans-serif;">
+<div>
+<p style="font-size: 14px; font-weight: 700; color: #FF7B9C; margin: 0 0 6px 0;">② K=5</p>
+<p style="font-size: 16px; font-weight: 700; color: #1F2937; margin: 0; line-height: 1.4;">Faithfulness 피크 <span style="color: #FF7B9C; font-weight: 900;">0.6094</span><br/>Latency <span style="color: #607196;">14.3s</span></p>
+</div>
+<span style="background: #FFC759; color: #1F2937; font-size: 13px; font-weight: 700; padding: 4px 8px; border-radius: 4px;">채택</span>
+</div>
+</div>
+<!-- Decision Box 3 Background (K=10) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 550px; left: 890px; width: 310px; height: 110px; background: #FFFFFF; border: 1px solid #E8E9ED; border-left: 4px solid #BABFD1; border-radius: 6px; z-index: 1;"></div>
+<!-- Decision Box 3 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 565px; left: 914px; width: 266px; height: 80px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #BABFD1; margin: 0 0 6px 0;">③ K=10</p>
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin: 0; line-height: 1.4;">Cost <span style="color: #FFC759;">+30%</span><br/>Faithfulness <span style="color: #BABFD1;">역전 하락</span></p>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 685px; left: 80px; width: 1120px; height: 1px; background: #E8E9ED; z-index: 1;"></div>
+<!-- Footer Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 695px; left: 80px; width: 600px; height: 20px; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 400; color: #BABFD1; margin: 0;">
+        bench-3905e4ce · Scenario B · 80문항 full · 2026-04-19
+    </p>
+</div>
+<!-- Footer Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 695px; left: 680px; width: 520px; height: 20px; text-align: right; z-index: 10;">
+<p style="font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #607196; margin: 0;">
+        ★ 임팩트 · 검색 최적화
+    </p>
+</div>
+<script>
+    const ctx = document.getElementById('topkLineChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['K=3', 'K=5', 'K=10'],
+            datasets: [
+                {
+                    label: 'MRR',
+                    data: [0.9578, 0.9578, 0.9578],
+                    borderColor: '#607196',
+                    backgroundColor: 'rgba(96, 113, 150, 0.1)',
+                    borderWidth: 3,
+                    pointRadius: 6,
+                    pointBackgroundColor: '#607196',
+                    fill: false,
+                    tension: 0,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Faithfulness',
+                    data: [0.5969, 0.6094, 0.5750],
+                    borderColor: '#FF7B9C',
+                    backgroundColor: 'rgba(255, 123, 156, 0.1)',
+                    borderWidth: 3,
+                    pointRadius: 6,
+                    pointBackgroundColor: '#FFFFFF',
+                    pointBorderColor: '#FF7B9C',
+                    pointBorderWidth: 2,
+                    fill: false,
+                    tension: 0.3,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Cost (USD)',
+                    data: [0.2036, 0.2218, 0.2657],
+                    borderColor: '#FFC759',
+                    backgroundColor: 'rgba(255, 199, 89, 0.1)',
+                    borderWidth: 3,
+                    borderDash: [5, 5],
+                    pointRadius: 6,
+                    pointBackgroundColor: '#FFC759',
+                    fill: false,
+                    tension: 0.1,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#FFFFFF',
+                    titleColor: '#1F2937',
+                    bodyColor: '#607196',
+                    borderColor: '#E8E9ED',
+                    borderWidth: 1,
+                    padding: 10,
+                    cornerRadius: 4,
+                    titleFont: { family: "'Noto Sans KR', sans-serif", size: 13, weight: 'bold' },
+                    bodyFont: { family: "'Noto Sans KR', sans-serif", size: 12 }
+                },
+                annotation: {
+                    annotations: {
+                        line1: {
+                            type: 'line',
+                            xMin: 1,
+                            xMax: 1,
+                            borderColor: '#FF7B9C',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            label: {
+                                content: '채택',
+                                display: true,
+                                position: 'start',
+                                color: '#1F2937',
+                                backgroundColor: '#FFC759',
+                                borderRadius: 4,
+                                font: { family: "'Noto Sans KR', sans-serif", size: 12, weight: 'bold' },
+                                padding: { top: 4, bottom: 4, left: 8, right: 8 }
+                            }
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 0.5,
+                    max: 1.1,
+                    grid: { color: '#E8E9ED', drawBorder: false },
+                    ticks: { color: '#BABFD1', font: { family: "'Noto Sans KR', sans-serif", size: 12 } },
+                    title: { display: true, text: 'MRR / Faithfulness', color: '#607196', font: { family: "'Noto Sans KR', sans-serif", size: 12, weight: 'bold' } }
+                },
+                y1: {
+                    position: 'right',
+                    beginAtZero: true,
+                    max: 0.35,
+                    grid: { display: false },
+                    ticks: { color: '#FFC759', font: { family: "'Noto Sans KR', sans-serif", size: 12 } },
+                    title: { display: true, text: 'Cost (USD)', color: '#FFC759', font: { family: "'Noto Sans KR', sans-serif", size: 12, weight: 'bold' } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#1F2937', font: { family: "'Noto Sans KR', sans-serif", size: 14, weight: 'bold' }, padding: 10 }
+                }
+            }
+        }
+    });
+</script>
+</div>
+</body>
+</html>
