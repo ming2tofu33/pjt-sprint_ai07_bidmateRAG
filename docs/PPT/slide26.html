@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>프롬프트 최적화 효과가 모델 간 차이보다 크게 나타났다</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;family=Nanum+Gothic+Coding:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 500px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; margin: 0;">
+<span style="color: #FF7B9C;">핵심 결과</span> · 시나리오 A · 20종 확장 실험
+</p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #64748B; letter-spacing: 0.5px; margin: 0;"><span style="font-weight: 700; color: #475569;">26</span><span style="font-weight: 500; color: #94A3B8;">/31</span></p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 98px; left: 80px; width: 960px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #111827; letter-spacing: -2px; margin: 0; line-height: 1.2;">
+프롬프트 최적화 효과가 모델 간 차이보다 크게 나타났다
+</p>
+</div>
+<!-- Subtitle (Hook) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 148px; left: 80px; width: 960px; height: 40px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 500; color: #64748B; margin: 0; line-height: 1.4; font-style: italic;">
+"20종 확장 실험 결과, 프롬프트만으로 <span style="font-weight: 700; color: #1F2937; font-style: normal;">0.5156 → 0.8438</span> 달성. 모델 간 차이(&lt;0.1) 대비 편차 0.33은 3배 이상."
+</p>
+</div>
+<!-- Result Status Badge -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 108px; left: 1050px; width: 150px; height: 36px; background: #10B981; border-radius: 18px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 108px; left: 1050px; width: 150px; height: 36px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 700; color: #FFFFFF; margin: 0; line-height: 36px; text-align: center;">
+20종 실험 완료
+</p>
+</div>
+<!-- ============ LEFT COLUMN ============ -->
+<!-- Left: Pilot Summary Card -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 80px; width: 540px; height: 190px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 215px; left: 100px; width: 500px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0 0 12px 0;">
+20종 확장 실험 요약 <span style="font-weight: 500; color: #64748B; font-size: 13px;">(Gemma-4-E4B, eval_batch_45 20문항)</span>
+</p>
+<!-- Row 1 -->
+<div style="display: flex; align-items: center; border-bottom: 1px solid #E8E9ED; padding: 6px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px;">
+<div style="flex: 7; color: #1F2937;">4지표 평균 (최저 → 최고)</div>
+<div style="flex: 3; font-family: 'Pretendard', monospace; font-weight: 700; color: #10B981; text-align: right;">0.52 → 0.84</div>
+</div>
+<!-- Row 2 -->
+<div style="display: flex; align-items: center; border-bottom: 1px solid #E8E9ED; padding: 6px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px;">
+<div style="flex: 7; color: #1F2937;">최고 성능 조합 (Judge v1)</div>
+<div style="flex: 3; font-family: 'Pretendard', monospace; font-weight: 700; color: #FF7B9C; text-align: right;">P4_C2_F5_S3_T5</div>
+</div>
+<!-- Row 3 -->
+<div style="display: flex; align-items: center; border-bottom: 1px solid #E8E9ED; padding: 6px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px;">
+<div style="flex: 7; color: #1F2937;">Judge v2 재채점 결과</div>
+<div style="flex: 3; font-family: 'Pretendard', monospace; font-weight: 700; color: #1F2937; text-align: right;">0.8875 (1위)</div>
+</div>
+<!-- Row 4 -->
+<div style="display: flex; align-items: center; padding: 6px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px;">
+<div style="flex: 7; color: #1F2937;">Judge nan (파싱 실패)</div>
+<div style="flex: 3; font-family: 'Pretendard', monospace; font-weight: 700; color: #10B981; text-align: right;">50% → 0%</div>
+</div>
+</div>
+<!-- Left: 프롬프트 최적화 5원칙 Card -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 405px; left: 80px; width: 540px; height: 250px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 418px; left: 100px; width: 500px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 17px; font-weight: 700; color: #1F2937; margin: 0 0 14px 0;">
+프롬프트 최적화 5원칙 <span style="font-weight: 500; color: #64748B; font-size: 13px;">(20종 실험 도출)</span>
+</p>
+<!-- Principle 1 -->
+<div style="display: flex; align-items: center; padding: 7px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13.5px; color: #1F2937; line-height: 1.45;">
+<span style="flex: 0 0 22px; font-weight: 900; color: #FF7B9C;">①</span>
+<span style="flex: 0 0 158px; font-weight: 700; font-size: 14.5px; color: #111827;">한국어 통일+LaTeX 금지</span>
+<span style="flex: 1; color: #64748B;">nan 50% → 0%</span>
+</div>
+<!-- Principle 2 -->
+<div style="display: flex; align-items: center; padding: 7px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13.5px; color: #1F2937; line-height: 1.45;">
+<span style="flex: 0 0 22px; font-weight: 900; color: #FF7B9C;">②</span>
+<span style="flex: 0 0 158px; font-weight: 700; font-size: 14.5px; color: #111827;">~1,000자 최적 (역U자)</span>
+<span style="flex: 1; color: #64748B;">232자 0.62 / 982자 0.76 / 2,494자 0.66</span>
+</div>
+<!-- Principle 3 -->
+<div style="display: flex; align-items: center; padding: 7px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13.5px; color: #1F2937; line-height: 1.45;">
+<span style="flex: 0 0 22px; font-weight: 900; color: #FF7B9C;">③</span>
+<span style="flex: 0 0 158px; font-weight: 700; font-size: 14.5px; color: #111827;">예시 3개 + 거절 필수</span>
+<span style="flex: 1; color: #64748B;">거절 제거 −8.8% / 부분답변 유도 −18.7%</span>
+</div>
+<!-- Principle 4 -->
+<div style="display: flex; align-items: center; padding: 7px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13.5px; color: #1F2937; line-height: 1.45;">
+<span style="flex: 0 0 22px; font-weight: 900; color: #FF7B9C;">④</span>
+<span style="flex: 0 0 158px; font-weight: 700; font-size: 14.5px; color: #111827;">영어 CoT "활용 방식"</span>
+<span style="flex: 1; color: #64748B;">짧은 프롬프트 + 깊은 영어 CoT만 유효</span>
+</div>
+<!-- Principle 5 -->
+<div style="display: flex; align-items: center; padding: 7px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13.5px; color: #1F2937; line-height: 1.45;">
+<span style="flex: 0 0 22px; font-weight: 900; color: #FF7B9C;">⑤</span>
+<span style="flex: 0 0 158px; font-weight: 700; font-size: 14.5px; color: #111827;">P4 완벽주의 감리원</span>
+<span style="flex: 1; color: #64748B;">P4 0.8438 vs P1 0.5656 (최하)</span>
+</div>
+</div>
+<!-- ============ RIGHT COLUMN: Strategic Realignment ============ -->
+<!-- Right: Strategic Realignment Card with Accent -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 660px; width: 540px; height: 455px; background: #FFFFFF; border-radius: 8px; z-index: 1;"></div>
+<!-- Accent Ribbon -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 660px; width: 540px; height: 44px; background: #FF7B9C; border-radius: 8px 8px 0 0; z-index: 2;"></div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 660px; width: 540px; height: 455px; background: transparent; border: 2px solid #FF7B9C; border-radius: 8px; box-sizing: border-box; z-index: 3;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 200px; left: 660px; width: 540px; height: 44px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #FFFFFF; margin: 0; line-height: 44px; text-align: center; letter-spacing: 0.3px;">
+해석 — A·B는 상호 보완 관계
+</p>
+</div>
+<!-- Strategic Realignment Table -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 260px; left: 680px; width: 500px; z-index: 10;">
+<!-- Table Header -->
+<div style="display: flex; border-bottom: 2px solid #FF7B9C; padding-bottom: 8px; margin-bottom: 10px; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 700; color: #64748B;">
+<div style="flex: 3.5;">구분</div>
+<div style="flex: 4.5;">원래 프레이밍</div>
+<div style="flex: 4.5;">바뀐 프레이밍</div>
+</div>
+<!-- Row 1 -->
+<div style="display: flex; align-items: flex-start; border-bottom: 1px solid #F3E8EC; padding: 12px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px;">
+<div style="flex: 3.5; font-weight: 700; color: #1F2937; line-height: 1.4;">시나리오 A·B<br/>관계</div>
+<div style="flex: 4.5; color: #9A6B75; line-height: 1.5;">위계 (B=상한선,<br/>A=제약 도전)</div>
+<div style="flex: 4.5; font-weight: 700; color: #1F2937; line-height: 1.5;">상호 보완<br/>A=품질, B=속도·비용</div>
+</div>
+<!-- Row 2 -->
+<div style="display: flex; align-items: flex-start; border-bottom: 1px solid #F3E8EC; padding: 12px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px;">
+<div style="flex: 3.5; font-weight: 700; color: #1F2937; line-height: 1.4;">성능 격차<br/>원인</div>
+<div style="flex: 4.5; color: #9A6B75; line-height: 1.5;">모델 성능 차이가<br/>주된 제약</div>
+<div style="flex: 4.5; font-weight: 700; color: #1F2937; line-height: 1.5;">프롬프트 최적화 효과(0.33)<br/>&gt; 모델 간 차이(&lt;0.1)</div>
+</div>
+<!-- Row 3 -->
+<div style="display: flex; align-items: flex-start; padding: 12px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px;">
+<div style="flex: 3.5; font-weight: 700; color: #1F2937; line-height: 1.4;">권장<br/>다음 수</div>
+<div style="flex: 4.5; color: #9A6B75; line-height: 1.5;">"A는 프롬프트로<br/>못 푼다 → PEFT"</div>
+<div style="flex: 4.5; font-weight: 700; color: #1F2937; line-height: 1.5;">B에 A-Top1 프롬프트<br/>전략 이전 실험</div>
+</div>
+</div>
+<!-- Bottom insight quote inside right card -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 535px; left: 680px; width: 500px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #64748B; margin: 0; line-height: 1.6; padding: 12px 14px; background: #FDF5F7; border-left: 3px solid #FF7B9C; border-radius: 4px;">
+동일 Retrieval 파이프라인에서 A·B가 각자 다른 강점을 발휘한다. A는 품질(0.8875), B는 속도·비용 효율(5.3s, $0.005). 프롬프트 최적화가 모델 교체보다 큰 개선을 만든다.
+</p>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 680px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Footer -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 693px; left: 80px; width: 1120px; height: 20px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #64748B; margin: 0;">
+eval_batch_45 20문항 공통 조건 · 20종 확장 실험 완료 · Judge v1 0.8438 / Judge v2 0.8875 &nbsp;&nbsp;→&nbsp; <span style="color: #1F2937; font-weight: 700;">다음 슬라이드부터 시나리오 B 프롬프트 설계로 복귀</span>
+</p>
+</div>
+</div>
+</body>
+</html>

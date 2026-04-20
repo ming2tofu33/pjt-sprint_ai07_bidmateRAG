@@ -21,14 +21,15 @@ REPORT_TEMPLATE = """\
 | 날짜 | {timestamp_kst} |
 | 시나리오 | {scenario} |
 | 평가셋 버전 | {eval_basename} |
+| 프롬프트 버전 | {prompt_basename} |
 | 임베딩 모델 | {embedding_model} |
 | 생성 모델 | {llm_model} |
 | Chunk Size | {chunk_size} |
 | Top-k | {top_k} |
 | Git Commit | {git_commit_short} |
-| Hit Rate@5 | {hit_rate} |
+| Hit Rate@{top_k} | {hit_rate} |
 | MRR | {mrr} |
-| MAP@5 | {map} |
+| MAP@{top_k} | {map} |
 | Faithfulness | {faithfulness} |
 | Latency Avg (s) | {latency_avg_s} |
 | Total Tokens | {total_tokens} |
@@ -50,6 +51,7 @@ REPORT_TEMPLATE = """\
 | Git Branch | {git_branch} |
 | Git Commit | {git_commit} {dirty_marker} |
 | 평가셋 | {eval_path} ({num_samples} samples) |
+| 프롬프트 | {prompt_basename} |
 | 임베딩 모델 | {embedding_model} |
 | 생성 모델 | {llm_model} |
 | Vector DB | ChromaDB ({collection_name}) |
@@ -61,10 +63,10 @@ REPORT_TEMPLATE = """\
 
 | 지표 | 값 |
 | --- | --- |
-| Hit Rate@5 | {hit_rate} |
+| Hit Rate@{top_k} | {hit_rate} |
 | MRR | {mrr} |
-| nDCG@5 | {ndcg} |
-| MAP@5 | {map} |
+| nDCG@{top_k} | {ndcg} |
+| MAP@{top_k} | {map} |
 | Faithfulness | {faithfulness} |
 | Answer Relevance | {answer_relevance} |
 | Context Precision | {context_precision} |
@@ -73,11 +75,11 @@ REPORT_TEMPLATE = """\
 | Latency P95 (s) | {latency_p95_s} |
 | Prompt Tokens (sum) | {prompt_tokens_sum} |
 | Completion Tokens (sum) | {completion_tokens_sum} |
-| Total Tokens | {total_tokens} |
+{rewrite_token_rows}| Total Tokens | {total_tokens} |
 | 생성 비용 (USD) | {generation_cost} |
 | 임베딩 비용 (USD) | {embedding_cost} |
 | Judge 비용 (USD) | {judge_cost} |
-| **Cost (USD)** | **{grand_total_cost}** |
+{rewrite_cost_row}| **Cost (USD)** | **{grand_total_cost}** |
 {cost_warning}{gpt5_warning}
 ## 리소스 링크
 

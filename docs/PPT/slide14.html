@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>청킹 실패 유형 3가지와 계층형 해법</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;family=Nanum+Gothic+Coding:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 500px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; margin: 0;">
+<span style="color: #FFC759;">설계 배경</span> · 섹션 ③ · 청킹 전략
+</p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #64748B; letter-spacing: 0.5px; margin: 0;"><span style="font-weight: 700; color: #475569;">14</span><span style="font-weight: 500; color: #94A3B8;">/31</span></p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 98px; left: 80px; width: 1120px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #111827; letter-spacing: -2px; margin: 0; line-height: 1.2; line-height: 1.2;">
+청킹 실패 유형 3가지와 계층형 해법
+</p>
+</div>
+<!-- Subtitle -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 150px; left: 80px; width: 1120px; height: 30px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 500; color: #64748B; margin: 0;">
+모델 성능보다 <span style="font-weight: 700; color: #1F2937;">RFP 물리적 구조(표·단락)</span>를 먼저 반영한 청킹 설계
+</p>
+</div>
+<!-- ============ 3재앙 Row (상단) ============ -->
+<!-- Disaster 1 -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 195px; left: 80px; width: 360px; height: 180px; background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid #DC2626; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 212px; left: 100px; width: 320px; z-index: 10;">
+<div style="display: flex; align-items: center;">
+<span style="font-family: 'Pretendard', monospace; font-size: 11px; font-weight: 700; color: #FFFFFF; background: #DC2626; padding: 3px 8px; border-radius: 10px;">유형 ①</span>
+<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin-left: 8px;">너무 작게</span>
+</div>
+</div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 250px; left: 100px; width: 320px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; color: #1F2937; margin: 0 0 10px 0; line-height: 1.55;">
+문장 앞뒤 문맥이 절단 → 대명사·지시어 <span style="font-weight: 700;">해석 불가</span>
+</p>
+</div>
+<!-- Disaster 1 example box -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 282px; left: 100px; width: 320px; height: 85px; background: #FEF2F2; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 292px; left: 114px; width: 296px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #64748B; margin: 0 0 4px 0; font-weight: 700;">예 ·</p>
+<p style="font-family: 'Pretendard', monospace; font-size: 11.5px; color: #1F2937; margin: 0; line-height: 1.5;">
+"<span style="color: #DC2626;">그 사업은</span> 3년간…"<br/>
+→ <span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; color: #DC2626;">"그 사업"의 지시 대상 소실</span>
+</p>
+</div>
+<!-- Disaster 2 -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 195px; left: 460px; width: 360px; height: 180px; background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid #DC2626; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 212px; left: 480px; width: 320px; z-index: 10;">
+<div style="display: flex; align-items: center;">
+<span style="font-family: 'Pretendard', monospace; font-size: 11px; font-weight: 700; color: #FFFFFF; background: #DC2626; padding: 3px 8px; border-radius: 10px;">유형 ②</span>
+<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin-left: 8px;">너무 크게</span>
+</div>
+</div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 250px; left: 480px; width: 320px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; color: #1F2937; margin: 0 0 10px 0; line-height: 1.55;">
+노이즈 함유량 증가 → 검색 <span style="font-weight: 700;">정밀도 하락</span>
+</p>
+</div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 282px; left: 480px; width: 320px; height: 85px; background: #FEF2F2; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 292px; left: 494px; width: 296px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #64748B; margin: 0 0 4px 0; font-weight: 700;">예 ·</p>
+<p style="font-family: 'Pretendard', monospace; font-size: 11.5px; color: #1F2937; margin: 0; line-height: 1.5;">
+2,000자 청크 = 사업개요<br/>+ 요구사항 + 일정 + 예산 ...<br/>
+→ <span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; color: #DC2626;">핵심 신호 희석</span>
+</p>
+</div>
+<!-- Disaster 3 -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 195px; left: 840px; width: 360px; height: 180px; background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid #DC2626; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 212px; left: 860px; width: 320px; z-index: 10;">
+<div style="display: flex; align-items: center;">
+<span style="font-family: 'Pretendard', monospace; font-size: 11px; font-weight: 700; color: #FFFFFF; background: #DC2626; padding: 3px 8px; border-radius: 10px;">유형 ③</span>
+<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin-left: 8px;">경계 무시</span>
+</div>
+</div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 250px; left: 860px; width: 320px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; color: #1F2937; margin: 0 0 10px 0; line-height: 1.55;">
+논리 경계 무시 → 두 요구사항이 <span style="font-weight: 700;">한 청크에 섞임</span>
+</p>
+</div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 282px; left: 860px; width: 320px; height: 85px; background: #FEF2F2; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 292px; left: 874px; width: 296px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #64748B; margin: 0 0 4px 0; font-weight: 700;">예 ·</p>
+<p style="font-family: 'Pretendard', monospace; font-size: 11.5px; color: #1F2937; margin: 0; line-height: 1.5;">
+"보안 요구 | 성능 요구"<br/>
+한 청크에 공존<br/>
+→ <span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; color: #DC2626;">분리 불가, 검색 오염</span>
+</p>
+</div>
+<!-- ============ 3단 계층 해법 (하단) ============ -->
+<!-- Connecting arrow / label -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 400px; left: 80px; width: 1120px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 700; color: #111827; margin: 0; text-align: center;">
+<i class="fa-solid fa-arrow-down" style="color: #FF7B9C; margin-right: 8px;"></i>
+설계 방향 · <span style="color: #FF7B9C;">하이브리드 청킹</span> = <span style="font-weight: 900;">단락 기반(1단)</span> + <span style="font-weight: 900;">고정크기(2단)</span> · Semantic(3단)은 비교 후보
+</p>
+</div>
+<!-- Solution layer 1: Markdown Header -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 460px; left: 80px; width: 360px; height: 190px; background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid #10B981; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 475px; left: 100px; width: 320px; z-index: 10;">
+<div style="display: flex; align-items: center;">
+<span style="font-family: 'Pretendard', monospace; font-size: 11px; font-weight: 700; color: #FFFFFF; background: #10B981; padding: 3px 8px; border-radius: 10px;">1단 · 단락</span>
+<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin-left: 8px;">Markdown 헤더 분할</span>
+</div>
+</div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 515px; left: 100px; width: 320px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13.5px; color: #1F2937; margin: 0 0 10px 0; line-height: 1.55;">
+Kordoc 출력의 <span style="font-family: 'Pretendard', monospace; font-weight: 700;">#</span> 헤더 기준 1차 분할
+</p>
+</div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 555px; left: 100px; width: 320px; height: 85px; background: #F0FDF4; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 565px; left: 114px; width: 296px; z-index: 10;">
+<p style="font-family: 'Pretendard', monospace; font-size: 11px; color: #1F2937; margin: 0; line-height: 1.6;">
+<span style="color: #10B981; font-weight: 700;"># 사업개요</span><br/>
+<span style="color: #10B981; font-weight: 700;">## 요구사항 · 보안</span><br/>
+<span style="color: #10B981; font-weight: 700;">## 요구사항 · 성능</span>
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 10.5px; color: #64748B; margin: 4px 0 0 0;">
+min_section_size = 500자 (작은 섹션 병합)
+</p>
+</div>
+<!-- Solution layer 2: Recursive -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 460px; left: 460px; width: 360px; height: 190px; background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid #10B981; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 475px; left: 480px; width: 320px; z-index: 10;">
+<div style="display: flex; align-items: center;">
+<span style="font-family: 'Pretendard', monospace; font-size: 11px; font-weight: 700; color: #FFFFFF; background: #10B981; padding: 3px 8px; border-radius: 10px;">2단 · 고정크기</span>
+<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin-left: 8px;">Recursive Character</span>
+</div>
+</div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 515px; left: 480px; width: 320px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13.5px; color: #1F2937; margin: 0 0 10px 0; line-height: 1.55;">
+큰 섹션을 문자 수 기준 <span style="font-weight: 700;">재귀 분할</span>
+</p>
+</div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 555px; left: 480px; width: 320px; height: 85px; background: #F0FDF4; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 565px; left: 494px; width: 296px; z-index: 10;">
+<p style="font-family: 'Pretendard', monospace; font-size: 11px; color: #1F2937; margin: 0; line-height: 1.6;">
+separators = [<br/>
+&nbsp;&nbsp;"<span style="color: #10B981; font-weight: 700;">\n\n</span>", "<span style="color: #10B981; font-weight: 700;">\n</span>", ". ", " "<br/>
+]
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 10.5px; color: #64748B; margin: 4px 0 0 0;">
+자연 경계 우선, 점진적으로 세분화
+</p>
+</div>
+<!-- Solution layer 3: Semantic -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 460px; left: 840px; width: 360px; height: 190px; background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid #10B981; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 475px; left: 860px; width: 320px; z-index: 10;">
+<div style="display: flex; align-items: center;">
+<span style="font-family: 'Pretendard', monospace; font-size: 11px; font-weight: 700; color: #FFFFFF; background: #BABFD1; padding: 3px 8px; border-radius: 10px;">3단 · 대안</span>
+<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin-left: 8px;">Semantic Chunker</span>
+</div>
+</div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 515px; left: 860px; width: 320px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13.5px; color: #1F2937; margin: 0 0 10px 0; line-height: 1.55;">
+임베딩 유사도 급변 지점에서 <span style="font-weight: 700;">주제 경계 감지</span>
+</p>
+</div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 555px; left: 860px; width: 320px; height: 85px; background: #F0FDF4; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 565px; left: 874px; width: 296px; z-index: 10;">
+<p style="font-family: 'Pretendard', monospace; font-size: 11px; color: #1F2937; margin: 0; line-height: 1.6;">
+breakpoint_type = <br/>
+&nbsp;&nbsp;<span style="color: #10B981; font-weight: 700;">"percentile"</span>, amount = <span style="color: #10B981; font-weight: 700;">95</span>
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 10.5px; color: #64748B; margin: 4px 0 0 0;">
+슬라이드 17에서 실측 비교 결과 공개
+</p>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 680px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Footer -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 693px; left: 80px; width: 1120px; height: 20px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #64748B; margin: 0;">
+langchain-text-splitters + langchain-experimental(Semantic) · 의미 유사도보다 물리적 구조 선행 · 슬라이드 15에서 크기 파라미터 결정 근거 / 17에서 반전 공개
+</p>
+</div>
+</div>
+</body>
+</html>

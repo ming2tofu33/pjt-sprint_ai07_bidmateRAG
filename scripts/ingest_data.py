@@ -43,7 +43,7 @@ def main() -> None:
         from pathlib import Path
 
         import yaml
-        exp_cfg = yaml.safe_load(Path(args.experiment_config).read_text())
+        exp_cfg = yaml.safe_load(Path(args.experiment_config).read_text(encoding="utf-8"))
         chunk_size = exp_cfg.get("chunk_size", chunk_size)
         chunk_overlap = exp_cfg.get("chunk_overlap", chunk_overlap)
         exp_name = exp_cfg.get("name", "default")

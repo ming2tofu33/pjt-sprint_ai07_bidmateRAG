@@ -44,6 +44,7 @@ def _make_cleaned_documents(tmp_path: Path) -> Path:
 
 def _make_sample(
     qid: str,
+    question: str = "dummy",
     metadata_filter: dict | None = None,
     expected_doc_titles: list[str] | None = None,
     history: object = None,
@@ -55,7 +56,7 @@ def _make_sample(
         metadata["history"] = history
     return EvalSample(
         question_id=qid,
-        question="dummy",
+        question=question,
         expected_doc_titles=expected_doc_titles or [],
         metadata=metadata,
     )
@@ -152,6 +153,88 @@ def test_ground_truth_doc_matches_사업명(tmp_path):
     samples = [_make_sample("Q1", expected_doc_titles=["차세대 ERP 구축"])]
     report = validate_eval_samples(samples, cleaned_documents_path=cleaned)
     assert report.warnings == []
+
+
+def test_multidoc_question_without_anchors_warns(tmp_path):
+    cleaned = _make_cleaned_documents(tmp_path)
+    samples = [
+        _make_sample(
+            "Q1",
+            question="세 사업 중 문서 내에 법제도 준수 여부 점검표를 포함한 사업은 무엇입니까?",
+            expected_doc_titles=[
+                "한국가스공사_차세대 ERP 구축.hwp",
+                "고려대학교_차세대 포털·학사 정보시스템.pdf",
+            ],
+        )
+    ]
+    report = validate_eval_samples(samples, cleaned_documents_path=cleaned)
+    assert any(
+        issue.field == "question" and "underspecified" in issue.message
+        for issue in report.warnings
+    )
+
+
+def test_multidoc_question_with_visible_anchors_does_not_warn(tmp_path):
+    cleaned = _make_cleaned_documents(tmp_path)
+    samples = [
+        _make_sample(
+            "Q1",
+            question="한국가스공사와 고려대학교 사업을 비교할 때 예산 규모가 큰 곳은 어디입니까?",
+            expected_doc_titles=[
+                "한국가스공사_차세대 ERP 구축.hwp",
+                "고려대학교_차세대 포털·학사 정보시스템.pdf",
+            ],
+        )
+    ]
+    report = validate_eval_samples(samples, cleaned_documents_path=cleaned)
+    assert not any(issue.field == "question" for issue in report.warnings)
+
+
+def test_multidoc_question_anchor_matches_ignoring_fullwidth_parens(tmp_path):
+    """파일명/기관명에 전각 괄호(）, 질문에 반각 괄호()가 섞여도 매칭되어야 함 (Q028 회귀)."""
+    df = pd.DataFrame(
+        [
+            {
+                "발주 기관": "(사)벤처기업협회",
+                "사업명": "벤처확인종합관리시스템",
+                "사업도메인": "경영/행정",
+                "기관유형": "협회",
+                "공개연도": 2024,
+                "사업 금액": 352_000_000,
+                "파일명": "(사)벤처기업협회_2024년 벤처확인종합관리시스템 기능 고도화 용역사업 .hwp",
+            },
+            {
+                "발주 기관": "(사）한국대학스포츠협의회",
+                "사업명": "KUSF 체육특기자 경기기록 관리시스템",
+                "사업도메인": "교육/학습",
+                "기관유형": "협회",
+                "공개연도": 2024,
+                "사업 금액": 150_000_000,
+                "파일명": "(사）한국대학스포츠협의회_KUSF 체육특기자 경기기록 관리시스템 개발.hwp",
+            },
+        ]
+    )
+    cleaned = tmp_path / "cleaned_documents.parquet"
+    df.to_parquet(cleaned, index=False)
+
+    samples = [
+        _make_sample(
+            "Q028",
+            question=(
+                "(사)벤처기업협회와 (사)한국대학스포츠협의회의 사업은 특정 목적을 위한 "
+                "세부 제도 지원 또는 평가 체계 구축을 포함합니다."
+            ),
+            expected_doc_titles=[
+                "(사)벤처기업협회_2024년 벤처확인종합관리시스템 기능 고도화 용역사업 .hwp",
+                "(사）한국대학스포츠협의회_KUSF 체육특기자 경기기록 관리시스템 개발.hwp",
+            ],
+        )
+    ]
+    report = validate_eval_samples(samples, cleaned_documents_path=cleaned)
+    assert not any(
+        issue.field == "question" and "underspecified" in issue.message
+        for issue in report.warnings
+    )
 
 
 # ---------------------------------------------------------------------------

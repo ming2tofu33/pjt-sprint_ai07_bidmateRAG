@@ -12,11 +12,13 @@ ChromaDB 메타데이터와 매칭되는지 사전에 확인합니다. 어제 �
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
 import pandas as pd
 
+from bidmate_rag.retrieval.agency_matching import extract_agencies_from_text
 from bidmate_rag.schema import EvalSample
 
 logger = logging.getLogger(__name__)
@@ -88,6 +90,67 @@ def _load_known_metadata(
     return known
 
 
+def _load_doc_to_agency_map(
+    cleaned_documents_path: Path | str = "data/processed/cleaned_documents.parquet",
+) -> dict[str, str]:
+    """Build a filename/stem to agency lookup for eval-set diagnostics."""
+
+    path = Path(cleaned_documents_path)
+    if not path.exists():
+        return {}
+    df = pd.read_parquet(path)
+    if "파일명" not in df.columns or "발주 기관" not in df.columns:
+        return {}
+
+    mapping: dict[str, str] = {}
+    for _, row in df.iterrows():
+        file_name = str(row.get("파일명") or "").strip()
+        agency = str(row.get("발주 기관") or "").strip()
+        if not file_name or not agency:
+            continue
+        mapping[file_name] = agency
+        mapping[Path(file_name).stem] = agency
+    return mapping
+
+
+def _warn_if_multidoc_question_is_underspecified(
+    *,
+    sample: EvalSample,
+    issues: list[ValidationIssue],
+    doc_to_agency: dict[str, str],
+) -> None:
+    """Warn when a multi-doc eval question lacks visible anchors."""
+
+    titles = sample.expected_doc_titles or []
+    metadata = sample.metadata or {}
+    if len(titles) < 2:
+        return
+    if metadata.get("metadata_filter") or metadata.get("history"):
+        return
+
+    agencies = {
+        doc_to_agency.get(title) or doc_to_agency.get(Path(title).stem, "")
+        for title in titles
+    }
+    agencies.discard("")
+
+    question = sample.question or ""
+    mentioned_agencies = set(extract_agencies_from_text(question, list(agencies)))
+    quoted_segments = re.findall(r'"[^"]+"|\'[^\']+\'', question)
+
+    if len(mentioned_agencies) >= 2 or len(quoted_segments) >= 2:
+        return
+
+    issues.append(
+        ValidationIssue(
+            sample.question_id,
+            "warning",
+            "question",
+            "multi-doc question may be underspecified: no metadata_filter/history and not enough document anchors in the question",
+        )
+    )
+
+
 def validate_eval_samples(
     samples: list[EvalSample],
     cleaned_documents_path: Path | str = "data/processed/cleaned_documents.parquet",
@@ -105,6 +168,7 @@ def validate_eval_samples(
     4. **history 형식** — list[dict] 형태인지 (어긋나면 error)
     """
     known = _load_known_metadata(cleaned_documents_path)
+    doc_to_agency = _load_doc_to_agency_map(cleaned_documents_path)
     issues: list[ValidationIssue] = []
     file_set = known.get("파일명", set())
     biz_set = known.get("사업명", set())
@@ -173,6 +237,12 @@ def validate_eval_samples(
                                 f"turn[{i}] is not a dict",
                             )
                         )
+
+        _warn_if_multidoc_question_is_underspecified(
+            sample=sample,
+            issues=issues,
+            doc_to_agency=doc_to_agency,
+        )
 
     return ValidationReport(total_samples=len(samples), issues=issues)
 

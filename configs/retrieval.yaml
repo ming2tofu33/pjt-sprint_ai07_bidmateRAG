@@ -1,0 +1,43 @@
+# 선택적 실험용 Cross-Encoder 리랭킹 모델 (null이면 기본 운영 경로 사용)
+# 한국어 특화: dragonkue/bge-reranker-v2-m3-ko
+# 다국어:      BAAI/bge-reranker-v2-m3 / Qwen3-Reranker-0.6B
+reranker_model: null
+
+# 규칙 기반 부스팅 가중치 (코사인 유사도 0~1 스케일 기준)
+boost:
+  section: 0.12    # 섹션 힌트 일치 시 가산 점수
+  table: 0.08      # 표(table) 청크 가산 점수
+  metadata: 0.12   # 기관명/사업명/파일명 등 메타데이터 매칭 가산 점수
+  max_total: 0.15  # 부스팅 합산 상한
+
+# 하이브리드 검색: Dense 벡터 + BM25 Sparse + RRF 융합
+hybrid:
+  enabled: true              # 하이브리드 검색 활성화 여부
+  dense_pool_multiplier: 5   # Dense 후보 풀 배수
+  sparse_pool_multiplier: 5  # Sparse 후보 풀 배수
+  rrf_k: 60                  # RRF 순위 융합 상수
+  anchor_auxiliary: true     # fact형 질의에 anchor 보조 검색 1회 추가
+
+# 멀티턴 검색 보강 (이전 대화 기반 질의 재작성 + 기관 필터 계승)
+enable_multiturn: true
+
+# 멀티턴 질의 재작성 설정
+rewrite:
+  mode: rule_only  # LLM 재작성 우선, 실패 시 규칙 기반으로 폴백
+  # gpt-5 계열은 reasoning 토큰이 completion에 포함되므로 넉넉하게 (CLAUDE.md 참조).
+  # 로컬 HF 모델은 HFLocalLLM.rewrite()가 내부적으로 256 제한을 사용.
+  max_completion_tokens: 16000  # rewrite 단계에서 허용할 최대 출력 토큰 수
+  timeout_seconds: 30           # rewrite LLM 호출 제한 시간(초)
+
+# 대화 메모리 설정
+memory:
+  enabled: true  # 최근 대화 요약/슬롯 기억 사용 여부
+  summary_buffer:
+    max_recent_turns: 4    # 최근 몇 개 turn을 그대로 유지할지
+    max_summary_chars: 400 # 오래된 대화를 요약해 저장할 최대 글자 수
+  slot_memory:
+    enabled: true  # 기관명/사업명 같은 핵심 슬롯 기억 사용 여부
+
+# 디버그 추적 정보 기록 여부
+debug_trace:
+  enabled: true  # rewritten_query, memory_state 등 내부 추적 정보 포함

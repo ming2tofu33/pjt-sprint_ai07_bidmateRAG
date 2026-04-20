@@ -1,9 +1,16 @@
-"""Tests for evaluation/metrics.py — focused on identifier matching."""
+"""Tests for evaluation/metrics.py."""
 
 from __future__ import annotations
 
-from bidmate_rag.evaluation.metrics import calc_hit_rate, calc_map, calc_mrr, calc_ndcg
-from bidmate_rag.schema import Chunk, RetrievedChunk
+from bidmate_rag.evaluation.metrics import (
+    aggregate_retrieval_metrics_by_type,
+    calc_hit_rate,
+    calc_map,
+    calc_mrr,
+    calc_ndcg,
+    summarize_run_operations,
+)
+from bidmate_rag.schema import Chunk, EvalSample, GenerationResult, RetrievedChunk
 
 
 def _make_chunk(
@@ -121,3 +128,175 @@ def test_hit_rate_outside_topk():
         _make_chunk(파일명="hit.hwp", rank=6),  # k=5 밖
     ]
     assert calc_hit_rate(chunks, ["hit.hwp"], k=5) == 0.0
+
+
+def test_summarize_run_operations_aggregates_cost_tokens_and_latency() -> None:
+    results = [
+        GenerationResult(
+            question_id="q1",
+            question="질문1",
+            scenario="scenario_b",
+            run_id="run-1",
+            embedding_provider="openai",
+            embedding_model="text-embedding-3-small",
+            llm_provider="openai",
+            llm_model="gpt-5-mini",
+            answer="답변1",
+            latency_ms=1000.0,
+            token_usage={"prompt": 100, "completion": 20, "total": 120},
+            cost_usd=0.001,
+        ),
+        GenerationResult(
+            question_id="q2",
+            question="질문2",
+            scenario="scenario_b",
+            run_id="run-1",
+            embedding_provider="openai",
+            embedding_model="text-embedding-3-small",
+            llm_provider="openai",
+            llm_model="gpt-5-mini",
+            answer="답변2",
+            latency_ms=3000.0,
+            token_usage={
+                "prompt": 200,
+                "completion": 50,
+                "total": 250,
+                "rewrite_prompt": 40,
+                "rewrite_completion": 10,
+                "rewrite_total": 50,
+            },
+            cost_usd=0.002,
+            debug={"rewrite_cost_usd": 0.0003},
+        ),
+    ]
+
+    summary = summarize_run_operations(results, judge_total_cost_usd=0.0008)
+
+    assert summary == {
+        "generation_cost_usd": 0.003,
+        "rewrite_cost_usd": 0.0003,
+        "judge_cost_usd": 0.0008,
+        "total_cost_usd": 0.0041,
+        "prompt_tokens": 300,
+        "completion_tokens": 70,
+        "rewrite_prompt_tokens": 40,
+        "rewrite_completion_tokens": 10,
+        "rewrite_total_tokens": 50,
+        "total_tokens": 420,
+        "avg_latency_ms": 2000.0,
+    }
+
+
+def test_summarize_run_operations_returns_zeroed_defaults_for_empty_results() -> None:
+    summary = summarize_run_operations([], judge_total_cost_usd=0.0008)
+
+    assert summary["generation_cost_usd"] == 0.0
+    assert summary["rewrite_cost_usd"] == 0.0
+    assert summary["judge_cost_usd"] == 0.0008
+    assert summary["total_cost_usd"] == 0.0008
+    assert summary["total_tokens"] == 0
+    assert summary["avg_latency_ms"] == 0.0
+
+
+
+def _make_sample(
+    *, question_id: str, type_value: str, expected: list[str]
+) -> EvalSample:
+    return EvalSample(
+        question_id=question_id,
+        question="q",
+        expected_doc_titles=expected,
+        metadata={"type": type_value},
+    )
+
+
+def _make_chunk_with_title(title: str, *, chunk_id: str = "c-1") -> RetrievedChunk:
+    chunk = Chunk(
+        chunk_id=chunk_id,
+        doc_id=f"{chunk_id}-doc",
+        text="t",
+        text_with_meta="t",
+        char_count=1,
+        section="요구사항",
+        content_type="text",
+        chunk_index=0,
+        metadata={"파일명": title},
+    )
+    return RetrievedChunk(rank=1, score=0.9, chunk=chunk)
+
+
+def _make_result(
+    *, question_id: str, retrieved: list[RetrievedChunk]
+) -> GenerationResult:
+    return GenerationResult(
+        question_id=question_id,
+        question="q",
+        scenario="scenario_b",
+        run_id="run-1",
+        embedding_provider="openai",
+        embedding_model="text-embedding-3-small",
+        llm_provider="fake",
+        llm_model="fake-model",
+        answer="a",
+        retrieved_chunk_ids=[c.chunk.chunk_id for c in retrieved],
+        retrieved_doc_ids=[c.chunk.doc_id for c in retrieved],
+        retrieved_chunks=retrieved,
+        latency_ms=1.0,
+        token_usage={},
+    )
+
+
+def test_aggregate_retrieval_metrics_by_type_groups_by_metadata_type() -> None:
+    """Type A(2 hits), Type C(1 miss) 샘플을 넣고 그룹별 집계 검증."""
+    samples = [
+        _make_sample(question_id="q1", type_value="A", expected=["doc1.hwp"]),
+        _make_sample(question_id="q2", type_value="A", expected=["doc2.hwp"]),
+        _make_sample(question_id="q3", type_value="C", expected=["doc3.hwp"]),
+    ]
+    results = [
+        _make_result(question_id="q1", retrieved=[_make_chunk_with_title("doc1.hwp")]),
+        _make_result(question_id="q2", retrieved=[_make_chunk_with_title("doc2.hwp")]),
+        _make_result(question_id="q3", retrieved=[_make_chunk_with_title("other.hwp")]),
+    ]
+
+    breakdown = aggregate_retrieval_metrics_by_type(samples, results, k=5)
+
+    assert breakdown["A"]["n"] == 2
+    assert breakdown["A"]["hit_rate@5"] == 1.0
+    assert breakdown["A"]["mrr"] == 1.0
+    assert breakdown["C"]["n"] == 1
+    assert breakdown["C"]["hit_rate@5"] == 0.0
+    assert breakdown["C"]["mrr"] == 0.0
+
+
+def test_aggregate_retrieval_metrics_by_type_handles_missing_type_and_expected() -> None:
+    """type 누락 / expected 누락 샘플 처리 — 전자는 '(unknown)'에 들어감, 후자는 집계 제외."""
+    samples = [
+        _make_sample(question_id="q1", type_value="A", expected=["doc1.hwp"]),
+        EvalSample(
+            question_id="q2",
+            question="q",
+            expected_doc_titles=["doc2.hwp"],
+            metadata={},  # type 누락
+        ),
+        EvalSample(
+            question_id="q3",
+            question="q",
+            expected_doc_titles=[],  # expected 없음
+            metadata={"type": "C"},
+        ),
+    ]
+    results = [
+        _make_result(question_id="q1", retrieved=[_make_chunk_with_title("doc1.hwp")]),
+        _make_result(question_id="q2", retrieved=[_make_chunk_with_title("doc2.hwp")]),
+        _make_result(question_id="q3", retrieved=[_make_chunk_with_title("anything.hwp")]),
+    ]
+
+    breakdown = aggregate_retrieval_metrics_by_type(samples, results, k=5)
+
+    assert breakdown["A"]["n"] == 1
+    assert breakdown["A"]["hit_rate@5"] == 1.0
+    assert breakdown["(unknown)"]["n"] == 1
+    assert breakdown["(unknown)"]["hit_rate@5"] == 1.0
+    # Type C는 expected 없어 집계 제외 → 키 자체가 없음
+    assert "C" not in breakdown

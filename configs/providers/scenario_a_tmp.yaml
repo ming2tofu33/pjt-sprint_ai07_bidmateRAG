@@ -1,0 +1,9 @@
+# 시나리오 A 스모크/재현용 — 팀원 리포트(MD)의 모델·임베딩과 동일
+# collection_name: 리포트의 "bidmate-huggingface-baai-bge-m3" 와 맞춤.
+# 컬렉션 문서 수가 0이면 기본 종료(RuntimeError). 팀 chroma_db(zip) 배치 또는
+# 전체 재임베딩 의도 시에만 환경 변수 BIDMATE_AUTO_BUILD_INDEX=1.
+provider: huggingface
+scenario: scenario_a
+model: google/gemma-4-E4B-it
+embedding_model: BAAI/bge-m3
+collection_name: bidmate-huggingface-baai-bge-m3

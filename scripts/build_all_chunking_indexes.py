@@ -26,16 +26,16 @@ CHUNKING_CONFIGS = [
         "config": "configs/chunking/chunking_semantic_percentile.yaml",
         "chunks": "data/processed/semantic-percentile/chunks.parquet",
     },
-    {
-        "name": "chunking_semantic_std",
-        "config": "configs/chunking/chunking_semantic_std.yaml",
-        "chunks": "data/processed/semantic-std/chunks.parquet",
-    },
-    {
-        "name": "chunking_semantic_interquartile",
-        "config": "configs/chunking/chunking_semantic_interquartile.yaml",
-        "chunks": "data/processed/semantic-interquartile/chunks.parquet",
-    },
+    # {
+    #     "name": "chunking_semantic_std",
+    #     "config": "configs/chunking/chunking_semantic_std.yaml",
+    #     "chunks": "data/processed/semantic-std/chunks.parquet",
+    # },
+    # {
+    #     "name": "chunking_semantic_interquartile",
+    #     "config": "configs/chunking/chunking_semantic_interquartile.yaml",
+    #     "chunks": "data/processed/semantic-interquartile/chunks.parquet",
+    # },
 ]
 
 def run(cmd: list[str]) -> None:
@@ -55,7 +55,7 @@ def main() -> None:
         if cfg["name"] != "chunking_1000_150":
             print(f"  → ingest 실행 중...")
             run([
-                "python", "scripts/ingest_data.py",
+                sys.executable, "scripts/ingest_data.py",
                 "--experiment-config", cfg["config"],
                 "--parsed-path", "data/processed/parsed_documents.parquet",
             ])
@@ -63,7 +63,7 @@ def main() -> None:
         # 2. build_index
         print(f"  → build_index 실행 중...")
         run([
-            "python", "scripts/build_index.py",
+            sys.executable, "scripts/build_index.py",
             "--provider-config", PROVIDER,
             "--experiment-config", cfg["config"],
             "--chunks-path", cfg["chunks"],

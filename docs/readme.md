@@ -1,0 +1,1 @@
+* [[보고서] BidMate RAG 기술 보고서 다운로드 (PDF)](./docs/%5B%EB%B3%B4%EA%B3%A0%EC%84%9C%5D%20BidMate%20RAG%20%EA%B8%B0%EC%88%A0%20%EB%B3%B4%EA%B3%A0%EC%84%9C.pdf)

@@ -1,0 +1,36 @@
+# 시나리오 B 평가를 돌리되, 검색 단만 이미지상 시나리오 A에 가깝게 맞출 때 사용.
+# - Dense(Chroma)만 — hybrid.enabled=false 이면 BM25·RRF 미사용 (runtime.py sparse_store 미생성)
+# - 규칙 부스트 가중치 0 — rerank_with_boost에서 가산 없음에 가깝게
+# - 멀티턴·메모리 비활성 — 단일 질의 검색에 가깝게
+#
+# 주의: 임베딩·컬렉션은 여전히 --provider-config (예: openai_gpt5mini.yaml) 에 따름.
+# 진짜 "A와 동일" 스택은 Gemma+BGE+A chroma 로 시나리오 A 파이프라인을 돌리는 것과 다름.
+
+reranker_model: null
+
+boost:
+  section: 0
+  table: 0
+  metadata: 0
+  max_total: 0
+
+hybrid:
+  enabled: false
+
+enable_multiturn: false
+
+rewrite:
+  mode: rule_only
+  max_completion_tokens: 16000
+  timeout_seconds: 30
+
+memory:
+  enabled: false
+  summary_buffer:
+    max_recent_turns: 4
+    max_summary_chars: 400
+  slot_memory:
+    enabled: false
+
+debug_trace:
+  enabled: true

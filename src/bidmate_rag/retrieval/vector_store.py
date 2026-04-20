@@ -90,7 +90,10 @@ class ChromaVectorStore:
         self.collection = client.get_or_create_collection(
             name=collection_name, metadata={"hnsw:space": "cosine"}
         )
-
+    def count(self) -> int:
+    #컬렉션에 저장된 청크 수를 반환한다
+        return self.collection.count()
+    
     def upsert(
         self, chunks: list[Chunk], embeddings: list[list[float]], batch_size: int = 5000
     ) -> None:

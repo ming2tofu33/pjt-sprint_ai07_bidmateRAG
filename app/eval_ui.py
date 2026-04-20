@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-
+from app.api.routes import run_benchmark_experiment, load_metadata_options, list_scenario_a_embeddings, list_scenario_a_llms
 import pandas as pd
 import yaml as _yaml
 
@@ -14,6 +14,7 @@ from bidmate_rag.evaluation.dataset import (
     normalize_metadata_filter,
 )
 from bidmate_rag.tracking.markdown_report import load_report_data, write_report
+from bidmate_rag.tracking.pricing import load_pricing, normalize_run_costs
 
 # 평가셋은 ``data/eval/eval_v1/``, ``eval_v2/`` 등 버전 디렉토리에 둡니다.
 # UI는 가장 높은 버전을 자동으로 사용 (새 버전 만들면 코드 수정 없이 반영됨).
@@ -49,7 +50,7 @@ def _sort_providers(configs):
     )
 
 
-def _render_scenario_provider_selector(st, list_provider_configs, key_prefix=""):
+def _render_scenario_provider_selector(st, list_provider_configs, list_scenario_a_embeddings=None, list_scenario_a_llms=None, key_prefix=""):
     """시나리오 체크박스 + Provider selectbox. 평가실행/디버깅 공통."""
     provider_configs = list_provider_configs()
     col_s1, col_s2 = st.columns(2)
@@ -61,19 +62,44 @@ def _render_scenario_provider_selector(st, list_provider_configs, key_prefix="")
     filtered = []
     for p in provider_configs:
         scenario, _ = _get_provider_info(p)
-        if scenario == "scenario_a" and show_a:
+        if scenario == "scenario_a" and show_a and not (show_a and not show_b):
             filtered.append(p)
         elif scenario == "scenario_b" and show_b:
             filtered.append(p)
     filtered = _sort_providers(filtered)
 
-    if not filtered:
-        st.warning("선택한 시나리오에 Provider가 없습니다.")
-        return None
-    return st.selectbox(
-        "Provider", filtered, format_func=_format_provider, key=f"{key_prefix}_provider"
-    )
+    provider = None
+    # 시나리오 B만 선택 시 Provider selectbox 표시
+    if show_b:
+        if not filtered:
+            st.warning("선택한 시나리오에 Provider가 없습니다.")
+            return None, None, None
+        provider = st.selectbox(
+            "Provider", filtered, format_func=_format_provider, key=f"{key_prefix}_provider"
+        )
 
+    # 시나리오 A 전용 설정 (Provider 숨김)
+    selected_embedding = None
+    selected_llm = None
+    if show_a and not show_b and list_scenario_a_embeddings and list_scenario_a_llms:
+        embedding_configs = list_scenario_a_embeddings()
+        if embedding_configs:
+            selected_embedding = st.selectbox(
+                "임베딩 모델",
+                embedding_configs,
+                format_func=lambda p: p.stem,
+                key=f"{key_prefix}_embedding",
+            )
+        llm_configs = list_scenario_a_llms()
+        if llm_configs:
+            selected_llm = st.selectbox(
+                "LLM 모델",
+                llm_configs,
+                format_func=lambda p: p.stem,
+                key=f"{key_prefix}_llm",
+            )
+
+    return provider, selected_embedding, selected_llm
 
 EVAL_SET_PATH = EVAL_DIR / "eval_set.json"
 RUNS_DIR = Path("artifacts/logs/runs")
@@ -176,6 +202,9 @@ def render_eval_tabs(
     run_live_query,
     list_provider_configs,
     list_chunking_configs,
+    list_scenario_a_embeddings, # 시나리오 A 임베딩 옵션 로딩 함수
+    list_scenario_a_llms, # 시나리오 A LLM 옵션 로딩 함수
+    list_prompt_configs, # 프롬프트 설정 로딩 함수
     load_benchmark_frames,
     load_run_records,
 ):
@@ -216,12 +245,12 @@ def render_eval_tabs(
 
     # ── 서브탭 1: 평가 실행 ──
     with run_tab:
-        _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_chunking_configs)
+        _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_chunking_configs, list_scenario_a_embeddings, list_scenario_a_llms, list_prompt_configs) # 시나리오 A 옵션 전달 추가
 
     # ── 서브탭 2: 질문 디버깅 ──
     with debug_tab:
         _render_debug_tab(
-            st, eval_set, run_live_query, list_provider_configs, list_chunking_configs
+            st, eval_set, run_live_query, list_provider_configs, list_chunking_configs, list_scenario_a_embeddings, list_scenario_a_llms, list_prompt_configs   # 시나리오 A 옵션 전달 추가
         )
 
     # ── 서브탭 3: 결과 비교 ──
@@ -233,7 +262,7 @@ def render_eval_tabs(
         _render_edit_tab(st, eval_set)
 
 
-def _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_chunking_configs):
+def _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_chunking_configs, list_scenario_a_embeddings, list_scenario_a_llms, list_prompt_configs): # 시나리오 A 옵션 인자 추가
     """평가셋 일괄 실행 탭. CLI(``bidmate-eval``)와 정확히 같은 코드 경로를 호출한다.
 
     UX 단순화 원칙:
@@ -258,22 +287,43 @@ def _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_ch
         "'평가셋 편집' 탭에서 저장 후 다시 로딩하세요)"
     )
 
-    provider = _render_scenario_provider_selector(st, list_provider_configs, key_prefix="run")
-    if provider is None:
+    provider, selected_embedding, selected_llm = _render_scenario_provider_selector( 
+    st, list_provider_configs, list_scenario_a_embeddings, list_scenario_a_llms, key_prefix="run") # 시나리오 A 임베딩/LLM 선택 추가
+    if provider is None and selected_embedding is None:
         return
     chunking = _render_chunking_selector(
         st, list_chunking_configs, key_prefix="run"
     )  # 청킹 선택 추가
+    top_k = st.slider("Top-K (검색 청크 수)", 1, 20, 5, key="run_topk")
+    prompt_configs = list_prompt_configs()
+    selected_prompt = None
+    if prompt_configs:
+        selected_prompt_config = st.selectbox(
+            "프롬프트 버전",
+            [None] + prompt_configs,
+            format_func=lambda p: "기본값" if p is None else _yaml.safe_load(p.read_text()).get("description", p.stem),
+            key="run_prompt_config",
+        )
+        if selected_prompt_config:
+            selected_prompt = _yaml.safe_load(selected_prompt_config.read_text()).get("system_prompt")
 
-    opt_col1, opt_col2 = st.columns(2)
+    opt_col1, opt_col2, opt_col3 = st.columns(3)
     with opt_col1:
         skip_judge = st.checkbox(
-            "Judge 끄기 (faithfulness 등)",
+            "Judge 끄기",
             value=False,
             key="run_skip_judge",
-            help="LLM judge는 추가 API 호출이라 비용/시간이 늘어납니다. 빠른 실행에 사용",
+            help="LLM judge는 추가 API 호출이라 비용/시간이 늘어납니다.",
         )
     with opt_col2:
+        judge_v2 = st.checkbox(
+            "Judge V2 사용",
+            value=True,
+            disabled=skip_judge,
+            key="run_judge_v2",
+            help="증거 기반의 더 정교한 평가 모델을 사용합니다.",
+        )
+    with opt_col3:
         judge_model = st.selectbox(
             "Judge 모델",
             ["gpt-4o-mini", "gpt-5-mini"],
@@ -296,7 +346,12 @@ def _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_ch
             experiment_config_path=chunking,  # 청킹 전략 전달
             skip_judge=skip_judge,
             judge_model=judge_model,
+            judge_v2=judge_v2,
+            top_k=top_k,  # 검색할 top_k 전달
             progress_callback=_on_progress,
+            embedding_config_path=selected_embedding,  # 시나리오 A 임베딩 전달,
+            llm_config_path=selected_llm,  # 시나리오 A LLM 전달
+            system_prompt=selected_prompt,  # 프롬프트 버전 전달
         )
     except Exception as exc:
         progress_bar.empty()
@@ -330,16 +385,27 @@ def _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_ch
 def _render_run_artifacts(st, artifacts) -> None:
     """평가 실행 결과를 메트릭 카드 + 표 + 리포트 다운로드로 렌더링."""
     metrics = artifacts.metrics or {}
+    ops_metrics = artifacts.ops_metrics or {}
     results = artifacts.benchmark.results
+    pricing = load_pricing()
+    llm_model = results[0].llm_model if results else ""
 
     # 비용/토큰/지연 집계
-    generation_cost = sum(float(r.cost_usd or 0.0) for r in results)
-    judge_cost = float(artifacts.judge_total_cost_usd or 0.0)
-    prompt_tokens = sum(int((r.token_usage or {}).get("prompt", 0) or 0) for r in results)
-    completion_tokens = sum(int((r.token_usage or {}).get("completion", 0) or 0) for r in results)
-    total_tokens = prompt_tokens + completion_tokens
-    latencies_ms = [float(r.latency_ms or 0.0) for r in results]
-    avg_latency_s = sum(latencies_ms) / len(latencies_ms) / 1000 if latencies_ms else 0.0
+    normalized_costs = normalize_run_costs(
+        llm_model=llm_model,
+        pricing=pricing,
+        generation_cost_usd=float(ops_metrics.get("generation_cost_usd", 0.0) or 0.0),
+        rewrite_cost_usd=float(ops_metrics.get("rewrite_cost_usd", 0.0) or 0.0),
+        prompt_tokens=int(ops_metrics.get("prompt_tokens", 0) or 0),
+        completion_tokens=int(ops_metrics.get("completion_tokens", 0) or 0),
+        rewrite_prompt_tokens=int(ops_metrics.get("rewrite_prompt_tokens", 0) or 0),
+        rewrite_completion_tokens=int(ops_metrics.get("rewrite_completion_tokens", 0) or 0),
+        judge_cost_usd=float(ops_metrics.get("judge_cost_usd", artifacts.judge_total_cost_usd) or 0.0),
+    )
+    generation_cost = float(normalized_costs["generation_cost_usd"])
+    judge_cost = float(normalized_costs["judge_cost_usd"])
+    total_tokens = int(ops_metrics.get("total_tokens", 0) or 0)
+    avg_latency_s = float(ops_metrics.get("avg_latency_ms", 0.0) or 0.0) / 1000
 
     # ── 검색 메트릭 카드 ──
     st.markdown("#### 🔍 검색 품질")
@@ -423,7 +489,8 @@ def _fmt_metric(value) -> str:
         return "N/A"
 
 
-def _render_debug_tab(st, eval_set, run_live_query, list_provider_configs, list_chunking_configs):
+def _render_debug_tab(st, eval_set, run_live_query, list_provider_configs, list_chunking_configs, list_scenario_a_embeddings, list_scenario_a_llms, list_prompt_configs): # 시나리오 A 옵션 인자 추가
+    """질문별 디버깅 탭. 평가셋에서 질문 하나를 선택해 검색/생성 결과와 메트릭을 상세히 보여준다."""
     st.subheader("질문별 디버깅")
 
     if not eval_set:
@@ -466,10 +533,23 @@ def _render_debug_tab(st, eval_set, run_live_query, list_provider_configs, list_
         return
 
     # 설정
-    provider = _render_scenario_provider_selector(st, list_provider_configs, key_prefix="debug")
-    if provider is None:
+    provider, selected_embedding, selected_llm = _render_scenario_provider_selector(
+    st, list_provider_configs, list_scenario_a_embeddings, list_scenario_a_llms, key_prefix="debug") # 시나리오 A 임베딩/LLM 선택 추가
+    if provider is None and selected_embedding is None:
         return
     top_k = st.slider("Top-K", 1, 20, 5, key="debug_topk")
+    # 프롬프트 버전 선택 ← 추가
+    prompt_configs = list_prompt_configs()
+    selected_prompt = None
+    if prompt_configs:
+        selected_prompt_config = st.selectbox(
+            "프롬프트 버전",
+            [None] + prompt_configs,
+            format_func=lambda p: "기본값" if p is None else _yaml.safe_load(p.read_text()).get("description", p.stem),
+            key="debug_prompt_config",
+        )
+        if selected_prompt_config:
+            selected_prompt = _yaml.safe_load(selected_prompt_config.read_text()).get("system_prompt")
     chunking = _render_chunking_selector(
         st, list_chunking_configs, key_prefix="debug"
     )  # 청킹 선택 추가
@@ -498,6 +578,9 @@ def _render_debug_tab(st, eval_set, run_live_query, list_provider_configs, list_
                     top_k=top_k,
                     metadata_filter=normalized_filter,
                     chat_history=history,
+                    embedding_config_path=selected_embedding,  # 시나리오 A 임베딩 전달,
+                    llm_config_path=selected_llm,  # 시나리오 A LLM 전달
+                    system_prompt=selected_prompt,  # 프롬프트 버전 전달
                 )
                 status.update(label="완료", state="complete")
 

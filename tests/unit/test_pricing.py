@@ -7,6 +7,8 @@ from bidmate_rag.tracking.pricing import (
     calc_llm_cost,
     is_model_priced,
     load_pricing,
+    normalize_run_costs,
+    resolve_llm_cost,
 )
 
 PRICING_FIXTURE = {
@@ -100,3 +102,43 @@ def test_calc_llm_cost_cached_falls_back_to_input_rate_when_unset():
     cost_no_cache = calc_llm_cost("no_cached", 1000, 0, CACHED_PRICING, cached_tokens=0)
     cost_with_cache = calc_llm_cost("no_cached", 1000, 0, CACHED_PRICING, cached_tokens=500)
     assert cost_no_cache == cost_with_cache
+
+
+def test_resolve_llm_cost_recomputes_when_existing_cost_missing():
+    cost = resolve_llm_cost(
+        "test-model",
+        prompt_tokens=1_000,
+        completion_tokens=500,
+        pricing=PRICING_FIXTURE,
+        existing_cost=0.0,
+    )
+    assert cost == 0.003
+
+
+def test_resolve_llm_cost_preserves_existing_cost_when_present():
+    cost = resolve_llm_cost(
+        "test-model",
+        prompt_tokens=1_000,
+        completion_tokens=500,
+        pricing=PRICING_FIXTURE,
+        existing_cost=0.123456,
+    )
+    assert cost == 0.123456
+
+
+def test_normalize_run_costs_backfills_generation_and_rewrite():
+    costs = normalize_run_costs(
+        llm_model="test-model",
+        pricing=PRICING_FIXTURE,
+        generation_cost_usd=0.0,
+        rewrite_cost_usd=0.0,
+        prompt_tokens=1_000,
+        completion_tokens=500,
+        rewrite_prompt_tokens=500,
+        rewrite_completion_tokens=250,
+        judge_cost_usd=0.1,
+    )
+    assert costs["generation_cost_usd"] == 0.003
+    assert costs["rewrite_cost_usd"] == 0.0015
+    assert costs["judge_cost_usd"] == 0.1
+    assert costs["total_cost_usd"] == 0.1045

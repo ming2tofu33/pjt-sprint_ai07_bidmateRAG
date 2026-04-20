@@ -83,7 +83,9 @@ def test_benchmark_run_result_summarizes_metrics() -> None:
         retrieved_doc_ids=["doc-1"],
         latency_ms=100,
         token_usage={"total": 30},
+        cost_usd=0.001,
         judge_scores={"faithfulness": 2, "relevance": 2},
+        debug={"rewrite_cost_usd": 0.0003},
     )
 
     benchmark = BenchmarkRunResult(
@@ -93,7 +95,7 @@ def test_benchmark_run_result_summarizes_metrics() -> None:
         provider_label="openai-gpt5-mini",
         samples=[sample],
         results=[result],
-        metrics={"hit_rate@5": 1.0},
+        metrics={"hit_rate@5": 1.0, "judge_cost_usd": 0.0008},
     )
 
     summary = benchmark.to_summary_record()
@@ -102,3 +104,7 @@ def test_benchmark_run_result_summarizes_metrics() -> None:
     assert summary["provider_label"] == "openai-gpt5-mini"
     assert summary["num_samples"] == 1
     assert summary["avg_latency_ms"] == 100
+    assert summary["generation_cost_usd"] == 0.001
+    assert summary["rewrite_cost_usd"] == 0.0003
+    assert summary["judge_cost_usd"] == 0.0008
+    assert summary["total_cost_usd"] == 0.0021

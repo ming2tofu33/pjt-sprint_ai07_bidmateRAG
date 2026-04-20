@@ -1,4 +1,4 @@
-from bidmate_rag.generation.context_builder import build_context_block
+from bidmate_rag.generation.context_builder import build_context_block, build_numbered_context_block
 from bidmate_rag.schema import Chunk, RetrievedChunk
 
 
@@ -127,3 +127,168 @@ def test_build_context_block_respects_max_chars_budget() -> None:
     assert "사업 1" in context
     assert "사업 2" not in context
     assert context == "[출처: 사업 1 | 기관 1]\n짧은 본문"
+
+
+def test_build_numbered_context_block_groups_chunks_by_document() -> None:
+    chunks = [
+        _make_retrieved_chunk(
+            chunk_id="chunk-1",
+            text="첫 번째 문서의 첫 청크",
+            metadata={
+                "사업명": "사업 A",
+                "발주 기관": "기관 A",
+                "파일명": "a.hwp",
+                "사업 금액": 100000000,
+            },
+        ),
+        _make_retrieved_chunk(
+            chunk_id="chunk-2",
+            text="두 번째 문서의 첫 청크",
+            metadata={
+                "사업명": "사업 B",
+                "발주 기관": "기관 B",
+                "파일명": "b.hwp",
+                "사업 금액": 200000000,
+            },
+        ),
+        _make_retrieved_chunk(
+            chunk_id="chunk-3",
+            text="첫 번째 문서의 두 번째 청크",
+            metadata={
+                "사업명": "사업 A",
+                "발주 기관": "기관 A",
+                "파일명": "a.hwp",
+                "사업 금액": 100000000,
+            },
+        ),
+    ]
+
+    context, used_indices = build_numbered_context_block(chunks, max_chars=2000)
+
+    assert used_indices == [0, 1, 2]
+    assert context.count("[문서: 사업 A | 기관 A | a.hwp]") == 1
+    assert context.count("[문서: 사업 B | 기관 B | b.hwp]") == 1
+    assert "[1] 섹션=요구사항" in context
+    assert "[2] 섹션=요구사항" in context
+    assert "[3] 섹션=요구사항" in context
+    assert context.count("사업 금액=100,000,000원") == 1
+    assert context.count("사업 금액=200,000,000원") == 1
+    first_group_index = context.index("[문서: 사업 A | 기관 A | a.hwp]")
+    second_group_index = context.index("[문서: 사업 B | 기관 B | b.hwp]")
+    first_doc_second_chunk = context.index("첫 번째 문서의 두 번째 청크")
+    assert first_group_index < first_doc_second_chunk < second_group_index
+
+
+def test_build_numbered_context_block_prioritizes_question_matched_chunks_within_document() -> None:
+    chunks = [
+        _make_retrieved_chunk(
+            chunk_id="chunk-1",
+            text="사업 개요와 추진 배경 설명",
+            metadata={
+                "사업명": "사업 A",
+                "발주 기관": "기관 A",
+                "파일명": "a.hwp",
+            },
+        ),
+        _make_retrieved_chunk(
+            chunk_id="chunk-2",
+            text="사업예산은 900,000,000원이며 부가세 포함입니다.",
+            metadata={
+                "사업명": "사업 A",
+                "발주 기관": "기관 A",
+                "파일명": "a.hwp",
+            },
+        ),
+    ]
+
+    context, used_indices = build_numbered_context_block(
+        chunks,
+        max_chars=2000,
+        question="이 사업의 예산은 얼마입니까?",
+    )
+
+    assert used_indices == [1, 0]
+    assert context.index("사업예산은 900,000,000원") < context.index("사업 개요와 추진 배경 설명")
+
+
+def test_build_numbered_context_block_uses_round_robin_after_question_based_sorting() -> None:
+    chunks = [
+        _make_retrieved_chunk(
+            chunk_id="chunk-1",
+            text="사업 A 개요",
+            metadata={
+                "사업명": "사업 A",
+                "발주 기관": "기관 A",
+                "파일명": "a.hwp",
+            },
+        ),
+        _make_retrieved_chunk(
+            chunk_id="chunk-2",
+            text="사업 B 개요",
+            metadata={
+                "사업명": "사업 B",
+                "발주 기관": "기관 B",
+                "파일명": "b.hwp",
+            },
+        ),
+        _make_retrieved_chunk(
+            chunk_id="chunk-3",
+            text="사업예산은 100,000,000원입니다.",
+            metadata={
+                "사업명": "사업 A",
+                "발주 기관": "기관 A",
+                "파일명": "a.hwp",
+            },
+        ),
+        _make_retrieved_chunk(
+            chunk_id="chunk-4",
+            text="사업예산은 200,000,000원입니다.",
+            metadata={
+                "사업명": "사업 B",
+                "발주 기관": "기관 B",
+                "파일명": "b.hwp",
+            },
+        ),
+    ]
+
+    context, used_indices = build_numbered_context_block(
+        chunks,
+        max_chars=2000,
+        question="두 사업의 예산을 비교해줘",
+    )
+
+    assert used_indices == [2, 3, 0, 1]
+    assert context.index("사업예산은 100,000,000원입니다.") < context.index("사업 A 개요")
+    assert context.index("사업예산은 200,000,000원입니다.") < context.index("사업 B 개요")
+
+
+def test_build_numbered_context_block_marks_question_scoped_documents() -> None:
+    chunks = [
+        _make_retrieved_chunk(
+            chunk_id="chunk-1",
+            text="고려대학교 포털 시스템 내용",
+            metadata={
+                "사업명": "차세대 포털·학사 정보시스템 구축사업",
+                "발주 기관": "고려대학교",
+                "파일명": "korea.pdf",
+            },
+        ),
+        _make_retrieved_chunk(
+            chunk_id="chunk-2",
+            text="다른 기관 문서 내용",
+            metadata={
+                "사업명": "통합 정보시스템 운영지원",
+                "발주 기관": "경기도사회서비스원",
+                "파일명": "ggsw.hwp",
+            },
+        ),
+    ]
+
+    context, _ = build_numbered_context_block(
+        chunks,
+        max_chars=2000,
+        question="고려대학교 차세대 포털·학사 정보시스템 구축사업의 예산을 알려줘",
+    )
+
+    assert "[문서: 차세대 포털·학사 정보시스템 구축사업 | 고려대학교 | korea.pdf]\n질문대상=예" in context
+    assert "[문서: 통합 정보시스템 운영지원 | 경기도사회서비스원 | ggsw.hwp]\n질문대상=예" not in context

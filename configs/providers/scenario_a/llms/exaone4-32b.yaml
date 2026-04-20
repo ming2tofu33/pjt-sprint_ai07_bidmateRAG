@@ -1,0 +1,3 @@
+provider: huggingface
+model: LGAI-EXAONE/EXAONE-4.0-32B
+description: "LG AI EXAONE 4.0 32B (4-bit 양자화)"

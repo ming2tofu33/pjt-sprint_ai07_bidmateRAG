@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>6종 노이즈 정제 + Alias 매핑</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;family=Nanum+Gothic+Coding:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 400px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; margin: 0;">
+                기술 아키텍처 · 데이터 엔지니어링
+            </p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #64748B; letter-spacing: 0.5px; margin: 0;"><span style="font-weight: 700; color: #475569;">11</span><span style="font-weight: 500; color: #94A3B8;">/31</span></p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 105px; left: 80px; width: 1120px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #111827; letter-spacing: -2px; margin: 0; line-height: 1.2; line-height: 1.2;">
+                6종 노이즈 정제 파이프라인 + 메타데이터 Alias 매핑
+            </p>
+</div>
+<!-- Left Column Title (Pipeline) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 180px; left: 80px; width: 560px; height: 60px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 700; color: #1F2937; margin: 0 0 5px 0;">
+                순차 정제 파이프라인 <span style="font-family: 'Pretendard', monospace; font-size: 15px; color: #FF7B9C; margin-left: 8px; background: #FFF5F7; padding: 2px 6px; border-radius: 4px;">cleaner.py</span>
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #64748B; margin: 0;">
+                실행 순서 자체가 하나의 설계 의사결정 (이전 단계 정제 결과에 의존)
+            </p>
+</div>
+<!-- Left Column Content (Pipeline Diagram) -->
+<!-- Fixed width to 565px to prevent 2px horizontal overflow. Adjusted top/height for balance. -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 245px; left: 80px; width: 565px; height: 415px; z-index: 10;">
+<div style="display: flex; flex-direction: column; width: 100%; font-family: 'Pretendard', 'Noto Sans KR', sans-serif;">
+<!-- Step 1 -->
+<div style="display: flex; align-items: center; width: 100%; height: 50px; background: #FFFFFF; border: 1px solid #607196; border-radius: 6px; box-shadow: 0 2px 4px rgba(96, 113, 150, 0.05);">
+<div style="width: 44px; height: 100%; background: #607196; border-radius: 5px 0 0 5px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: 900; font-family: 'Black Han Sans', sans-serif; font-size: 18px;">1</div>
+<div style="flex: 1; padding: 0 16px; display: flex; justify-content: space-between; align-items: center;">
+<span style="font-weight: 700; color: #1F2937; font-size: 15px;">BR태그 정규화</span>
+<span style="color: #64748B; font-size: 13px;">개행 및 문단 분리 명확화</span>
+</div>
+</div>
+<!-- Arrow 1 - Adjusted height to prevent tight padding/flush edges -->
+<div style="text-align: center; color: #94A3B8; height: 23px; display: flex; justify-content: center; align-items: center;">
+<i class="fas fa-arrow-down" style="font-size: 14px;"></i>
+</div>
+<!-- Step 2 -->
+<div style="display: flex; align-items: center; width: 100%; height: 50px; background: #FFFFFF; border: 1px solid #607196; border-radius: 6px; box-shadow: 0 2px 4px rgba(96, 113, 150, 0.05);">
+<div style="width: 44px; height: 100%; background: #607196; border-radius: 5px 0 0 5px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: 900; font-family: 'Black Han Sans', sans-serif; font-size: 18px;">2</div>
+<div style="flex: 1; padding: 0 16px; display: flex; justify-content: space-between; align-items: center;">
+<span style="font-weight: 700; color: #1F2937; font-size: 15px;">HTML 테이블 복원</span>
+<span style="color: #64748B; font-size: 13px;">표 구조 파괴 방지 및 행/열 보존</span>
+</div>
+</div>
+<!-- Arrow 2 -->
+<div style="text-align: center; color: #94A3B8; height: 23px; display: flex; justify-content: center; align-items: center;">
+<i class="fas fa-arrow-down" style="font-size: 14px;"></i>
+</div>
+<!-- Step 3 -->
+<div style="display: flex; align-items: center; width: 100%; height: 50px; background: #FFFFFF; border: 1px solid #607196; border-radius: 6px; box-shadow: 0 2px 4px rgba(96, 113, 150, 0.05);">
+<div style="width: 44px; height: 100%; background: #607196; border-radius: 5px 0 0 5px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: 900; font-family: 'Black Han Sans', sans-serif; font-size: 18px;">3</div>
+<div style="flex: 1; padding: 0 16px; display: flex; justify-content: space-between; align-items: center;">
+<span style="font-weight: 700; color: #1F2937; font-size: 15px;">텍스트 목차 계층화</span>
+<span style="color: #64748B; font-size: 13px;">RFP의 물리적 인덱스 계층 구조화</span>
+</div>
+</div>
+<!-- Arrow 3 -->
+<div style="text-align: center; color: #94A3B8; height: 23px; display: flex; justify-content: center; align-items: center;">
+<i class="fas fa-arrow-down" style="font-size: 14px;"></i>
+</div>
+<!-- Step 4 -->
+<div style="display: flex; align-items: center; width: 100%; height: 50px; background: #FFFFFF; border: 1px solid #607196; border-radius: 6px; box-shadow: 0 2px 4px rgba(96, 113, 150, 0.05);">
+<div style="width: 44px; height: 100%; background: #607196; border-radius: 5px 0 0 5px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: 900; font-family: 'Black Han Sans', sans-serif; font-size: 18px;">4</div>
+<div style="flex: 1; padding: 0 16px; display: flex; justify-content: space-between; align-items: center;">
+<span style="font-weight: 700; color: #1F2937; font-size: 15px;">섹션박스 정규화</span>
+<span style="color: #64748B; font-size: 13px;">논리적 단락 경계의 헤더 설정</span>
+</div>
+</div>
+<!-- Arrow 4 -->
+<div style="text-align: center; color: #94A3B8; height: 23px; display: flex; justify-content: center; align-items: center;">
+<i class="fas fa-arrow-down" style="font-size: 14px;"></i>
+</div>
+<!-- Step 5 -->
+<div style="display: flex; align-items: center; width: 100%; height: 50px; background: #FFFFFF; border: 1px solid #607196; border-radius: 6px; box-shadow: 0 2px 4px rgba(96, 113, 150, 0.05);">
+<div style="width: 44px; height: 100%; background: #607196; border-radius: 5px 0 0 5px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: 900; font-family: 'Black Han Sans', sans-serif; font-size: 18px;">5</div>
+<div style="flex: 1; padding: 0 16px; display: flex; justify-content: space-between; align-items: center;">
+<span style="font-weight: 700; color: #1F2937; font-size: 15px;">PUA 및 불필요 공백 정제</span>
+<span style="color: #64748B; font-size: 13px;">유니코드 깨짐 텍스트 제거 및 압축</span>
+</div>
+</div>
+<!-- Arrow 5 -->
+<div style="text-align: center; color: #94A3B8; height: 23px; display: flex; justify-content: center; align-items: center;">
+<i class="fas fa-arrow-down" style="font-size: 14px;"></i>
+</div>
+<!-- Step 6 -->
+<div style="display: flex; align-items: center; width: 100%; height: 50px; background: #FFFFFF; border: 1px solid #607196; border-radius: 6px; box-shadow: 0 2px 4px rgba(96, 113, 150, 0.05);">
+<div style="width: 44px; height: 100%; background: #607196; border-radius: 5px 0 0 5px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: 900; font-family: 'Black Han Sans', sans-serif; font-size: 18px;">6</div>
+<div style="flex: 1; padding: 0 16px; display: flex; justify-content: space-between; align-items: center;">
+<span style="font-weight: 700; color: #1F2937; font-size: 15px;">중복셀 병합 처리</span>
+<span style="color: #64748B; font-size: 13px;">의미 없는 반복 텍스트 제거로 토큰 절약</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column Background Shape (Alias Mapping) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 180px; left: 680px; width: 520px; height: 485px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; z-index: 1;"></div>
+<!-- Right Column Content -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 205px; left: 710px; width: 460px; height: 435px; z-index: 10;">
+<div style="display: flex; align-items: center; margin-bottom: 15px;">
+<i class="fas fa-map-signs" style="color: #FFC759; font-size: 20px; margin-right: 10px;"></i>
+<h3 style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 700; color: #1F2937; margin: 0;">메타데이터 Alias 매핑</h3>
+</div>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 400; color: #64748B; line-height: 1.6; margin: 0 0 25px 0; word-break: keep-all;">
+                동일 기관의 다양한 표기 변동을 통합하여 검색 노이즈를 제거합니다. 완전 중복 문서의 경우
+                <span style="font-family: 'Pretendard', monospace; font-size: 13px; color: #FF7B9C; background: #FFF5F7; padding: 2px 4px; border-radius: 3px;">is_duplicate=True</span>
+                플래그를 부여하여 벡터 인덱싱에서 자동 제외 처리됩니다.
+            </p>
+<table style="width: 100%; border-collapse: collapse; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; text-align: left;">
+<thead>
+<tr style="border-bottom: 2px solid #607196;">
+<th style="padding: 12px 10px; color: #94A3B8; font-weight: 700; width: 50%;">원본 표기 (노이즈)</th>
+<th style="padding: 12px 10px; color: #1F2937; font-weight: 700; width: 50%;">정규화 후 (통합)</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom: 1px solid #E8E9ED;">
+<td style="padding: 14px 10px; color: #94A3B8; text-decoration: line-through;">국민연금관리공단</td>
+<td style="padding: 14px 10px; color: #1F2937; font-weight: 700; background: rgba(96, 113, 150, 0.05); border-left: 2px solid #607196;">국민연금공단</td>
+</tr>
+<tr style="border-bottom: 1px solid #E8E9ED;">
+<td style="padding: 14px 10px; color: #94A3B8; text-decoration: line-through;">한국지능정보사회진흥원</td>
+<td style="padding: 14px 10px; color: #1F2937; font-weight: 700; background: rgba(96, 113, 150, 0.05); border-left: 2px solid #607196;">NIA</td>
+</tr>
+<tr style="border-bottom: 1px solid #E8E9ED;">
+<td style="padding: 14px 10px; color: #94A3B8; text-decoration: line-through;">(재)한국보육진흥원</td>
+<td style="padding: 14px 10px; color: #1F2937; font-weight: 700; background: rgba(96, 113, 150, 0.05); border-left: 2px solid #607196;">한국보육진흥원</td>
+</tr>
+<tr style="border-bottom: 1px solid #E8E9ED;">
+<td style="padding: 14px 10px; color: #94A3B8; text-decoration: line-through;">한국보육진흥원 재단법인</td>
+<td style="padding: 14px 10px; color: #1F2937; font-weight: 700; background: rgba(96, 113, 150, 0.05); border-left: 2px solid #607196;">한국보육진흥원</td>
+</tr>
+<tr>
+<td style="padding: 14px 10px; color: #94A3B8; text-decoration: line-through;">에이티티(주)</td>
+<td style="padding: 14px 10px; color: #1F2937; font-weight: 700; background: rgba(96, 113, 150, 0.05); border-left: 2px solid #607196;">에이티티</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 680px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Footer Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 693px; left: 80px; width: 500px; height: 20px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 400; color: #94A3B8; margin: 0;">
+                cleaner.py · 9개 함수 · duplicates_map.csv
+            </p>
+</div>
+<!-- Footer Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 693px; left: 700px; width: 500px; height: 20px; text-align: right; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #64748B; margin: 0;">
+                파이프라인 단계별 정제 및 정규화
+            </p>
+</div>
+</div>
+</body>
+</html>

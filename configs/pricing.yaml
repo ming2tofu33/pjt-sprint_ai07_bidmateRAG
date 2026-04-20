@@ -4,7 +4,7 @@
 # 등록되지 않은 모델은 cost 0.0 + 리포트에 "(단가 미등록)" 경고가 표시됩니다.
 #
 # 출처: OpenAI 공식 API 가격표 (https://openai.com/api/pricing/)
-# 갱신 일자: 2026-04-09
+# 갱신 일자: 2026-04-20
 #
 # 참고:
 #  - cached input은 일반 input의 10% 수준 (예: gpt-5-mini는 $0.025/1M)
@@ -16,6 +16,10 @@
 
 llm:
   # GPT-5 family
+  gpt-5:
+    input_per_1m: 1.25
+    output_per_1m: 10.00
+    cached_input_per_1m: 0.125  # 일반 input의 10%
   gpt-5-mini:
     input_per_1m: 0.25
     output_per_1m: 2.00

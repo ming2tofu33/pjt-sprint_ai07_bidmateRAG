@@ -11,6 +11,9 @@ load_dotenv()
 from app.api.routes import (
     list_provider_configs,
     list_chunking_configs,
+    list_scenario_a_embeddings,
+    list_scenario_a_llms,
+    list_prompt_configs,
     load_benchmark_frames,
     load_metadata_options,
     load_run_records,
@@ -26,6 +29,20 @@ EXAMPLE_QUESTIONS = [
     "5억 이상 대규모 시스템 구축 사업이 있어?",
     "기초과학연구원 극저온시스템에서 AI 기반 예측 요구사항이 있나?",
 ]
+
+
+def _build_chat_history(messages: list[dict]) -> list[dict[str, str]]:
+    """Run 직전까지의 user/assistant 메시지만 멀티턴 history로 정리한다."""
+    history: list[dict[str, str]] = []
+    for message in messages:
+        role = message.get("role")
+        content = message.get("content")
+        if role not in {"user", "assistant"}:
+            continue
+        if not isinstance(content, str) or not content.strip():
+            continue
+        history.append({"role": role, "content": content})
+    return history
 
 
 def _running_under_streamlit() -> bool:
@@ -204,6 +221,20 @@ def _render_streamlit_app() -> None:
 
         # 시스템 프롬프트 편집
         from bidmate_rag.config.prompts import SYSTEM_PROMPT as DEFAULT_PROMPT
+        st.subheader("📝 프롬프트 버전")
+        prompt_configs = list_prompt_configs()
+        if prompt_configs:
+            selected_prompt_config = st.selectbox(
+                "프롬프트 선택",
+                [None] + prompt_configs,
+                format_func=lambda p: "직접 편집" if p is None else _yaml.safe_load(p.read_text()).get("description", p.stem),
+                key="prompt_config_select",
+            )
+            if selected_prompt_config:
+                loaded_prompt = _yaml.safe_load(selected_prompt_config.read_text()).get("system_prompt", "")
+                if loaded_prompt:
+                    st.session_state["custom_prompt"] = loaded_prompt
+                    st.caption(f"✅ {selected_prompt_config.stem} 프롬프트 적용됨")
         with st.expander("📝 시스템 프롬프트", expanded=False):
             custom_prompt = st.text_area(
                 "프롬프트 편집",
@@ -223,6 +254,34 @@ def _render_streamlit_app() -> None:
                 prompt_changed = custom_prompt.strip() != DEFAULT_PROMPT.strip()
                 if prompt_changed:
                     st.caption("✏️ 수정됨")
+        if show_a and not show_b:
+            st.subheader("🅰️ 시나리오 A 설정")
+            
+            # 임베딩 모델 선택
+            embedding_configs = list_scenario_a_embeddings()
+            if embedding_configs:
+                selected_embedding = st.selectbox(
+                    "임베딩 모델",
+                    embedding_configs,
+                    format_func=lambda p: p.stem,
+                    key="scenario_a_embedding",
+                )
+            else:
+                st.warning("임베딩 모델 설정이 없습니다.")
+                selected_embedding = None
+
+            # LLM 모델 선택
+            llm_configs = list_scenario_a_llms()
+            if llm_configs:
+                selected_llm = st.selectbox(
+                    "LLM 모델",
+                    llm_configs,
+                    format_func=lambda p: p.stem,
+                    key="scenario_a_llm",
+                )
+            else:
+                st.warning("LLM 모델 설정이 없습니다.")
+                selected_llm = None
         # 청킹 전략 선택    
         st.subheader("📦 청킹 전략")
         chunking_configs = list_chunking_configs()
@@ -383,6 +442,7 @@ def _render_streamlit_app() -> None:
         prompt = pending or st.chat_input("질문을 입력하세요 (예: 국민연금공단 이러닝시스템 요구사항)")
 
         if prompt:
+            chat_history = _build_chat_history(st.session_state.messages)
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
@@ -405,6 +465,7 @@ def _render_streamlit_app() -> None:
                         experiment_config_path=selected_chunking,
                         top_k=top_k,
                         manual_filters=filters_to_pass,
+                        chat_history=chat_history,
                         system_prompt=prompt_override,
                         max_context_chars=max_context_chars,
                     )
@@ -556,7 +617,7 @@ def _render_streamlit_app() -> None:
 
     # ── 탭 3: 평가 ──
     with eval_tab:
-        render_eval_tabs(st, run_live_query, list_provider_configs, list_chunking_configs, load_benchmark_frames, load_run_records)
+        render_eval_tabs(st, run_live_query, list_provider_configs, list_chunking_configs, list_scenario_a_embeddings, list_scenario_a_llms,list_prompt_configs, load_benchmark_frames, load_run_records)
 
 
 def _render_debug_panel(st_module, meta: dict) -> None:
