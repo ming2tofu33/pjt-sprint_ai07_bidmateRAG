@@ -1,0 +1,7 @@
+name: chunking-1000-150
+mode: full_rag
+chunk_size: 1000
+chunk_overlap: 150
+description: "기본 설정 (1000자, 150 오버랩) — baseline"
+provider_configs:
+  - configs/providers/openai_gpt5mini.yaml

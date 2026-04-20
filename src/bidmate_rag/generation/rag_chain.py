@@ -1,1 +1,0 @@
-"""RAG answer synthesis placeholder."""

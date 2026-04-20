@@ -1,0 +1,44 @@
+# 모델별 단가 (USD per 1M tokens 기준)
+#
+# 가격이 바뀌면 이 파일만 수정하면 모든 실험 리포트의 cost가 갱신됩니다.
+# 등록되지 않은 모델은 cost 0.0 + 리포트에 "(단가 미등록)" 경고가 표시됩니다.
+#
+# 출처: OpenAI 공식 API 가격표 (https://openai.com/api/pricing/)
+# 갱신 일자: 2026-04-20
+#
+# 참고:
+#  - cached input은 일반 input의 10% 수준 (예: gpt-5-mini는 $0.025/1M)
+#    현재 코드는 cached/uncached를 구분하지 않고 일반 input 단가로 일괄 계산
+#  - Batch API는 일반 가격의 50% (예: text-embedding-3-small batch $0.01/1M)
+#    현재 코드는 batch 사용을 자동 감지하지 않음
+#  - gpt-5 계열은 reasoning tokens가 completion에 포함되어 청구되므로
+#    output 단가가 그대로 적용됨
+
+llm:
+  # GPT-5 family
+  gpt-5:
+    input_per_1m: 1.25
+    output_per_1m: 10.00
+    cached_input_per_1m: 0.125  # 일반 input의 10%
+  gpt-5-mini:
+    input_per_1m: 0.25
+    output_per_1m: 2.00
+    cached_input_per_1m: 0.025  # 일반 input의 10%
+
+  # GPT-4o family
+  gpt-4o:
+    input_per_1m: 2.50
+    output_per_1m: 10.00
+    cached_input_per_1m: 1.25   # 일반 input의 50%
+  gpt-4o-mini:
+    input_per_1m: 0.15
+    output_per_1m: 0.60
+    cached_input_per_1m: 0.075  # 일반 input의 50%
+
+embedding:
+  text-embedding-3-small:
+    per_1m: 0.02
+    # batch_per_1m: 0.01  # 참고용 (현재 미사용)
+  text-embedding-3-large:
+    per_1m: 0.13
+    # batch_per_1m: 0.065  # 참고용 (현재 미사용)

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>문제 제시 — 수작업 중심 RFP 분석의 한계</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 400px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; margin: 0;">
+    문제 · 섹션 ①
+</p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #64748B; letter-spacing: 0.5px; margin: 0;"><span style="font-weight: 700; color: #475569;">03</span><span style="font-weight: 500; color: #94A3B8;">/31</span></p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 100px; left: 80px; width: 480px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #111827; letter-spacing: -2px; margin: 0; line-height: 1.2;">
+    수작업 지옥, Web UI로 해결
+</p>
+</div>
+<!-- Subtitle -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 165px; left: 80px; width: 480px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 18px; font-weight: 600; color: #64748B; margin: 0; letter-spacing: -0.3px;">
+    RFP 분석의 비효율을 줄이는 실무 맞춤형 UI
+</p>
+</div>
+
+<!-- Left Column: Pain Points -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 240px; left: 80px; width: 440px; z-index: 10;">
+    <p style="font-family: 'Pretendard', sans-serif; font-size: 16px; font-weight: 700; color: #FF7B9C; margin: 0 0 20px 0;">기존 수작업의 한계</p>
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+        <div style="display: flex; align-items: flex-start; gap: 14px;">
+            <div style="width: 32px; height: 32px; background: #FFF1F2; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fa-solid fa-folder-tree" style="color: #FF7B9C; font-size: 14px;"></i>
+            </div>
+            <div>
+                <p style="font-family: 'Pretendard', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0;">비정형 방대한 분량</p>
+                <p style="font-family: 'Pretendard', sans-serif; font-size: 14px; font-weight: 500; color: #64748B; margin: 0; line-height: 1.4;">수백 페이지의 HWP/PDF 문서를 개별 검토</p>
+            </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 14px;">
+            <div style="width: 32px; height: 32px; background: #FFF1F2; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fa-solid fa-person-digging" style="color: #FF7B9C; font-size: 14px;"></i>
+            </div>
+            <div>
+                <p style="font-family: 'Pretendard', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0;">수작업 기반 발췌</p>
+                <p style="font-family: 'Pretendard', sans-serif; font-size: 14px; font-weight: 500; color: #64748B; margin: 0; line-height: 1.4;">요약, 일정, 평가기준 등 항목별 직접 확인 고역</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Left Column: Solutions -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 450px; left: 80px; width: 480px; z-index: 10;">
+    <p style="font-family: 'Pretendard', sans-serif; font-size: 16px; font-weight: 700; color: #3B82F6; margin: 0 0 16px 0;">BidMate RAG 지원 기능</p>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; gap: 8px;">
+            <span style="background: #EFF6FF; border: 1px solid #BFDBFE; color: #1D4ED8; font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 20px; font-family: 'Pretendard', sans-serif;"><i class="fa-solid fa-at" style="margin-right: 4px;"></i>문서 멘션</span>
+            <span style="background: #EFF6FF; border: 1px solid #BFDBFE; color: #1D4ED8; font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 20px; font-family: 'Pretendard', sans-serif;"><i class="fa-solid fa-terminal" style="margin-right: 4px;"></i>슬래시 커맨드</span>
+            <span style="background: #EFF6FF; border: 1px solid #BFDBFE; color: #1D4ED8; font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 20px; font-family: 'Pretendard', sans-serif;"><i class="fa-solid fa-quote-left" style="margin-right: 4px;"></i>근거 패널</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <span style="background: #EFF6FF; border: 1px solid #BFDBFE; color: #1D4ED8; font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 20px; font-family: 'Pretendard', sans-serif;"><i class="fa-solid fa-eye" style="margin-right: 4px;"></i>문서 미리보기</span>
+            <span style="background: #EFF6FF; border: 1px solid #BFDBFE; color: #1D4ED8; font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 20px; font-family: 'Pretendard', sans-serif;"><i class="fa-solid fa-folder-open" style="margin-right: 4px;"></i>카탈로그 탐색</span>
+        </div>
+    </div>
+</div>
+
+<!-- Right Column: Chat UI Mockup Container -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 100px; left: 600px; width: 600px; height: 560px; background: #FFFFFF; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01); z-index: 1;"></div>
+
+<!-- Chat Header -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 100px; left: 600px; width: 600px; height: 60px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0; box-sizing: border-box; z-index: 2;"></div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 100px; left: 600px; width: 600px; height: 560px; background: transparent; border: 1px solid #E2E8F0; border-radius: 16px; box-sizing: border-box; z-index: 3;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 118px; left: 624px; width: 200px; z-index: 10;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="width: 24px; height: 24px; background: #3B82F6; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+            <i class="fa-solid fa-robot" style="color: #FFFFFF; font-size: 12px;"></i>
+        </div>
+        <p style="font-family: 'Pretendard', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin: 0;">BidMate Assistant</p>
+    </div>
+</div>
+
+<!-- Chat Area (Bot Message) -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 184px; left: 624px; width: 500px; z-index: 10;">
+    <div style="display: flex; gap: 12px; align-items: flex-start;">
+        <div style="width: 32px; height: 32px; background: #F1F5F9; border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #E2E8F0;">
+            <i class="fa-solid fa-robot" style="color: #64748B; font-size: 14px;"></i>
+        </div>
+        <div style="background: #F8FAFC; padding: 12px 16px; border-radius: 4px 16px 16px 16px; font-family: 'Pretendard', sans-serif; font-size: 14px; color: #334155; line-height: 1.5; border: 1px solid #E2E8F0;">
+            안녕하세요! RFP 문서를 분석할 준비가 되었습니다.<br>원하시는 문서를 <b>@멘션</b>하고, <b>/명령어</b>를 입력해 보세요.
+        </div>
+    </div>
+</div>
+
+<!-- Pop-up Menu -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 290px; left: 624px; width: 320px; height: 270px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); z-index: 15; overflow: hidden; display: flex; flex-direction: column;">
+    <!-- Slash Commands -->
+    <div style="padding: 12px 12px 6px 12px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0;">
+        <p style="font-family: 'Pretendard', sans-serif; font-size: 12px; font-weight: 700; color: #64748B; margin: 0 0 8px 4px;">기능 명령어 (Slash Commands)</p>
+
+        <!-- Active Item -->
+        <div style="display: flex; align-items: center; padding: 8px 10px; background: #EFF6FF; border-radius: 6px; margin-bottom: 4px;">
+            <span style="font-family: 'Pretendard', monospace; font-size: 14px; font-weight: 700; color: #2563EB; width: 80px;">/요약</span>
+            <span style="font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 500; color: #1D4ED8;">문서의 핵심 내용 요약</span>
+        </div>
+
+        <div style="display: flex; align-items: center; padding: 8px 10px; border-radius: 6px; margin-bottom: 4px;">
+            <span style="font-family: 'Pretendard', monospace; font-size: 14px; font-weight: 700; color: #475569; width: 80px;">/자격요건</span>
+            <span style="font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 500; color: #64748B;">입찰 참가 자격 요약</span>
+        </div>
+
+        <div style="display: flex; align-items: center; padding: 8px 10px; border-radius: 6px;">
+            <span style="font-family: 'Pretendard', monospace; font-size: 14px; font-weight: 700; color: #475569; width: 80px;">/평가기준</span>
+            <span style="font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 500; color: #64748B;">제안서 평가 항목 정리</span>
+        </div>
+    </div>
+
+    <!-- Mentions -->
+    <div style="padding: 12px; flex: 1;">
+        <p style="font-family: 'Pretendard', sans-serif; font-size: 12px; font-weight: 700; color: #64748B; margin: 0 0 8px 4px;">문서 멘션 (Mentions)</p>
+        <div style="display: flex; align-items: center; padding: 8px 10px; border-radius: 6px; margin-bottom: 4px;">
+            <i class="fa-solid fa-file-pdf" style="color: #EF4444; width: 20px; font-size: 14px;"></i>
+            <span style="font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 600; color: #334155;">2026_클라우드전환_RFP.pdf</span>
+        </div>
+        <div style="display: flex; align-items: center; padding: 8px 10px; border-radius: 6px;">
+            <i class="fa-solid fa-file-word" style="color: #3B82F6; width: 20px; font-size: 14px;"></i>
+            <span style="font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 600; color: #334155;">기술평가_가이드라인.hwp</span>
+        </div>
+    </div>
+</div>
+
+<!-- Input Box Area -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 576px; left: 624px; width: 552px; height: 60px; background: #FFFFFF; border: 2px solid #3B82F6; border-radius: 30px; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1); z-index: 10;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 594px; left: 644px; width: 500px; z-index: 15;">
+    <p style="font-family: 'Pretendard', sans-serif; font-size: 16px; margin: 0;">
+        <span style="color: #3B82F6; font-weight: 700; background: #EFF6FF; padding: 4px 8px; border-radius: 12px; margin-right: 6px;">/요약</span>
+        <span style="color: #F43F5E; font-weight: 700; background: #FFF1F2; padding: 4px 8px; border-radius: 12px; margin-right: 6px;">@2026_클라우드전환_RFP.pdf</span>
+        <span style="color: #1F2937; font-weight: 500;"> 핵심 내용 정리해줘<span style="color: #3B82F6;">|</span></span>
+    </p>
+</div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 586px; left: 1124px; width: 40px; height: 40px; background: #3B82F6; border-radius: 20px; z-index: 15; display: flex; align-items: center; justify-content: center;">
+    <i class="fa-solid fa-paper-plane" style="color: #FFFFFF; font-size: 16px;"></i>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 680px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Footer -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 693px; left: 80px; width: 1120px; height: 20px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #64748B; margin: 0; text-align: right;">문제 제시 · 섹션 ①</p>
+</div>
+</div>
+</body>
+</html>

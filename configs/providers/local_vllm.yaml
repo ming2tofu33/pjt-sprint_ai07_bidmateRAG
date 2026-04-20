@@ -1,3 +1,6 @@
 provider: local-openai-compat
+scenario: scenario_a
 model: local-model
+embedding_model: BAAI/bge-m3
 api_base: http://localhost:8000/v1
+collection_name: bidmate-scenario-a-bge-m3

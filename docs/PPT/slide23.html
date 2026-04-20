@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>7,943 → 5: 6단계 검색 축소 파이프라인</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;family=Nanum+Gothic+Coding:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 500px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; margin: 0;">
+<span style="color: #FF7B9C;">핵심 결과</span> · 섹션 ④ · 종합 검토
+</p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #64748B; letter-spacing: 0.5px; margin: 0;"><span style="font-weight: 700; color: #475569;">23</span><span style="font-weight: 500; color: #94A3B8;">/31</span></p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 98px; left: 80px; width: 1120px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #111827; letter-spacing: -2px; margin: 0; line-height: 1.2; line-height: 1.2;">
+7,943 → 5: 6단계 검색 축소 파이프라인
+</p>
+</div>
+<!-- Subtitle Hook -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 158px; left: 80px; width: 1120px; height: 30px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #FF7B9C; margin: 0;">
+전체 청크 가운데 최종적으로 LLM에 전달되는 후보는 0.063% 수준으로 축소됩니다.
+</p>
+</div>
+<!-- ============ LEFT: Funnel Infographic ============ -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 80px; width: 380px; height: 470px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
+<!-- Funnel Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 215px; left: 100px; width: 340px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 700; color: #1F2937; margin: 0; text-align: center;">
+검색 깔때기 시각화
+</p>
+</div>
+<!-- Funnel Stage 1: 7,943 (widest) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 248px; left: 105px; width: 330px; height: 56px; background: linear-gradient(135deg, #607196 0%, #4A5978 100%); border-radius: 4px; z-index: 2;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 248px; left: 105px; width: 330px; height: 56px; z-index: 10;">
+<div style="display: flex; align-items: center; justify-content: space-between; height: 56px; padding: 0 18px;">
+<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #FFFFFF; font-weight: 700;">① 메타 필터</span>
+<span style="font-family: 'Pretendard', monospace; font-size: 20px; color: #FFFFFF; font-weight: 700;">7,943</span>
+</div>
+</div>
+<!-- Funnel Stage 2: Dense ~ -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 314px; left: 130px; width: 280px; height: 48px; background: linear-gradient(135deg, #7B8AAD 0%, #607196 100%); border-radius: 4px; z-index: 2;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 314px; left: 130px; width: 280px; height: 48px; z-index: 10;">
+<div style="display: flex; align-items: center; justify-content: space-between; height: 48px; padding: 0 16px;">
+<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #FFFFFF; font-weight: 700;">② Dense</span>
+<span style="font-family: 'Pretendard', monospace; font-size: 16px; color: #FFFFFF; font-weight: 700;">15~20</span>
+</div>
+</div>
+<!-- Funnel Stage 3: Sparse (BM25) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 372px; left: 155px; width: 230px; height: 44px; background: linear-gradient(135deg, #9AA3BE 0%, #7B8AAD 100%); border-radius: 4px; z-index: 2;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 372px; left: 155px; width: 230px; height: 44px; z-index: 10;">
+<div style="display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 14px;"><span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #FFFFFF; font-weight: 700;">③ Sparse (BM25)</span>
+<span style="font-family: 'Pretendard', monospace; font-size: 15px; color: #FFFFFF; font-weight: 700;">15</span>
+</div>
+</div>
+<!-- Funnel Stage 4: RRF -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 426px; left: 175px; width: 190px; height: 42px; background: linear-gradient(135deg, #BABFD1 0%, #9AA3BE 100%); border-radius: 4px; z-index: 2;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 426px; left: 175px; width: 190px; height: 42px; z-index: 10;">
+<div style="display: flex; align-items: center; justify-content: space-between; height: 42px; padding: 0 12px;">
+<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11px; color: #FFFFFF; font-weight: 700;">④ RRF 융합</span>
+<span style="font-family: 'Pretendard', monospace; font-size: 14px; color: #FFFFFF; font-weight: 700;">15~20</span>
+</div>
+</div>
+<!-- Funnel Stage 5: Soft Boost -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 478px; left: 195px; width: 150px; height: 40px; background: #FFC759; border-radius: 4px; z-index: 2;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 478px; left: 195px; width: 150px; height: 40px; z-index: 10;">
+<div style="display: flex; align-items: center; justify-content: space-between; height: 40px; padding: 0 10px;">
+<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11px; color: #1F2937; font-weight: 700;">⑤ Soft Boost</span>
+<span style="font-family: 'Pretendard', monospace; font-size: 13px; color: #1F2937; font-weight: 700;">10</span>
+</div>
+</div>
+<!-- Funnel Stage 6: Top-K (narrowest, highlighted) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 530px; left: 215px; width: 110px; height: 50px; background: #FF7B9C; border-radius: 4px; z-index: 2;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 530px; left: 215px; width: 110px; height: 50px; z-index: 10;">
+<div style="display: flex; align-items: center; justify-content: space-between; height: 50px; padding: 0 12px;">
+<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #FFFFFF; font-weight: 700;">⑥ Top-K</span>
+<span style="font-family: 'Pretendard', monospace; font-size: 20px; color: #FFFFFF; font-weight: 700;">5</span>
+</div>
+</div>
+<!-- Final LLM indicator -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 595px; left: 100px; width: 340px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #64748B; margin: 0; text-align: center;">
+<i class="fa-solid fa-arrow-down" style="color: #FF7B9C; margin-right: 6px;"></i>
+<span style="font-weight: 700; color: #1F2937;">LLM에 전달</span>
+</p>
+<div style="display: flex; justify-content: center; gap: 6px; margin-top: 8px;">
+<div style="width: 40px; height: 28px; background: #FF7B9C; border-radius: 3px; display: flex; align-items: center; justify-content: center;"><span style="font-family: 'Pretendard', monospace; font-size: 10px; color: #FFFFFF; font-weight: 700;">[1]</span></div>
+<div style="width: 40px; height: 28px; background: #FF7B9C; border-radius: 3px; display: flex; align-items: center; justify-content: center;"><span style="font-family: 'Pretendard', monospace; font-size: 10px; color: #FFFFFF; font-weight: 700;">[2]</span></div>
+<div style="width: 40px; height: 28px; background: #FF7B9C; border-radius: 3px; display: flex; align-items: center; justify-content: center;"><span style="font-family: 'Pretendard', monospace; font-size: 10px; color: #FFFFFF; font-weight: 700;">[3]</span></div>
+<div style="width: 40px; height: 28px; background: #FF7B9C; border-radius: 3px; display: flex; align-items: center; justify-content: center;"><span style="font-family: 'Pretendard', monospace; font-size: 10px; color: #FFFFFF; font-weight: 700;">[4]</span></div>
+<div style="width: 40px; height: 28px; background: #FF7B9C; border-radius: 3px; display: flex; align-items: center; justify-content: center;"><span style="font-family: 'Pretendard', monospace; font-size: 10px; color: #FFFFFF; font-weight: 700;">[5]</span></div>
+</div>
+</div>
+<!-- ============ RIGHT: 6단 Mechanism Table ============ -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 480px; width: 720px; height: 470px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
+<!-- Mechanism Table Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 215px; left: 500px; width: 680px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0;">
+6단 메커니즘 상세
+</p>
+</div>
+<!-- Table Header -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 248px; left: 500px; width: 680px; z-index: 10;">
+<div style="display: flex; border-bottom: 2px solid #607196; padding-bottom: 8px; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; font-weight: 700; color: #64748B; letter-spacing: 0.3px;">
+<div style="flex: 2.2;">단계</div>
+<div style="flex: 1.5; text-align: center;">입력</div>
+<div style="flex: 1.5; text-align: center;">출력</div>
+<div style="flex: 4;">메커니즘</div>
+</div>
+</div>
+<!-- Row 1 -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 282px; left: 500px; width: 680px; z-index: 10;">
+<div style="display: flex; align-items: center; border-bottom: 1px solid #E8E9ED; padding: 10px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937;">
+<div style="flex: 2.2; font-weight: 700;">① 메타데이터 필터</div>
+<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">7,943</div>
+<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">수백~수천</div>
+<div style="flex: 4; color: #64748B; font-size: 11.5px;">Where Clause 하드 필터 (기관·연도·도메인)</div>
+</div>
+</div>
+<!-- Row 2 -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 327px; left: 500px; width: 680px; z-index: 10;">
+<div style="display: flex; align-items: center; border-bottom: 1px solid #E8E9ED; padding: 10px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937;">
+<div style="flex: 2.2; font-weight: 700;">② Dense 검색</div>
+<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">수천</div>
+<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">15~20</div>
+<div style="flex: 4; color: #64748B; font-size: 11.5px;">bge-m3 코사인 유사도 (의미 매칭)</div>
+</div>
+</div>
+<!-- Row 3 -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 372px; left: 500px; width: 680px; z-index: 10;">
+<div style="display: flex; align-items: center; border-bottom: 1px solid #E8E9ED; padding: 10px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937;">
+<div style="flex: 2.2; font-weight: 700;">③ Sparse (BM25)</div>
+<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">수천</div>
+<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">15</div>
+<div style="flex: 4; color: #64748B; font-size: 11.5px;">키워드·고유명사 정확 매칭 (Dense 보완)</div>
+</div>
+</div>
+<!-- Row 4 -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 417px; left: 500px; width: 680px; z-index: 10;">
+<div style="display: flex; align-items: center; border-bottom: 1px solid #E8E9ED; padding: 10px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937;">
+<div style="flex: 2.2; font-weight: 700;">④ RRF 융합</div>
+<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">30~35</div>
+<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">15~20</div>
+<div style="flex: 4; color: #64748B; font-size: 11.5px;">Reciprocal Rank Fusion (k=60)</div>
+</div>
+</div>
+<!-- Row 5 -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 462px; left: 500px; width: 680px; z-index: 10;">
+<div style="display: flex; align-items: center; border-bottom: 1px solid #E8E9ED; padding: 10px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937;">
+<div style="flex: 2.2; font-weight: 700;">⑤ Soft Boost</div>
+<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">15~20</div>
+<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">10</div>
+<div style="flex: 4; color: #64748B; font-size: 11.5px;">section · table · metadata 가산 (max 0.15)</div>
+</div>
+</div>
+<!-- Row 6 (Highlighted - Final) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 505px; left: 500px; width: 680px; height: 45px; background: #FDF5F7; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 507px; left: 500px; width: 680px; z-index: 10;">
+<div style="display: flex; align-items: center; padding: 10px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937;">
+<div style="flex: 2.2; font-weight: 700; color: #FF7B9C; padding-left: 10px;">⑥ Top-K 최종 전달</div>
+<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace; font-weight: 700;">10</div>
+<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace; font-size: 16px; font-weight: 900; color: #FF7B9C;">5</div>
+<div style="flex: 4; color: #1F2937; font-size: 11.5px; font-weight: 700;">LLM 컨텍스트에 [1]~[5]로 주입</div>
+</div>
+</div>
+<!-- Insight Summary Box (Bottom of right) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 570px; left: 500px; width: 680px; height: 85px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; z-index: 2;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 583px; left: 520px; width: 640px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 700; color: #D49B25; margin: 0 0 6px 0;">
+깔때기 설계의 핵심
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #1F2937; margin: 0; line-height: 1.55;">
+각 단계는 <span style="color: #D49B25; font-weight: 700;">비용 vs 정확도</span>의 트레이드오프를 가짐. 초기 단계일수록 저비용 대규모 필터링, 후반으로 갈수록 고비용 정밀 스코어링. <span style="color: #D49B25; font-weight: 700;">7,943개 중 5개</span> 선발 = <span style="font-family: 'Pretendard', monospace; font-weight: 700;">0.063%</span> 정밀 타격.
+</p>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 680px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Footer -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 693px; left: 80px; width: 1120px; height: 20px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #64748B; margin: 0;">
+configs/retrieval.yaml · hybrid.enabled=true · rrf_k=60 · boost.max_total=0.15 · 현재 인덱스 청크 7,943개 기준 (1000/150 베이스라인)
+</p>
+</div>
+</div>
+</body>
+</html>

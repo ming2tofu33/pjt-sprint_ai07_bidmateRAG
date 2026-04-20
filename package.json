@@ -1,0 +1,28 @@
+{
+  "name": "pjt-sprint_ai07_bidmaterag",
+  "version": "1.0.0",
+  "description": "Scaffold for an RFP-focused RAG project with separate areas for app serving, ingestion, retrieval, generation, evaluation, and experiment tracking.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ming2tofu33/pjt-sprint_ai07_bidmateRAG.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ming2tofu33/pjt-sprint_ai07_bidmateRAG/issues"
+  },
+  "homepage": "https://github.com/ming2tofu33/pjt-sprint_ai07_bidmateRAG#readme",
+  "dependencies": {
+    "kordoc": "^1.7.2",
+    "pdfjs-dist": "^5.6.205"
+  }
+}

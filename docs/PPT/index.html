@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BidMate RAG — 발표</title>
+  <style>
+    :root {
+      --nav-height: 56px;
+      --scale: 1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #0a0a0a;
+      font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif;
+      color: #e0e0e0;
+      overflow: hidden;
+    }
+
+    .stage {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: var(--nav-height);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .slide-wrapper {
+      width: calc(1280px * var(--scale));
+      height: calc(720px * var(--scale));
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      border-radius: 4px;
+      overflow: hidden;
+      background: #FAFAFA;
+    }
+
+    .slide-frame {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1280px;
+      height: 720px;
+      border: 0;
+      transform-origin: top left;
+      transform: scale(var(--scale));
+      background: #FAFAFA;
+    }
+
+    .nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-height);
+      background: rgba(15, 15, 15, 0.95);
+      border-top: 1px solid #222;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .nav-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .nav-section.center {
+      justify-content: center;
+      font-size: 13px;
+      color: #888;
+    }
+
+    .nav-section.right {
+      justify-content: flex-end;
+    }
+
+    .title {
+      color: #bbb;
+      font-weight: 500;
+    }
+
+    .counter {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+      margin-left: 6px;
+    }
+
+    .filename {
+      font-family: 'SF Mono', Monaco, Menlo, 'Nanum Gothic Coding', monospace;
+      font-size: 12px;
+      color: #888;
+      padding: 3px 8px;
+      background: #1a1a1a;
+      border-radius: 4px;
+      margin-left: 10px;
+      user-select: all;
+      cursor: text;
+    }
+
+    .filename:hover { color: #bbb; background: #222; }
+
+    button {
+      background: transparent;
+      color: #ddd;
+      border: 1px solid #333;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+
+    button:hover:not(:disabled) {
+      background: #1f1f1f;
+      border-color: #555;
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    button:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+
+    .kbd {
+      font-family: 'SF Mono', Monaco, Menlo, 'Nanum Gothic Coding', monospace;
+      font-size: 11px;
+      padding: 2px 7px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #888;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #666;
+      margin-left: 4px;
+    }
+
+    /* Fullscreen: hide nav, maximize slide area */
+    :fullscreen .nav,
+    :-webkit-full-screen .nav { display: none; }
+
+    :fullscreen .stage,
+    :-webkit-full-screen .stage {
+      bottom: 0;
+      padding: 0;
+    }
+
+    :fullscreen .slide-wrapper,
+    :-webkit-full-screen .slide-wrapper {
+      box-shadow: none;
+      border-radius: 0;
+    }
+
+    /* Small screen: tighter padding */
+    @media (max-width: 900px) {
+      .stage { padding: 8px; }
+      .nav-section.right .kbd:not(:last-child) { display: none; }
+      .title { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="slide-wrapper">
+      <iframe class="slide-frame" id="slideFrame" src="slide01.html" title="슬라이드" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-section">
+      <button id="prevBtn" aria-label="이전 슬라이드">← 이전</button>
+      <button id="nextBtn" aria-label="다음 슬라이드">다음 →</button>
+    </div>
+    <div class="nav-section center">
+      <span class="title">BidMate RAG</span>
+      <span class="counter"><span id="current">1</span> / <span id="total">30</span></span>
+      <span class="filename" id="filename">slide01.html</span>
+    </div>
+    <div class="nav-section right">
+      <span class="kbd">← →</span>
+      <span class="kbd">F</span><span class="hint">풀스크린</span>
+      <span class="kbd">Home/End</span>
+    </div>
+  </nav>
+
+  <script>
+    const TOTAL = 31;
+    const frame = document.getElementById('slideFrame');
+    const currentEl = document.getElementById('current');
+    const totalEl = document.getElementById('total');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    totalEl.textContent = TOTAL;
+
+    function getSlideNumber() {
+      const hash = window.location.hash.slice(1);
+      const n = parseInt(hash, 10);
+      return (n >= 1 && n <= TOTAL) ? n : 1;
+    }
+
+    function loadSlide(n) {
+      const padded = String(n).padStart(2, '0');
+      const target = `slide${padded}.html`;
+      if (frame.getAttribute('src') !== target) {
+        frame.src = target;
+      }
+      currentEl.textContent = n;
+      document.getElementById('filename').textContent = target;
+      prevBtn.disabled = (n <= 1);
+      nextBtn.disabled = (n >= TOTAL);
+      document.title = `BidMate RAG — ${n}/${TOTAL}`;
+    }
+
+    function goto(n) {
+      n = Math.max(1, Math.min(TOTAL, n));
+      if (window.location.hash === `#${n}`) {
+        loadSlide(n);
+      } else {
+        window.location.hash = `#${n}`;
+      }
+    }
+
+    prevBtn.addEventListener('click', () => goto(getSlideNumber() - 1));
+    nextBtn.addEventListener('click', () => goto(getSlideNumber() + 1));
+
+    window.addEventListener('hashchange', () => loadSlide(getSlideNumber()));
+
+    document.addEventListener('keydown', (e) => {
+      // Don't hijack keys when user is typing in iframe content
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      switch (e.key) {
+        case 'ArrowLeft':
+        case 'PageUp':
+          goto(getSlideNumber() - 1);
+          e.preventDefault();
+          break;
+        case 'ArrowRight':
+        case 'PageDown':
+        case ' ':
+          goto(getSlideNumber() + 1);
+          e.preventDefault();
+          break;
+        case 'Home':
+          goto(1);
+          e.preventDefault();
+          break;
+        case 'End':
+          goto(TOTAL);
+          e.preventDefault();
+          break;
+        case 'f':
+        case 'F':
+          if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            (document.documentElement.requestFullscreen ||
+             document.documentElement.webkitRequestFullscreen)?.call(document.documentElement);
+          } else {
+            (document.exitFullscreen ||
+             document.webkitExitFullscreen)?.call(document);
+          }
+          e.preventDefault();
+          break;
+      }
+    });
+
+    // Responsive scaling: fit 1280×720 inside available viewport
+    // - Fullscreen: scale to fill (can exceed 1.0, up to whatever the screen supports)
+    // - Windowed: cap at 1.0 to avoid ugly upscaling on oversized windows
+    function updateScale() {
+      const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      const padding = isFullscreen ? 0 : 32;
+      const navHeight = isFullscreen ? 0 : 56;
+      const availableW = window.innerWidth - padding;
+      const availableH = window.innerHeight - navHeight - padding;
+      const fitScale = Math.min(availableW / 1280, availableH / 720);
+      const scale = isFullscreen ? fitScale : Math.min(fitScale, 1);
+      document.documentElement.style.setProperty('--scale', scale);
+    }
+
+    window.addEventListener('resize', updateScale);
+    document.addEventListener('fullscreenchange', updateScale);
+    document.addEventListener('webkitfullscreenchange', updateScale);
+
+    // Initial load
+    updateScale();
+    loadSlide(getSlideNumber());
+  </script>
+</body>
+</html>

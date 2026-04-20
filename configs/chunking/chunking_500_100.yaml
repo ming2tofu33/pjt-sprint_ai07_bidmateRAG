@@ -1,0 +1,7 @@
+name: chunking-500-100
+mode: full_rag
+chunk_size: 500
+chunk_overlap: 100
+description: "작은 청크 (500자, 100 오버랩) — 팩토이드 질문에 유리"
+provider_configs:
+  - configs/providers/openai_gpt5mini.yaml

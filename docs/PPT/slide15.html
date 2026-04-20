@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>의사결정: 왜 chunk_size=1000인가</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;family=Nanum+Gothic+Coding:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 500px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; margin: 0;">
+<span style="color: #FF7B9C;">의사결정</span> · 섹션 ③ · 청킹 파라미터
+</p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #64748B; letter-spacing: 0.5px; margin: 0;"><span style="font-weight: 700; color: #475569;">15</span><span style="font-weight: 500; color: #94A3B8;">/31</span></p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 98px; left: 80px; width: 1120px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #111827; letter-spacing: -2px; margin: 0; line-height: 1.2; line-height: 1.2;">
+왜 chunk_size = 1000인가
+</p>
+</div>
+<!-- Subtitle -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 158px; left: 80px; width: 1120px; height: 30px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 500; color: #64748B; margin: 0;">
+<span style="font-weight: 700; color: #FF7B9C;">하이브리드 청킹</span>(단락 + 고정크기)에서 RFP 세부 요구사항 1~2개를 온전히 담는 <span style="font-weight: 700; color: #1F2937;">황금비율</span>
+</p>
+</div>
+<!-- ============ 3열 프리셋 비교 카드 ============ -->
+<!-- Preset 1: small -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 80px; width: 360px; height: 268px; background: #FFFFFF; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
+<!-- Preset label -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 80px; width: 360px; height: 40px; background: #EAECEF; border-radius: 12px 12px 0 0; z-index: 2;"></div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 80px; width: 360px; height: 268px; background: transparent; border: 1px solid #E2E8F0; border-radius: 12px; box-sizing: border-box; z-index: 3;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 200px; left: 80px; width: 360px; height: 40px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0; line-height: 40px; text-align: center;">
+small
+</p>
+</div>
+<!-- small params -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 252px; left: 100px; width: 320px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #F3F4F6; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12.5px;">
+<span style="color: #64748B;">chunk_size</span>
+<span style="font-family: 'Pretendard', monospace; font-weight: 700; color: #1F2937;">500</span>
+</div>
+<div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #F3F4F6; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12.5px;">
+<span style="color: #64748B;">overlap</span>
+<span style="font-family: 'Pretendard', monospace; font-weight: 700; color: #1F2937;">100</span>
+</div>
+<div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #F3F4F6; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12.5px;">
+<span style="color: #64748B;">min_section</span>
+<span style="font-family: 'Pretendard', monospace; font-weight: 700; color: #1F2937;">300</span>
+</div>
+<div style="display: flex; justify-content: space-between; padding: 5px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12.5px;">
+<span style="color: #64748B;">max_table</span>
+<span style="font-family: 'Pretendard', monospace; font-weight: 700; color: #1F2937;">1,000</span>
+</div>
+</div>
+<!-- small use case -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 392px; left: 100px; width: 320px; height: 56px; background: #FEF2F2; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 404px; left: 114px; width: 292px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11px; color: #64748B; margin: 0 0 4px 0; font-weight: 700;">적합 ·</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937; margin: 0; line-height: 1.4;">
+팩토이드 단답형 (예: "예산 얼마?")
+</p>
+</div>
+<!-- Preset 2: medium (채택) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 460px; width: 360px; height: 268px; background: #FFFFFF; border-radius: 12px; z-index: 1;"></div>
+<!-- Preset label with accent -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 460px; width: 360px; height: 40px; background: #FF7B9C; border-radius: 12px 12px 0 0; z-index: 2;"></div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 460px; width: 360px; height: 268px; background: transparent; border: 2px solid #FF7B9C; border-radius: 12px; box-sizing: border-box; z-index: 3;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 200px; left: 460px; width: 360px; height: 40px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #FFFFFF; margin: 0; line-height: 40px; text-align: center;">
+medium — 채택 (단락 + 고정 하이브리드)
+</p>
+</div>
+<!-- medium params -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 252px; left: 480px; width: 320px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #F3F4F6; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12.5px;">
+<span style="color: #64748B;">chunk_size</span>
+<span style="font-family: 'Pretendard', monospace; font-weight: 700; color: #FF7B9C; font-size: 14px;">1,000</span>
+</div>
+<div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #F3F4F6; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12.5px;">
+<span style="color: #64748B;">overlap</span>
+<span style="font-family: 'Pretendard', monospace; font-weight: 700; color: #FF7B9C; font-size: 14px;">150</span>
+</div>
+<div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #F3F4F6; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12.5px;">
+<span style="color: #64748B;">min_section</span>
+<span style="font-family: 'Pretendard', monospace; font-weight: 700; color: #1F2937;">500</span>
+</div>
+<div style="display: flex; justify-content: space-between; padding: 5px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12.5px;">
+<span style="color: #64748B;">max_table</span>
+<span style="font-family: 'Pretendard', monospace; font-weight: 700; color: #1F2937;">1,500</span>
+</div>
+</div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 392px; left: 480px; width: 320px; height: 56px; background: #FDF5F7; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 404px; left: 494px; width: 292px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11px; color: #FF7B9C; margin: 0 0 4px 0; font-weight: 700;">적합 · 범용</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937; margin: 0; line-height: 1.4;">
+요구사항·비교·분석 모두 안정적으로 커버
+</p>
+</div>
+<!-- Preset 3: large -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 840px; width: 360px; height: 268px; background: #FFFFFF; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 840px; width: 360px; height: 40px; background: #EAECEF; border-radius: 12px 12px 0 0; z-index: 2;"></div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 840px; width: 360px; height: 268px; background: transparent; border: 1px solid #E2E8F0; border-radius: 12px; box-sizing: border-box; z-index: 3;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 200px; left: 840px; width: 360px; height: 40px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0; line-height: 40px; text-align: center;">
+large
+</p>
+</div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 252px; left: 860px; width: 320px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #F3F4F6; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12.5px;">
+<span style="color: #64748B;">chunk_size</span>
+<span style="font-family: 'Pretendard', monospace; font-weight: 700; color: #1F2937;">1,500</span>
+</div>
+<div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #F3F4F6; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12.5px;">
+<span style="color: #64748B;">overlap</span>
+<span style="font-family: 'Pretendard', monospace; font-weight: 700; color: #1F2937;">200</span>
+</div>
+<div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #F3F4F6; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12.5px;">
+<span style="color: #64748B;">min_section</span>
+<span style="font-family: 'Pretendard', monospace; font-weight: 700; color: #1F2937;">700</span>
+</div>
+<div style="display: flex; justify-content: space-between; padding: 5px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12.5px;">
+<span style="color: #64748B;">max_table</span>
+<span style="font-family: 'Pretendard', monospace; font-weight: 700; color: #1F2937;">2,000</span>
+</div>
+</div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 392px; left: 860px; width: 320px; height: 56px; background: #FEF2F2; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 404px; left: 874px; width: 292px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11px; color: #64748B; margin: 0 0 4px 0; font-weight: 700;">적합 ·</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937; margin: 0; line-height: 1.4;">
+분석·비교형 (예: "A·B 사업 배점 비교")
+</p>
+</div>
+<!-- ============ Header Carry-over 도식 (하단) ============ -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 484px; left: 80px; width: 1120px; height: 176px; background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 6px solid #FFC759; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 499px; left: 104px; width: 1080px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0;">
+Header Carry-over: 표 분할 시 헤더 재삽입
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12.5px; color: #64748B; margin: 4px 0 0 0;">
+max_table 초과 구간을 나눌 때 <span style="font-weight: 700;">각 청크의 선두에 열 헤더를 다시 넣어</span>, 검색 결과 단독으로도 컬럼 의미를 유지
+</p>
+</div>
+<!-- Header Carry-over visualization -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 544px; left: 104px; width: 1080px; z-index: 10;">
+<div style="display: flex; align-items: stretch; gap: 12px;">
+<div style="flex: 2.45; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 10px 12px;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11px; color: #64748B; margin: 0 0 6px 0; font-weight: 700;">원본 표</p>
+<p style="font-family: 'Pretendard', monospace; font-size: 10px; color: #1F2937; margin: 0; line-height: 1.45;">
+<span style="background: #FFC759; padding: 1px 4px; border-radius: 2px;">| 구분 | 점수 | 설명 |</span><br/>
+| 기술 | 80 | ... |<br/>
+| 가격 | 20 | ... |<br/>
+<span style="color: #94A3B8;">...</span>
+</p>
+</div>
+<div style="display: flex; align-items: center; justify-content: center; color: #FF7B9C; font-size: 20px; font-weight: 700; padding: 0 2px;">→</div>
+<div style="flex: 3.05; display: flex; gap: 8px;">
+<div style="flex: 1; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 10px 12px;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 10.5px; color: #64748B; margin: 0 0 5px 0; font-weight: 700;">청크 A</p>
+<p style="font-family: 'Pretendard', monospace; font-size: 9.8px; color: #1F2937; margin: 0; line-height: 1.45;">
+<span style="background: #FFC759; padding: 1px 4px; border-radius: 2px;">| 구분 | 점수 | 설명 |</span><br/>
+| 기술 | 80 | ... |
+</p>
+</div>
+<div style="flex: 1; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px; padding: 10px 12px;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 10.5px; color: #64748B; margin: 0 0 5px 0; font-weight: 700;">청크 B</p>
+<p style="font-family: 'Pretendard', monospace; font-size: 9.8px; color: #1F2937; margin: 0; line-height: 1.45;">
+<span style="background: #FFC759; padding: 1px 4px; border-radius: 2px;">| 구분 | 점수 | 설명 |</span><br/>
+| 품질 | 15 | ... |
+</p>
+</div>
+</div>
+<div style="flex: 2.7; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 10px; padding: 12px 14px;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11px; color: #059669; margin: 0 0 6px 0; font-weight: 700;">효과</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937; margin: 0; line-height: 1.5;">
+각 청크가 <span style="font-weight: 700;">열 이름을 함께 유지</span>하므로, 검색 결과만 봐도 "점수·설명"의 의미를 바로 해석 가능
+</p>
+</div>
+</div>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 680px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Footer -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 693px; left: 80px; width: 1120px; height: 20px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #64748B; margin: 0;">
+configs/chunking/chunking_1000_150.yaml (채택) · small/medium/large 3종 전부 실측 → medium이 Faithfulness 최고 (슬라이드 17에서 공개)
+</p>
+</div>
+</div>
+</body>
+</html>

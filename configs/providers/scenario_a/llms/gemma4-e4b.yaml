@@ -1,0 +1,3 @@
+provider: huggingface
+model: google/gemma-4-E4B-it
+description: "Google Gemma4 E4B 엣지 모델 (멀티모달, 128K context)"

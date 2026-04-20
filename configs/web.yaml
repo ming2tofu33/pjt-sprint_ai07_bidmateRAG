@@ -1,0 +1,14 @@
+# Web UI 전용 프리셋
+#
+# 사용자용 Next.js UI가 실행할 RAG 조합을 한 파일에 모아둔다.
+# 실험 후 최적 조합이 바뀌면 이 파일만 수정하면 된다.
+#
+# 참고:
+# - 팀용 Streamlit(app/main.py)은 이 파일을 사용하지 않음 (사이드바로 수동 선택)
+# - 프론트(useStore.ts)가 provider/chunking을 보내지 않으면 이 값이 적용됨
+
+name: web_default
+provider_config: openai_gpt5mini         # configs/providers/*.yaml 의 파일명 (확장자 제외)
+chunking_config: chunking_1000_150       # configs/chunking/*.yaml 의 파일명 (확장자 제외)
+top_k: 5                                 # 기본 검색 청크 수 (슬래시 커맨드가 오버라이드 가능)
+max_context_chars: 8000                  # LLM에 전달할 컨텍스트 최대 글자 수

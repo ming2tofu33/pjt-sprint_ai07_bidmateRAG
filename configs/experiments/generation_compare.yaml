@@ -1,6 +1,6 @@
 name: generation-compare
 mode: generation_only
 provider_configs:
+  - configs/providers/openai_gpt5nano.yaml
   - configs/providers/openai_gpt5mini.yaml
-  - configs/providers/gemini_flash.yaml
-  - configs/providers/claude_sonnet.yaml
+  - configs/providers/openai_gpt5.yaml

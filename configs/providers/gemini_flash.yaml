@@ -1,3 +1,0 @@
-provider: gemini-openai-compat
-model: gemini-3-flash-preview
-api_base: https://generativelanguage.googleapis.com/v1beta/openai/

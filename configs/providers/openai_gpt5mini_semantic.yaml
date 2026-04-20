@@ -1,0 +1,7 @@
+provider: openai
+scenario: scenario_b
+model: gpt-5-mini
+embedding_model: text-embedding-3-small
+api_base: https://api.openai.com/v1
+collection_name: bidmate-scenario-b-semantic-percentile
+# persist_dir: artifacts/chroma_db_semantic

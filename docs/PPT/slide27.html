@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>의사결정: 답변 3섹션 규약 (핵심/근거/없는 항목)</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;family=Nanum+Gothic+Coding:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 500px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; margin: 0;">
+<span style="color: #FFC759;">시나리오 B</span> · 답변 규약 · 환각 방어
+</p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #64748B; letter-spacing: 0.5px; margin: 0;"><span style="font-weight: 700; color: #475569;">27</span><span style="font-weight: 500; color: #94A3B8;">/31</span></p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 98px; left: 80px; width: 1120px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #111827; letter-spacing: -2px; margin: 0; line-height: 1.2; line-height: 1.2;">
+답변 3섹션 규약: 핵심 / 근거 / 문서에 없는 항목
+</p>
+</div>
+<!-- Subtitle -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 150px; left: 80px; width: 1120px; height: 30px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 500; color: #64748B; margin: 0;">
+시나리오 B의 gpt-5-mini 대상 — 환각 방어 + 근거 추적성 + 부분 정답 허용을 시스템 프롬프트로 강제
+</p>
+</div>
+<!-- ============ Left: 3 Section Structure Template ============ -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 80px; width: 560px; height: 310px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 215px; left: 100px; width: 520px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0;">
+강제되는 3섹션 출력 구조
+</p>
+</div>
+<!-- Section 1: Core -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 250px; left: 100px; width: 520px; height: 70px; background: #F0FDF4; border-left: 4px solid #10B981; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 261px; left: 114px; width: 492px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0 0 5px 0;">
+<i class="fa-solid fa-bullseye" style="color: #10B981; margin-right: 6px;"></i>① 핵심 답변
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px; color: #64748B; margin: 0; line-height: 1.55;">
+질문에 대한 <span style="font-weight: 700; color: #1F2937;">직접적인 답</span>만 (부연 설명 X)
+</p>
+</div>
+<!-- Section 2: Evidence -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 330px; left: 100px; width: 520px; height: 70px; background: #FDF5F7; border-left: 4px solid #FF7B9C; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 341px; left: 114px; width: 492px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0 0 5px 0;">
+<i class="fa-solid fa-quote-right" style="color: #FF7B9C; margin-right: 6px;"></i>② 근거 (<span style="font-family: 'Pretendard', monospace;">[n]</span> 필수)
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px; color: #64748B; margin: 0; line-height: 1.55;">
+문서에서 확인한 사실 · 각 항목 끝에 <span style="font-family: 'Pretendard', monospace; font-weight: 700; color: #FF7B9C;">[1][2]</span> 인용 번호
+</p>
+</div>
+<!-- Section 3: Missing -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 410px; left: 100px; width: 520px; height: 70px; background: #FEF3C7; border-left: 4px solid #D49B25; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 421px; left: 114px; width: 492px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0 0 5px 0;">
+<i class="fa-solid fa-circle-minus" style="color: #D49B25; margin-right: 6px;"></i>③ 문서에 없는 항목
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px; color: #64748B; margin: 0; line-height: 1.55;">
+없으면 "없음", 있으면 구체적으로 — <span style="font-weight: 700;">부분 정답 허용</span>
+</p>
+</div>
+<!-- ============ Right: Example Answer (Q002 — 부분 정답 + 없는 항목) ============ -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 660px; width: 540px; height: 310px; background: #F3F4F6; border: 1px solid #E2E8F0; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 215px; left: 680px; width: 500px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #D49B25; margin: 0;">
+실제 답변 예시 — Q002 (벤처기업협회 · 1차/2차 오픈 일정)
+</p>
+</div>
+<!-- Example content -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 246px; left: 680px; width: 500px; z-index: 10;">
+<p style="font-family: 'Pretendard', monospace; font-size: 11px; color: #64748B; margin: 0 0 4px 0; line-height: 1.4;">
+# Q. 1차 오픈과 2차 그랜드 오픈은 각각 언제?
+</p>
+</div>
+<!-- ① Core answer -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 272px; left: 680px; width: 500px; z-index: 10;">
+<p style="font-family: 'Pretendard', monospace; font-size: 11px; color: #10B981; margin: 0 0 3px 0; font-weight: 700;">
+① 핵심 답변
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937; margin: 0; line-height: 1.5;">
+· 1차 오픈: <span style="font-weight: 700; color: #D49B25;">2024.07.10</span> <span style="font-family: 'Pretendard', monospace; color: #FF7B9C; font-weight: 700;">[1]</span><br/>
+· 2차 그랜드 오픈: <span style="font-weight: 700; color: #D49B25;">2024년 9월 중</span> (정확한 일자 불명) <span style="font-family: 'Pretendard', monospace; color: #FF7B9C; font-weight: 700;">[1]</span>
+</p>
+</div>
+<!-- ② Evidence -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 342px; left: 680px; width: 500px; z-index: 10;">
+<p style="font-family: 'Pretendard', monospace; font-size: 11px; color: #FF7B9C; margin: 0 0 3px 0; font-weight: 700;">
+② 근거
+</p>
+<p style="font-family: 'Pretendard', monospace; font-size: 10.5px; color: #475569; margin: 0; line-height: 1.55;">
+[1] "1차 오픈 : 2024.07.10. 성과조건부 ..."<br/>
+[1] "2차 오픈 : 2024.09월 中 GrandOpen"
+</p>
+</div>
+<!-- ③ Missing -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 404px; left: 680px; width: 500px; z-index: 10;">
+<p style="font-family: 'Pretendard', monospace; font-size: 11px; color: #D49B25; margin: 0 0 3px 0; font-weight: 700;">
+③ 문서에 없는 항목
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937; margin: 0; line-height: 1.5;">
+2차 그랜드 오픈의 <span style="color: #D49B25; font-weight: 700;">정확한 일자(일 단위)</span>
+</p>
+</div>
+<!-- Judge score badge -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 465px; left: 680px; width: 500px; height: 35px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; z-index: 2;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 465px; left: 694px; width: 472px; z-index: 10;">
+<p style="font-family: 'Pretendard', monospace; font-size: 11px; color: #64748B; margin: 0; line-height: 35px;">
+Judge: F/AR/CP/CR/AC = <span style="color: #10B981; font-weight: 700;">1.0 / 1.0 / 1.0 / 1.0 / 1.0</span> (전 지표 만점)
+</p>
+</div>
+<!-- ============ Bottom: 3 Defense Mechanisms Row ============ -->
+<!-- Defense 1: Citation Pre-injection -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 535px; left: 80px; width: 360px; height: 130px; background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid #FF7B9C; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 548px; left: 96px; width: 328px; height: 102px; display: flex; flex-direction: column; justify-content: center; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14.5px; font-weight: 700; color: #1F2937; margin: 0 0 6px 0;">
+<i class="fa-solid fa-link" style="color: #FF7B9C; margin-right: 6px;"></i>Citation 사전 주입
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #64748B; margin: 0; line-height: 1.58;">
+LLM 전달 컨텍스트의 각 청크에 <span style="font-family: 'Pretendard', monospace; font-weight: 700; color: #FF7B9C;">[1] [2]</span> 번호를 <span style="font-weight: 700;">미리 부여</span> → 답변 출처와 근거가 <span style="font-weight: 700;">1:1 매칭 보장</span>
+</p>
+</div>
+<!-- Defense 2: 환각 방어 문구 -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 535px; left: 460px; width: 360px; height: 130px; background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid #DC2626; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 548px; left: 476px; width: 328px; height: 102px; display: flex; flex-direction: column; justify-content: center; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14.5px; font-weight: 700; color: #1F2937; margin: 0 0 6px 0;">
+<i class="fa-solid fa-shield-halved" style="color: #DC2626; margin-right: 6px;"></i>환각 방어 기본 문구
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #64748B; margin: 0; line-height: 1.58;">
+컨텍스트에 없으면 <span style="font-family: 'Pretendard', monospace; font-size: 11px; background: #FEF2F2; padding: 1px 4px; border-radius: 2px; color: #DC2626;">"제공된 문서에서 해당 정보를 찾을 수 없습니다"</span>로 정직하게 답변
+</p>
+</div>
+<!-- Defense 3: 부분 정답 허용 -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 535px; left: 840px; width: 360px; height: 130px; background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid #10B981; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 548px; left: 856px; width: 328px; height: 102px; display: flex; flex-direction: column; justify-content: center; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14.5px; font-weight: 700; color: #1F2937; margin: 0 0 6px 0;">
+<i class="fa-solid fa-check-double" style="color: #10B981; margin-right: 6px;"></i>부분 정답 허용
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #64748B; margin: 0; line-height: 1.58;">
+"일부만 확인되면 <span style="font-weight: 700;">확인된 내용부터 답</span>하고, 없는 항목만 따로 적어라" — 전체 거절로 질문 회피 방지
+</p>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 680px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Footer -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 693px; left: 80px; width: 1120px; height: 20px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #64748B; margin: 0;">
+src/bidmate_rag/config/prompts.py · SYSTEM_PROMPT 전문 기반 · 80문항 평가에서 환각 0건 실증 (슬라이드 28·29 참조)
+</p>
+</div>
+</div>
+</body>
+</html>

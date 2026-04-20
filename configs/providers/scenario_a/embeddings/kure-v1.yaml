@@ -1,0 +1,4 @@
+embedding_model: nlpai-lab/KURE-v1
+embedding_provider: huggingface
+dimension: 1024
+description: "BGE-M3 기반 한국어 특화 임베딩 모델"

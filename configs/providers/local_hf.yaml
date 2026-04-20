@@ -1,0 +1,7 @@
+provider: huggingface
+scenario: scenario_a
+model: Qwen/Qwen3.5-4B
+embedding_model: BAAI/bge-m3
+# model: Qwen/Qwen2.5-0.5B-Instruct
+# embedding_model: sentence-transformers/all-MiniLM-L6-v2 
+collection_name: bidmate-scenario-a-bge-m3

@@ -1,0 +1,5 @@
+name: chunking-compare
+mode: full_rag
+provider_configs:
+  - configs/providers/openai_gpt5mini.yaml
+  - configs/providers/openai_gpt5mini_semantic.yaml

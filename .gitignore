@@ -1,3 +1,9 @@
+# chat/debug scratch artifacts
+/history.json
+#보고서 작성 관련
+/notion/
+/notion2/
+/experiments/
 # data
 data/raw/*
 !data/raw/.gitkeep
@@ -6,11 +12,26 @@ data/processed/*
 !data/processed/.gitkeep
 data/eval/*
 !data/eval/.gitkeep
+!data/eval/eval_set.json
+# Versioned eval directories (eval_v1/, eval_v2/, …) are tracked.
+# Loose top-level eval_batch_*.csv는 더 이상 사용하지 않습니다.
+!data/eval/eval_v*/
+!data/eval/eval_v*/**
 
 # build artifacts
 artifacts/*
 !artifacts/**/
 !artifacts/**/.gitkeep
+artifacts/chroma_db/*
+artifacts/logs/*
+artifacts/vector_db/*
+artifacts/cache/*
+artifacts/reports/*
+!artifacts/**/.gitkeep
+
+# Claude Code local settings
+.claude/
+.superpowers/
 
 # git worktrees
 .worktrees/
@@ -33,6 +54,7 @@ downloads/
 eggs/
 .eggs/
 lib/
+!web/lib/
 lib64/
 parts/
 sdist/
@@ -68,6 +90,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+tmp/
 
 # Translations
 *.mo
@@ -162,6 +185,12 @@ ENV/
 env.bak/
 venv.bak/
 
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -223,3 +252,22 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+configs/experiments/generated2/
+.agents/
+FETCH_HEAD
+Study.md
+study2A.md
+app/finetuning_ui.py
+artifacts/chroma_db_semantic/
+artifacts/training/
+.local_backup/
+artifacts/chroma/
+artifacts/sql/
+reports/
+scripts/build_project_report.py
+scripts/prepare_sft_data.py
+skills-lock.json
+experiments/notebooks/
+
+# Scenario A research files
+research/scenario_a/

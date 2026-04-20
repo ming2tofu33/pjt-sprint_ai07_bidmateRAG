@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>단락 기반 청킹이 Semantic Chunking 대비 우세</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;display=swap" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 400px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; margin: 0;">
+<span style="color: #FF7B9C;">주요 발견</span> · 섹션 ③ · 청킹 메타데이터
+        </p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #64748B; letter-spacing: 0.5px; margin: 0;"><span style="font-weight: 700; color: #475569;">17</span><span style="font-weight: 500; color: #94A3B8;">/31</span></p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 105px; left: 80px; width: 1120px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #111827; letter-spacing: -2px; margin: 0; line-height: 1.2; line-height: 1.2;">
+            단락 기반 청킹이 Semantic Chunking 대비 우세
+        </p>
+</div>
+<!-- Hook Box Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 175px; left: 80px; width: 1120px; height: 60px; background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 6px solid #FF7B9C; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
+<!-- Hook Box Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 190px; left: 104px; width: 1072px; height: 35px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 20px; font-weight: 500; color: #1F2937; margin: 0; line-height: 1.5;">
+            RFP 물리적 구조를 반영한 청킹이 의미 유사도 기반 청킹보다 더 높은 Faithfulness를 보였다
+        </p>
+</div>
+<!-- Left Chart Area Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 250px; left: 80px; width: 550px; height: 295px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
+<!-- Left Chart Area Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 275px; left: 104px; width: 500px; height: 30px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin: 0;">
+            MRR (4종 청킹 전략) <span style="font-weight: 500; font-size: 14px; color: #94A3B8; margin-left: 8px;">— 4종 모두 동일 수준</span>
+</p>
+</div>
+<!-- Left Chart Canvas -->
+<div data-object="true" data-object-type="chart" style="position: absolute; top: 320px; left: 104px; width: 500px; height: 205px; z-index: 10;">
+<canvas id="mrrChart"></canvas>
+</div>
+<!-- Right Chart Area Shape -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 250px; left: 650px; width: 550px; height: 295px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
+<!-- Right Chart Area Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 275px; left: 675px; width: 500px; height: 30px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin: 0;">
+                Faithfulness <span style="font-weight: 500; font-size: 14px; color: #64748B; margin-left: 8px;">— 단락 기반 우세</span>
+</p>
+<span style="background: #FFC759; color: #1F2937; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">최고: 0.6906</span>
+</div>
+</div>
+<!-- Right Chart Canvas -->
+<div data-object="true" data-object-type="chart" style="position: absolute; top: 320px; left: 675px; width: 500px; height: 205px; z-index: 10;">
+<canvas id="faithfulnessChart"></canvas>
+</div>
+<!-- Bottom Cards Area -->
+<!-- Bottom Card 1 Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 565px; left: 80px; width: 265px; height: 75px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
+<!-- Bottom Card 1 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 585px; left: 100px; width: 225px; height: 30px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; align-items: center; font-family: 'Pretendard', 'Noto Sans KR', sans-serif;">
+<div style="display: flex; align-items: center; gap: 8px;">
+<div style="width: 8px; height: 8px; background: #BABFD1; border-radius: 50%;"></div>
+<span style="font-size: 15px; font-weight: 700; color: #1F2937;">500 / 100</span>
+</div>
+<span style="font-size: 15px; font-weight: 700; color: #94A3B8;">0.6687</span>
+</div>
+</div>
+<!-- Bottom Card 2 Background (Winner) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 565px; left: 365px; width: 265px; height: 75px; background: #FFFDF5; border: 1px solid #FFC759; border-radius: 6px; z-index: 1;"></div>
+<!-- Bottom Card 2 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 585px; left: 385px; width: 225px; height: 30px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; align-items: center; font-family: 'Pretendard', 'Noto Sans KR', sans-serif;">
+<div style="display: flex; align-items: center; gap: 8px;">
+<div style="width: 8px; height: 8px; background: #FFC759; border-radius: 50%;"></div>
+<span style="font-size: 15px; font-weight: 700; color: #1F2937;">1000 / 150 <span style="font-size: 13px; color: #FFC759; margin-left: 2px;"></span></span>
+</div>
+<span style="font-size: 18px; font-weight: 900; color: #1F2937;">0.6906</span>
+</div>
+</div>
+<!-- Bottom Card 3 Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 565px; left: 650px; width: 265px; height: 75px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
+<!-- Bottom Card 3 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 585px; left: 670px; width: 225px; height: 30px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; align-items: center; font-family: 'Pretendard', 'Noto Sans KR', sans-serif;">
+<div style="display: flex; align-items: center; gap: 8px;">
+<div style="width: 8px; height: 8px; background: #BABFD1; border-radius: 50%;"></div>
+<span style="font-size: 15px; font-weight: 700; color: #1F2937;">1500 / 200</span>
+</div>
+<span style="font-size: 15px; font-weight: 700; color: #94A3B8;">0.6281</span>
+</div>
+</div>
+<!-- Bottom Card 4 Background -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 565px; left: 935px; width: 265px; height: 75px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
+<!-- Bottom Card 4 Text -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 585px; left: 955px; width: 225px; height: 30px; z-index: 10;">
+<div style="display: flex; justify-content: space-between; align-items: center; font-family: 'Pretendard', 'Noto Sans KR', sans-serif;">
+<div style="display: flex; align-items: center; gap: 8px;">
+<div style="width: 8px; height: 8px; background: #BABFD1; border-radius: 50%;"></div>
+<span style="font-size: 15px; font-weight: 700; color: #1F2937;">Semantic</span>
+</div>
+<span style="font-size: 15px; font-weight: 700; color: #94A3B8;">0.6719</span>
+</div>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 680px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Footer Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 693px; left: 80px; width: 600px; height: 20px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 400; color: #94A3B8; margin: 0;">
+            Apr 16, 시나리오 B, eval_batch_35 80문항
+        </p>
+</div>
+<!-- Footer Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 693px; left: 600px; width: 600px; height: 20px; text-align: right; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #64748B; margin: 0;">
+            단락 기반 &gt; Semantic   ·   <span style="font-weight: 700;">Faithfulness +2.78%</span>
+</p>
+</div>
+<script>
+        const lightTooltipOptions = {
+            backgroundColor: '#FFFFFF',
+            titleColor: '#1F2937',
+            bodyColor: '#607196',
+            borderColor: '#E8E9ED',
+            borderWidth: 1,
+            padding: 10,
+            cornerRadius: 4,
+            titleFont: { family: "'Pretendard', 'Noto Sans KR', sans-serif", size: 13, weight: 'bold' },
+            bodyFont: { family: "'Pretendard', 'Noto Sans KR', sans-serif", size: 12 }
+        };
+
+        const mrrCtx = document.getElementById('mrrChart').getContext('2d');
+        new Chart(mrrCtx, {
+            type: 'bar',
+            data: {
+                labels: ['500/100', '1000/150', '1500/200', 'Semantic'],
+                datasets: [{
+                    label: 'MRR',
+                    data: [0.9792, 0.9792, 0.9792, 0.9792],
+                    backgroundColor: '#BABFD1',
+                    borderRadius: 4,
+                    barPercentage: 0.5,
+                    categoryPercentage: 0.8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: lightTooltipOptions
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 0.9,
+                        max: 1.0,
+                        grid: { color: '#E8E9ED', drawBorder: false },
+                        ticks: { color: '#9BA1A6', font: { family: "'Pretendard', 'Noto Sans KR', sans-serif", size: 11 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#1F2937', font: { family: "'Pretendard', 'Noto Sans KR', sans-serif", size: 12 } }
+                    }
+                }
+            }
+        });
+
+        const faithCtx = document.getElementById('faithfulnessChart').getContext('2d');
+        new Chart(faithCtx, {
+            type: 'bar',
+            data: {
+                labels: ['500/100', '1000/150', '1500/200', 'Semantic'],
+                datasets: [{
+                    label: 'Faithfulness',
+                    data: [0.6687, 0.6906, 0.6281, 0.6719],
+                    backgroundColor: [
+                        '#607196',
+                        '#FFC759',
+                        '#607196',
+                        '#607196'
+                    ],
+                    borderRadius: 4,
+                    barPercentage: 0.5,
+                    categoryPercentage: 0.8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: lightTooltipOptions
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 0.6,
+                        max: 0.72,
+                        grid: { color: '#E8E9ED', drawBorder: false },
+                        ticks: { color: '#9BA1A6', font: { family: "'Pretendard', 'Noto Sans KR', sans-serif", size: 11 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { 
+                            color: '#1F2937', 
+                            font: { family: "'Pretendard', 'Noto Sans KR', sans-serif", size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</div>
+</body>
+</html>

@@ -1,0 +1,7 @@
+name: chunking-1500-200
+mode: full_rag
+chunk_size: 1500
+chunk_overlap: 200
+description: "큰 청크 (1500자, 200 오버랩) — 분석형 질문에 유리"
+provider_configs:
+  - configs/providers/openai_gpt5mini.yaml

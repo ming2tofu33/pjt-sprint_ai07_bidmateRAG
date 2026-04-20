@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Naïve Dense 검색의 3대 실패</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;family=Nanum+Gothic+Coding:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+</head>
+<body style="margin: 0; padding: 0; overflow: hidden; background: #FAFAFA;">
+<div class="slide-container" style="position: relative; width: 1280px; height: 720px; overflow: hidden; background: #FAFAFA;">
+<!-- Header Left -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 80px; width: 500px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #64748B; letter-spacing: 0.5px; margin: 0;">
+<span style="color: #FFC759;">문제 인식</span> · 섹션 ④ · Naïve RAG의 한계
+</p>
+</div>
+<!-- Header Right -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 40px; left: 800px; width: 400px; text-align: right; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 500; color: #64748B; letter-spacing: 0.5px; margin: 0;"><span style="font-weight: 700; color: #475569;">19</span><span style="font-weight: 500; color: #94A3B8;">/31</span></p>
+</div>
+<!-- Top Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 75px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Main Title -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 98px; left: 80px; width: 960px; height: 60px; z-index: 10;">
+<p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #111827; letter-spacing: -2px; margin: 0; line-height: 1.2; line-height: 1.2;">
+Naïve Dense 검색의 3대 실패
+</p>
+</div>
+<!-- Subtitle -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 155px; left: 80px; width: 960px; height: 30px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 500; color: #64748B; margin: 0;">
+Dense 임베딩 단독의 3대 실패 패턴 — <span style="font-weight: 700; color: #1F2937;">Dense + Sparse(BM25) + RRF 하이브리드로 해결 (최종 채택)</span>
+</p>
+</div>
+<!-- Embedding model badge (right of title) -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 108px; left: 1020px; width: 180px; height: 38px; background: #EAECEF; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 108px; left: 1020px; width: 180px; height: 38px; z-index: 10;">
+<p style="font-family: 'Pretendard', monospace; font-size: 13px; font-weight: 700; color: #1F2937; margin: 0; line-height: 38px; text-align: center;">
+BAAI/bge-m3
+</p>
+</div>
+<!-- ============ FAILURE 1: 기관 혼동 ============ -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 80px; width: 360px; height: 280px; background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid #DC2626; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 218px; left: 100px; width: 320px; z-index: 10;">
+<div style="display: flex; align-items: center;">
+<span style="font-family: 'Pretendard', monospace; font-size: 11px; font-weight: 700; color: #FFFFFF; background: #DC2626; padding: 3px 8px; border-radius: 10px;">실패 ①</span>
+<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin-left: 8px;">기관 혼동</span>
+</div>
+</div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 258px; left: 100px; width: 320px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px; color: #1F2937; margin: 0 0 12px 0; line-height: 1.5;">
+유사 맥락의 <span style="font-weight: 700;">다른 기관 문서</span>가 상위권에 포함됨
+</p>
+</div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 310px; left: 100px; width: 320px; height: 120px; background: #FEF2F2; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 322px; left: 114px; width: 296px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #64748B; margin: 0 0 6px 0; font-weight: 700;">예시 ·</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937; margin: 0 0 8px 0; line-height: 1.5;">
+Q. <span style="font-weight: 700;">국민연금공단</span>의 사업 예산은?
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #DC2626; margin: 0; line-height: 1.5;">
+→ Top-5에 <span style="font-weight: 700;">한국수출입은행</span> 예산 청크 포함
+</p>
+</div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 445px; left: 100px; width: 320px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #64748B; margin: 0; line-height: 1.5;">
+<span style="color: #1F2937; font-weight: 700;">원인:</span> 메타데이터 필터 부재 + 유사 의미 매칭
+</p>
+</div>
+<!-- ============ FAILURE 2: 고유명사 실패 ============ -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 460px; width: 360px; height: 280px; background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid #DC2626; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 218px; left: 480px; width: 320px; z-index: 10;">
+<div style="display: flex; align-items: center;">
+<span style="font-family: 'Pretendard', monospace; font-size: 11px; font-weight: 700; color: #FFFFFF; background: #DC2626; padding: 3px 8px; border-radius: 10px;">실패 ②</span>
+<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin-left: 8px;">고유명사 실패</span>
+</div>
+</div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 258px; left: 480px; width: 320px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px; color: #1F2937; margin: 0 0 12px 0; line-height: 1.5;">
+<span style="font-weight: 700;">모델번호·법률조항·숫자</span>는 벡터 유사도로 못 잡음
+</p>
+</div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 310px; left: 480px; width: 320px; height: 120px; background: #FEF2F2; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 322px; left: 494px; width: 296px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #64748B; margin: 0 0 6px 0; font-weight: 700;">예시 ·</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937; margin: 0 0 8px 0; line-height: 1.5;">
+Q. <span style="font-family: 'Pretendard', monospace; font-weight: 700;">"PER-003"</span> 요구사항은?
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #DC2626; margin: 0; line-height: 1.5;">
+→ Top-5에 정답 미포함, 일반 성능 문구만
+</p>
+</div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 445px; left: 480px; width: 320px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #64748B; margin: 0; line-height: 1.5;">
+<span style="color: #1F2937; font-weight: 700;">원인:</span> Sparse(BM25) 키워드 매칭 미적용
+</p>
+</div>
+<!-- ============ FAILURE 3: 대명사 붕괴 ============ -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 200px; left: 840px; width: 360px; height: 280px; background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid #DC2626; border-radius: 6px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 218px; left: 860px; width: 320px; z-index: 10;">
+<div style="display: flex; align-items: center;">
+<span style="font-family: 'Pretendard', monospace; font-size: 11px; font-weight: 700; color: #FFFFFF; background: #DC2626; padding: 3px 8px; border-radius: 10px;">실패 ③</span>
+<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin-left: 8px;">대명사 붕괴</span>
+</div>
+</div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 258px; left: 860px; width: 320px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px; color: #1F2937; margin: 0 0 12px 0; line-height: 1.5;">
+<span style="font-weight: 700;">멀티턴 후속 질문</span>에서 지시 대상을 잃음
+</p>
+</div>
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 310px; left: 860px; width: 320px; height: 120px; background: #FEF2F2; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 322px; left: 874px; width: 296px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #64748B; margin: 0 0 6px 0; font-weight: 700;">예시 ·</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937; margin: 0 0 8px 0; line-height: 1.5;">
+Q. "<span style="font-weight: 700;">그 사업</span>의 예산은?" (후속)
+</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #DC2626; margin: 0; line-height: 1.5;">
+→ 전혀 다른 사업 검색, 대명사 해석 실패
+</p>
+</div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 445px; left: 860px; width: 320px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #64748B; margin: 0; line-height: 1.5;">
+<span style="color: #1F2937; font-weight: 700;">원인:</span> 대화 맥락 상속 메커니즘 부재
+</p>
+</div>
+<!-- ============ bge-m3 채택 이유 Box ============ -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 510px; left: 80px; width: 1120px; height: 150px; background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 6px solid #FF7B9C; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 525px; left: 104px; width: 700px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0;">
+그럼에도 <span style="color: #FF7B9C;">BAAI/bge-m3</span>를 임베딩 기본으로 채택한 이유
+</p>
+</div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 560px; left: 104px; width: 1080px; z-index: 10;">
+<div style="display: flex; gap: 20px;">
+<div style="flex: 1; padding: 8px 12px; background: #FDF5F7; border-radius: 4px;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0;">다국어 강점</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #64748B; margin: 0; line-height: 1.4;">100개 언어 지원,<br/>한국어 도메인 안정</p>
+</div>
+<div style="flex: 1; padding: 8px 12px; background: #FDF5F7; border-radius: 4px;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0;">Dense + Sparse</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #64748B; margin: 0; line-height: 1.4;">단일 모델로 하이브리드<br/>구성 가능</p>
+</div>
+<div style="flex: 1; padding: 8px 12px; background: #FDF5F7; border-radius: 4px;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0;">긴 컨텍스트</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #64748B; margin: 0; line-height: 1.4;">8,192 토큰 — RFP<br/>긴 청크 온전 처리</p>
+</div>
+<div style="flex: 1; padding: 8px 12px; background: #FDF5F7; border-radius: 4px;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0;">오픈소스</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #64748B; margin: 0; line-height: 1.4;">시나리오 A/B 공유<br/>로컬 구동 가능</p>
+</div>
+</div>
+</div>
+<!-- Bottom Divider -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 680px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
+<!-- Footer -->
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 693px; left: 80px; width: 1120px; height: 20px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #64748B; margin: 0;">
+3대 실패 해결 경로 · ① 기관혼동 → 메타 필터 + Hybrid / ② 고유명사 → Sparse(BM25) / ③ 대명사 → 멀티턴 Rewrite (슬라이드 22)
+</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,10 @@
+name: semantic-percentile
+mode: full_rag
+chunking_strategy: semantic
+chunk_size: 1000
+chunk_overlap: 0
+breakpoint_threshold_type: percentile
+breakpoint_threshold_amount: 95
+description: "의미기반 청킹 - percentile 방식 (기본)"
+provider_configs:
+  - configs/providers/openai_gpt5mini.yaml
