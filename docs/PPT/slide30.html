@@ -61,15 +61,26 @@
 <canvas id="stackedChart"></canvas>
 </div>
 
-<!-- ============ Bottom Insight Banner ============ -->
-<div data-object="true" data-object-type="shape" style="position: absolute; top: 605px; left: 80px; width: 1120px; height: 70px; background: #EAECEF; border-left: 4px solid #FF7B9C; border-radius: 4px; z-index: 1;"></div>
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 620px; left: 110px; width: 1060px; height: 40px; z-index: 10;">
-<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 17px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0;">
-<span style="font-weight: 900; color: #FF7B9C; margin-right: 10px;">핵심 인사이트</span>환각은 사라지고, 논리 오류 비중이 커짐
+<!-- ============ Bottom Zone: Insight (left 65%) + Cost (right 35%) ============ -->
+<!-- Left: Insight Banner -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 605px; left: 80px; width: 720px; height: 70px; background: #EAECEF; border-left: 4px solid #FF7B9C; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 620px; left: 110px; width: 680px; height: 40px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 700; color: #1F2937; margin: 0 0 4px 0;">
+<span style="font-weight: 900; color: #FF7B9C; margin-right: 8px;">핵심 인사이트</span>환각은 사라지고, 논리 오류 비중이 커짐
 </p>
-<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 500; color: #64748B; margin: 0;">
-Hallucination 20% → 0% · 프롬프트·검색 단계 해결 완료 · 남은 과제는 LLM 추론 능력 개선
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 500; color: #64748B; margin: 0;">
+Hallucination 20% → 0% · 프롬프트·검색 해결 완료 · 남은 과제는 LLM 추론 능력 개선
 </p>
+</div>
+<!-- Right: Cost Mini Card -->
+<div data-object="true" data-object-type="shape" style="position: absolute; top: 605px; left: 820px; width: 380px; height: 70px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; z-index: 1;"></div>
+<div data-object="true" data-object-type="textbox" style="position: absolute; top: 615px; left: 840px; width: 340px; z-index: 10;">
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11px; font-weight: 700; color: #64748B; letter-spacing: 0.3px; margin: 0 0 5px 0;">💰 Cost/query <span style="font-weight: 500; color: #94A3B8;">(임베딩 제외, 20문항 기준)</span></p>
+<div style="display: flex; justify-content: space-between; align-items: baseline; font-family: 'Pretendard', 'Noto Sans KR', sans-serif;">
+<span style="font-size: 13px; font-weight: 700; color: #D49B25;">A-P4: <span style="font-family: 'Pretendard', monospace; color: #1F2937;">$0.0009</span></span>
+<span style="font-size: 13px; font-weight: 700; color: #FF7B9C;">B-Opt: <span style="font-family: 'Pretendard', monospace; color: #1F2937;">$0.005</span></span>
+<span style="font-size: 11px; color: #94A3B8;">(5.6×)</span>
+</div>
 </div>
 <!-- Footer Divider -->
 <div data-object="true" data-object-type="shape" style="position: absolute; top: 685px; left: 80px; width: 1120px; height: 1px; background: #E2E8F0; z-index: 1;"></div>
