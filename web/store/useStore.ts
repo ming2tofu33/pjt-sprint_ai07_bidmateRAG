@@ -219,7 +219,6 @@ export const useStore = create<Store>()(
             return { messages: nextMsgs, chats: syncedChats.chats };
           });
 
-        // eslint-disable-next-line prefer-const
         let finalMetadata = null as QueryMetadata | null;
 
         try {
