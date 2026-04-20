@@ -88,7 +88,7 @@
 - [ ] Naïve Dense 3대 실패 카드 구성
   - [ ] 실패 ① 기관 혼동: "A기관 예산" 질문 → 유사 맥락의 B기관 데이터가 상위
   - [ ] 실패 ② 고유명사 실패: 특정 모델번호·법률조항·숫자를 벡터 유사도로 못 잡음
-  - [ ] 실패 ③ 대명사 붕괴: "그 사업의 예산은?" → 전혀 다른 사업 검색
+  - [ ] 실패 ③ 멀티턴 맥락 복원 실패: "그 사업의 예산은?" → 전혀 다른 사업 검색
 - [ ] bge-m3 채택 근거 (다국어·8,192 토큰 컨텍스트·Dense+Sparse 동시 지원)
 - [ ] 커밋: `fix(ppt): 슬라이드 19 Naïve Dense 3대 실패로 재작성`
 
@@ -115,16 +115,16 @@
 
 - [ ] 현재 "2단계 리랭커 MRR +0.18" 전체 제거
 - [ ] 헤더: `★ 의사결정 · 섹션 ④`
-- [ ] 제목: `드라마: Hard Filter → Soft Boost + 원질문·재작성 병렬 조회`
+- [ ] 제목: `Hard Filter에서 Soft Boost와 보조 검색 병합으로`
 - [ ] Before/After 플로우 다이어그램
   - Before: Hard Filter가 정답 청크를 아예 빨간 X로 차단
   - After: Soft Boost가 점수 +0.12만 더하는 가산
 - [ ] 변경 포인트 4가지
   - section_hint를 hard filter가 아닌 **soft boost**로만 사용
-  - **원 질문 + 재작성 질문 병렬 조회**
+  - **기본 검색 + 보조 검색 결과 병합**
   - 동적 anchor
   - 메타데이터 boost
-- [ ] MAX_TOTAL_BOOST=0.15 상한 명시 (Cross-Encoder 점수 보호)
+- [ ] MAX_TOTAL_BOOST=0.15 상한 명시 (과도한 가산 역전 방지)
 - [ ] Type C 비교표 (13문항 한정)
   - Faithfulness 0.7692 → **0.8462 (+7.7%)**
   - Context Recall 0.7500 → 0.8462

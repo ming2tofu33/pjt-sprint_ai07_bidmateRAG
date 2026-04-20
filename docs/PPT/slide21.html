@@ -5,7 +5,7 @@
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Hard Filter에서 Soft Boost로의 전환과 병렬 조회</title>
+<title>Hard Filter에서 Soft Boost와 보조 검색 병합으로</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;family=Nanum+Gothic+Coding:wght@400;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
 </head>
@@ -26,7 +26,7 @@
 <!-- Main Title -->
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 98px; left: 80px; width: 1120px; height: 60px; z-index: 10;">
 <p style="font-family: 'Black Han Sans', sans-serif; font-size: 44px; color: #111827; letter-spacing: -2px; margin: 0; line-height: 1.2; line-height: 1.2;">
-Hard Filter에서 Soft Boost로의 전환과 병렬 조회
+Hard Filter에서 Soft Boost와 보조 검색 병합으로
 </p>
 </div>
 <!-- Subtitle -->
@@ -77,7 +77,7 @@ LLM이 추론한 섹션을 <span style="font-family: 'Pretendard', monospace; fo
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 213px; left: 680px; width: 500px; z-index: 10;">
 <div style="display: flex; align-items: center;">
 <span style="font-family: 'Pretendard', monospace; font-size: 11px; font-weight: 700; color: #FFFFFF; background: #10B981; padding: 3px 8px; border-radius: 10px;">AFTER</span>
-<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin-left: 8px;">Soft Boost + 병렬 조회</span>
+<span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; margin-left: 8px;">Soft Boost + 보조 검색 병합</span>
 </div>
 </div>
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 250px; left: 680px; width: 500px; z-index: 10;">
@@ -89,14 +89,14 @@ LLM이 추론한 섹션을 <span style="font-family: 'Pretendard', monospace; fo
 <div data-object="true" data-object-type="shape" style="position: absolute; top: 310px; left: 680px; width: 500px; height: 90px; background: #F0FDF4; border-radius: 4px; z-index: 1;"></div>
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 322px; left: 694px; width: 472px; z-index: 10;">
 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-<div style="flex: 1; padding: 6px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 10.5px; color: #1F2937;">원질문 + 재작성<br/>병렬 조회</div>
+<div style="flex: 1; padding: 6px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 10.5px; color: #1F2937;">기본 Hybrid<br/>검색</div>
 <i class="fa-solid fa-arrow-right" style="color: #10B981; font-size: 12px;"></i>
-<div style="flex: 1; padding: 6px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 10.5px; color: #1F2937;">Hybrid 후보 풀</div>
+<div style="flex: 1; padding: 6px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 10.5px; color: #1F2937;">anchor 보조<br/>검색 1회</div>
 <i class="fa-solid fa-arrow-right" style="color: #10B981; font-size: 12px;"></i>
-<div style="flex: 1.1; padding: 6px; background: #10B981; border-radius: 4px; text-align: center; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 10.5px; color: #FFFFFF; font-weight: 700;">Top-K 선발</div>
+<div style="flex: 1.1; padding: 6px; background: #10B981; border-radius: 4px; text-align: center; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 10.5px; color: #FFFFFF; font-weight: 700;">결과 병합 후<br/>Top-K 선발</div>
 </div>
 <p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 10.5px; color: #10B981; margin: 8px 0 0 0; text-align: center;">
-<span style="font-weight: 700;">section · table · metadata</span> boost (max_total=0.15 상한)
+<span style="font-weight: 700;">section · table · metadata · numeric</span> boost (max_total=0.15 상한)
 </p>
 </div>
 <!-- ============ Change Points (4-item row) ============ -->
@@ -111,12 +111,12 @@ LLM이 추론한 섹션을 <span style="font-family: 'Pretendard', monospace; fo
 <p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11px; color: #1F2937; margin: 0; line-height: 1.4;">hard filter → <span style="font-weight: 700;">soft boost</span>로만 사용</p>
 </div>
 <div style="flex: 1; padding: 8px 12px; background: #FDF5F7; border-radius: 4px;">
-<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; font-weight: 700; color: #FF7B9C; margin: 0 0 3px 0;">② 병렬 조회</p>
-<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11px; color: #1F2937; margin: 0; line-height: 1.4;">원 질문 + 재작성 <span style="font-weight: 700;">동시 검색</span></p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; font-weight: 700; color: #FF7B9C; margin: 0 0 3px 0;">② 보조 검색</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11px; color: #1F2937; margin: 0; line-height: 1.4;">anchor가 있을 때만 <span style="font-weight: 700;">보조 검색 1회</span> 추가</p>
 </div>
 <div style="flex: 1; padding: 8px 12px; background: #FDF5F7; border-radius: 4px;">
-<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; font-weight: 700; color: #FF7B9C; margin: 0 0 3px 0;">③ 동적 anchor</p>
-<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11px; color: #1F2937; margin: 0; line-height: 1.4;">질문별 <span style="font-weight: 700;">키워드 가중치</span> 자동 조정</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; font-weight: 700; color: #FF7B9C; margin: 0 0 3px 0;">③ 결과 병합</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11px; color: #1F2937; margin: 0; line-height: 1.4;">기본 검색과 <span style="font-weight: 700;">보조 검색 결과 병합</span></p>
 </div>
 <div style="flex: 1; padding: 8px 12px; background: #FDF5F7; border-radius: 4px;">
 <p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; font-weight: 700; color: #FF7B9C; margin: 0 0 3px 0;">④ 메타 boost</p>
@@ -154,7 +154,7 @@ run_id bench-706eacba · 2026-04-17
 <p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11px; color: #64748B; margin: 0 0 6px 0; font-weight: 700;">상한 보호</p>
 <p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11.5px; color: #1F2937; margin: 0; line-height: 1.5;">
 <span style="font-family: 'Pretendard', monospace; font-weight: 700;">MAX_TOTAL_BOOST = 0.15</span>
-<br/><span style="color: #64748B;">Cross-Encoder 점수 역전 방지</span>
+<br/><span style="color: #64748B;">과도한 가산 역전 방지</span>
 </p>
 </div>
 </div>
