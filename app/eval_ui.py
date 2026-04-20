@@ -14,6 +14,7 @@ from bidmate_rag.evaluation.dataset import (
     normalize_metadata_filter,
 )
 from bidmate_rag.tracking.markdown_report import load_report_data, write_report
+from bidmate_rag.tracking.pricing import load_pricing, normalize_run_costs
 
 # 평가셋은 ``data/eval/eval_v1/``, ``eval_v2/`` 등 버전 디렉토리에 둡니다.
 # UI는 가장 높은 버전을 자동으로 사용 (새 버전 만들면 코드 수정 없이 반영됨).
@@ -364,10 +365,23 @@ def _render_run_artifacts(st, artifacts) -> None:
     metrics = artifacts.metrics or {}
     ops_metrics = artifacts.ops_metrics or {}
     results = artifacts.benchmark.results
+    pricing = load_pricing()
+    llm_model = results[0].llm_model if results else ""
 
     # 비용/토큰/지연 집계
-    generation_cost = float(ops_metrics.get("generation_cost_usd", 0.0) or 0.0)
-    judge_cost = float(ops_metrics.get("judge_cost_usd", artifacts.judge_total_cost_usd) or 0.0)
+    normalized_costs = normalize_run_costs(
+        llm_model=llm_model,
+        pricing=pricing,
+        generation_cost_usd=float(ops_metrics.get("generation_cost_usd", 0.0) or 0.0),
+        rewrite_cost_usd=float(ops_metrics.get("rewrite_cost_usd", 0.0) or 0.0),
+        prompt_tokens=int(ops_metrics.get("prompt_tokens", 0) or 0),
+        completion_tokens=int(ops_metrics.get("completion_tokens", 0) or 0),
+        rewrite_prompt_tokens=int(ops_metrics.get("rewrite_prompt_tokens", 0) or 0),
+        rewrite_completion_tokens=int(ops_metrics.get("rewrite_completion_tokens", 0) or 0),
+        judge_cost_usd=float(ops_metrics.get("judge_cost_usd", artifacts.judge_total_cost_usd) or 0.0),
+    )
+    generation_cost = float(normalized_costs["generation_cost_usd"])
+    judge_cost = float(normalized_costs["judge_cost_usd"])
     total_tokens = int(ops_metrics.get("total_tokens", 0) or 0)
     avg_latency_s = float(ops_metrics.get("avg_latency_ms", 0.0) or 0.0) / 1000
 

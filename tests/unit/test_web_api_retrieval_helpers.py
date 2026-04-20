@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from types import SimpleNamespace
-
-import pytest
 
 from bidmate_rag.providers.llm.base import StreamDelta
 from bidmate_rag.schema import Chunk, GenerationResult, RetrievedChunk
@@ -26,7 +23,7 @@ def _make_chunk(doc_id: str, rank: int, score: float) -> RetrievedChunk:
             section="",
             content_type="text",
             chunk_index=rank - 1,
-            metadata={},
+            metadata={"파일명": doc_id},
         ),
     )
 
@@ -85,6 +82,9 @@ class _FakePipelineRetriever:
 
 
 class _FakeLLM:
+    provider_name = "openai"
+    model_name = "gpt-5-mini"
+
     def __init__(self) -> None:
         self.generate_calls: list[dict] = []
         self.stream_calls: list[dict] = []
@@ -124,6 +124,13 @@ class _FailLLM:
         raise AssertionError("계산형 질문은 LLM generate를 타면 안 됩니다.")
 
 
+def _make_calc_answer():
+    return SimpleNamespace(
+        mode="budget_difference",
+        answer="핵심 답변:\n- 차액은 700,000,000원입니다.\n\n계산 근거:\n- 테스트",
+    )
+
+
 def test_per_doc_split_retrieves_each_doc_separately() -> None:
     retriever = _FakeRetriever()
     merged = split_and_merge_chunks(
@@ -137,13 +144,9 @@ def test_per_doc_split_retrieves_each_doc_separately() -> None:
     per_doc_ks = {
         call["metadata_filter"]["$or"][0]["doc_id"]: call["top_k"] for call in retriever.calls
     }
-    # 9 // 3 + 2 = 5
     assert per_doc_ks == {"A": 5, "B": 5, "C": 5}
-
-    # merged는 top_k=9로 절단된 상위 9개 — 각 문서에서 최소 1개씩 포함
     assert len(merged) == 9
-    doc_ids = {c.chunk.doc_id for c in merged}
-    assert doc_ids == {"A", "B", "C"}
+    assert {c.chunk.doc_id for c in merged} == {"A", "B", "C"}
 
 
 def test_per_doc_split_resorts_by_score() -> None:
@@ -154,7 +157,6 @@ def test_per_doc_split_resorts_by_score() -> None:
         mentioned_doc_ids=["A", "B"],
         top_k=4,
     )
-    # 상위부터 내림차순으로 정렬됐는지 확인
     scores = [c.score for c in merged]
     assert scores == sorted(scores, reverse=True)
 
@@ -180,7 +182,6 @@ def test_per_doc_split_minimum_k_is_three() -> None:
         mentioned_doc_ids=["A", "B", "C", "D", "E", "F"],
         top_k=5,
     )
-    # 5 // 6 = 0, max(0, 3) + 2 = 5
     per_doc_ks = {call["top_k"] for call in retriever.calls}
     assert per_doc_ks == {5}
 
@@ -227,7 +228,7 @@ def test_web_query_forwards_chat_history_to_retriever_and_llm(monkeypatch) -> No
     chunks = [_make_chunk("chunk-1", 1, 0.9)]
     retriever = _FakePipelineRetriever(chunks)
     llm = _FakeLLM()
-    pipeline = SimpleNamespace(retriever=retriever)
+    pipeline = SimpleNamespace(retriever=retriever, calculation_engine=None)
     runtime = SimpleNamespace(provider=SimpleNamespace(scenario="scenario_b", provider="openai"))
     embedder = SimpleNamespace(provider_name="openai", model_name="text-embedding-3-small")
 
@@ -258,7 +259,7 @@ def test_web_query_stream_forwards_chat_history_to_retriever_and_llm(monkeypatch
     chunks = [_make_chunk("chunk-1", 1, 0.9)]
     retriever = _FakePipelineRetriever(chunks)
     llm = _FakeLLM()
-    pipeline = SimpleNamespace(retriever=retriever)
+    pipeline = SimpleNamespace(retriever=retriever, calculation_engine=None)
     runtime = SimpleNamespace(provider=SimpleNamespace(scenario="scenario_b", provider="openai"))
     embedder = SimpleNamespace(provider_name="openai", model_name="text-embedding-3-small")
 
@@ -292,12 +293,7 @@ def test_web_query_uses_calculation_engine_before_llm(monkeypatch) -> None:
     retriever = _FakePipelineRetriever(chunks)
     pipeline = SimpleNamespace(
         retriever=retriever,
-        calculation_engine=SimpleNamespace(
-            try_answer=lambda **_kwargs: SimpleNamespace(
-                mode="budget_difference",
-                answer="핵심 답변:\n- 차액은 700,000,000원입니다.\n\n계산 근거:\n- 테스트",
-            )
-        ),
+        calculation_engine=SimpleNamespace(try_answer=lambda **_kwargs: _make_calc_answer()),
     )
     runtime = SimpleNamespace(provider=SimpleNamespace(scenario="scenario_b", provider="openai"))
     embedder = SimpleNamespace(provider_name="openai", model_name="text-embedding-3-small")
@@ -310,8 +306,8 @@ def test_web_query_uses_calculation_engine_before_llm(monkeypatch) -> None:
     )
 
     result = helpers.web_query(
-        question="두 사업 예산 차이는 얼마야?",
-        augmented_query="두 사업 예산 차이는 얼마야?",
+        question="두 사업 예산 차이가 얼마야?",
+        augmented_query="두 사업 예산 차이가 얼마야?",
         mentioned_doc_ids=[],
         provider_config="openai_gpt5mini",
         chunking_config=None,
@@ -323,3 +319,39 @@ def test_web_query_uses_calculation_engine_before_llm(monkeypatch) -> None:
 
     assert result.answer.startswith("핵심 답변:")
     assert result.retrieved_doc_ids == ["doc-a.hwp", "doc-b.hwp"]
+
+
+def test_web_query_stream_uses_calculation_engine_before_llm(monkeypatch) -> None:
+    chunks = [_make_chunk("doc-a.hwp", 1, 0.9), _make_chunk("doc-b.hwp", 2, 0.8)]
+    retriever = _FakePipelineRetriever(chunks)
+    pipeline = SimpleNamespace(
+        retriever=retriever,
+        calculation_engine=SimpleNamespace(try_answer=lambda **_kwargs: _make_calc_answer()),
+    )
+    runtime = SimpleNamespace(provider=SimpleNamespace(scenario="scenario_b", provider="openai"))
+    embedder = SimpleNamespace(provider_name="openai", model_name="text-embedding-3-small")
+    llm = _FailLLM()
+
+    monkeypatch.setattr(
+        helpers,
+        "get_pipeline",
+        lambda provider_config, chunking_config: (pipeline, runtime, embedder, llm),
+    )
+
+    events = list(
+        helpers.web_query_stream(
+            question="두 사업 예산 차이가 얼마야?",
+            augmented_query="두 사업 예산 차이가 얼마야?",
+            mentioned_doc_ids=[],
+            provider_config="openai_gpt5mini",
+            chunking_config=None,
+            system_prompt=None,
+            top_k=3,
+            max_context_chars=8000,
+            chat_history=[],
+        )
+    )
+
+    assert [event[0] for event in events] == ["retrieval", "token", "done"]
+    assert events[1][1].startswith("핵심 답변:")
+    assert events[2][1].retrieved_doc_ids == ["doc-a.hwp", "doc-b.hwp"]

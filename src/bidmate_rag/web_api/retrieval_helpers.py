@@ -8,9 +8,11 @@ Document mentions are handled here by converting them into explicit
 from __future__ import annotations
 
 from collections.abc import Iterator
+from time import perf_counter
 from typing import Protocol
 
 from bidmate_rag.config.prompts import SYSTEM_PROMPT
+from bidmate_rag.generation.calculation_engine import build_calculation_generation_result
 from bidmate_rag.generation.context_builder import build_numbered_context_block
 from bidmate_rag.providers.llm.base import StreamDelta
 from bidmate_rag.retrieval.filters import is_comparison_query
@@ -186,6 +188,7 @@ def web_query(
 
     모든 멘션 개수(0/1/N+)를 동일한 retriever 경로로 처리한다.
     """
+    started_at = perf_counter()
     pipeline, runtime, embedder, llm = get_pipeline(provider_config, chunking_config)
     retriever = pipeline.retriever
 
@@ -196,6 +199,29 @@ def web_query(
         top_k=top_k,
         chat_history=chat_history,
     )
+
+    calculation_engine = getattr(pipeline, "calculation_engine", None)
+    if calculation_engine is not None:
+        calculation_answer = calculation_engine.try_answer(
+            question=question,
+            retrieved_chunks=chunks,
+            metadata_filter=None,
+        )
+        if calculation_answer is not None:
+            return build_calculation_generation_result(
+                question=question,
+                calculation_answer=calculation_answer,
+                context_chunks=chunks,
+                llm_provider=llm.provider_name,
+                llm_model=llm.model_name,
+                generation_config={
+                    "scenario": runtime.provider.scenario or runtime.provider.provider,
+                    "run_id": f"web-{provider_config}",
+                    "embedding_provider": embedder.provider_name,
+                    "embedding_model": embedder.model_name,
+                },
+                latency_ms=(perf_counter() - started_at) * 1000,
+            )
 
     return llm.generate(
         question=question,
@@ -234,6 +260,7 @@ def web_query_stream(
       2. ("token", str)                      — LLM delta마다
       3. ("done", GenerationResult)          — 스트림 종료 시 1회
     """
+    started_at = perf_counter()
     pipeline, runtime, embedder, llm = get_pipeline(provider_config, chunking_config)
     retriever = pipeline.retriever
 
@@ -250,6 +277,32 @@ def web_query_stream(
     _, used_indices = build_numbered_context_block(chunks, max_chars=max_context_chars)
     visible_chunks = [chunks[i] for i in used_indices]
     yield ("retrieval", visible_chunks)
+
+    calculation_engine = getattr(pipeline, "calculation_engine", None)
+    if calculation_engine is not None:
+        calculation_answer = calculation_engine.try_answer(
+            question=question,
+            retrieved_chunks=visible_chunks,
+            metadata_filter=None,
+        )
+        if calculation_answer is not None:
+            result = build_calculation_generation_result(
+                question=question,
+                calculation_answer=calculation_answer,
+                context_chunks=visible_chunks,
+                llm_provider=llm.provider_name,
+                llm_model=llm.model_name,
+                generation_config={
+                    "scenario": runtime.provider.scenario or runtime.provider.provider,
+                    "run_id": f"web-{provider_config}",
+                    "embedding_provider": embedder.provider_name,
+                    "embedding_model": embedder.model_name,
+                },
+                latency_ms=(perf_counter() - started_at) * 1000,
+            )
+            yield ("token", result.answer)
+            yield ("done", result)
+            return
 
     gen_config = {
         "max_context_chars": max_context_chars,

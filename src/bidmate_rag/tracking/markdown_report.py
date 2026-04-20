@@ -20,7 +20,7 @@ from typing import Any
 import pandas as pd
 import yaml
 
-from bidmate_rag.tracking.pricing import is_model_priced, load_pricing
+from bidmate_rag.tracking.pricing import is_model_priced, load_pricing, normalize_run_costs
 from bidmate_rag.tracking.templates import REPORT_TEMPLATE
 
 logger = logging.getLogger(__name__)
@@ -253,31 +253,6 @@ def _build_context(data: ReportData) -> dict[str, Any]:
     project_cfg = runtime_cfg.get("project", {}) or {}
     git = meta.get("git", {}) or {}
 
-    # Costs
-    generation_cost = float(
-        meta.get(
-            "generation_cost_usd",
-            sum(float(r.get("cost_usd") or 0.0) for r in data.results),
-        )
-        or 0.0
-    )
-    rewrite_cost = float(
-        meta.get(
-            "rewrite_cost_usd",
-            sum(
-                float(((r.get("debug") or {}).get("rewrite_cost_usd", 0.0) or 0.0))
-                for r in data.results
-            ),
-        )
-        or 0.0
-    )
-    embedding_cost = float((data.embedding_meta or {}).get("total_cost_usd", 0.0) or 0.0)
-    judge_cost = float(meta.get("judge_cost_usd", meta.get("judge_total_cost_usd", 0.0)) or 0.0)
-    llm_total_cost = float(
-        meta.get("total_cost_usd", generation_cost + rewrite_cost + judge_cost) or 0.0
-    )
-    grand_total = llm_total_cost + embedding_cost
-
     # Tokens
     prompt_tokens_sum = sum(
         int((r.get("token_usage") or {}).get("prompt", 0) or 0) for r in data.results
@@ -297,6 +272,47 @@ def _build_context(data: ReportData) -> dict[str, Any]:
     )
     total_tokens = prompt_tokens_sum + completion_tokens_sum + rewrite_total_tokens_sum
 
+    # Costs
+    llm_model = (
+        provider_cfg.get("model")
+        or (data.results[0].get("llm_model") if data.results else None)
+        or "unknown"
+    )
+    normalized_costs = normalize_run_costs(
+        llm_model=llm_model,
+        pricing=data.pricing,
+        generation_cost_usd=float(
+            meta.get(
+                "generation_cost_usd",
+                sum(float(r.get("cost_usd") or 0.0) for r in data.results),
+            )
+            or 0.0
+        ),
+        rewrite_cost_usd=float(
+            meta.get(
+                "rewrite_cost_usd",
+                sum(
+                    float(((r.get("debug") or {}).get("rewrite_cost_usd", 0.0) or 0.0))
+                    for r in data.results
+                ),
+            )
+            or 0.0
+        ),
+        prompt_tokens=int(meta.get("prompt_tokens", prompt_tokens_sum) or 0),
+        completion_tokens=int(meta.get("completion_tokens", completion_tokens_sum) or 0),
+        rewrite_prompt_tokens=int(meta.get("rewrite_prompt_tokens", rewrite_prompt_tokens_sum) or 0),
+        rewrite_completion_tokens=int(
+            meta.get("rewrite_completion_tokens", rewrite_completion_tokens_sum) or 0
+        ),
+        judge_cost_usd=float(meta.get("judge_cost_usd", meta.get("judge_total_cost_usd", 0.0)) or 0.0),
+    )
+    generation_cost = float(normalized_costs["generation_cost_usd"])
+    rewrite_cost = float(normalized_costs["rewrite_cost_usd"])
+    judge_cost = float(normalized_costs["judge_cost_usd"])
+    llm_total_cost = float(normalized_costs["total_cost_usd"])
+    embedding_cost = float((data.embedding_meta or {}).get("total_cost_usd", 0.0) or 0.0)
+    grand_total = llm_total_cost + embedding_cost
+
     # Latency
     latencies_ms = [float(r.get("latency_ms") or 0.0) for r in data.results if r.get("latency_ms")]
     latency_avg_s = (sum(latencies_ms) / len(latencies_ms) / 1000) if latencies_ms else None
@@ -306,11 +322,6 @@ def _build_context(data: ReportData) -> dict[str, Any]:
     embedding_model = (
         provider_cfg.get("embedding_model")
         or (data.results[0].get("embedding_model") if data.results else None)
-        or "unknown"
-    )
-    llm_model = (
-        provider_cfg.get("model")
-        or (data.results[0].get("llm_model") if data.results else None)
         or "unknown"
     )
     chunk_size = experiment_cfg.get("chunk_size") or project_cfg.get("default_chunk_size", "?")

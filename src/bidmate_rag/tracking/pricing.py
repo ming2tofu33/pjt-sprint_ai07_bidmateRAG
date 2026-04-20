@@ -89,6 +89,79 @@ def calc_llm_cost(
     return round(cost, 6)
 
 
+def resolve_llm_cost(
+    model: str,
+    prompt_tokens: int,
+    completion_tokens: int,
+    pricing: dict[str, Any],
+    *,
+    existing_cost: float = 0.0,
+    cached_tokens: int = 0,
+) -> float:
+    """Return an existing LLM cost or recompute it from token counts.
+
+    This is used when older run artifacts were saved before pricing.yaml
+    contained a model entry. In that case ``existing_cost`` is often 0.0 even
+    though prompt/completion token counts are available in meta/jsonl.
+    """
+    normalized_existing = round(float(existing_cost or 0.0), 6)
+    if normalized_existing > 0.0:
+        return normalized_existing
+    if int(prompt_tokens or 0) <= 0 and int(completion_tokens or 0) <= 0:
+        return normalized_existing
+    return calc_llm_cost(
+        model,
+        int(prompt_tokens or 0),
+        int(completion_tokens or 0),
+        pricing,
+        cached_tokens=int(cached_tokens or 0),
+    )
+
+
+def normalize_run_costs(
+    *,
+    llm_model: str,
+    pricing: dict[str, Any],
+    generation_cost_usd: float = 0.0,
+    rewrite_cost_usd: float = 0.0,
+    prompt_tokens: int = 0,
+    completion_tokens: int = 0,
+    cached_tokens: int = 0,
+    rewrite_prompt_tokens: int = 0,
+    rewrite_completion_tokens: int = 0,
+    rewrite_cached_tokens: int = 0,
+    judge_cost_usd: float = 0.0,
+) -> dict[str, float]:
+    """Normalize cost metrics for a run, backfilling missing LLM costs.
+
+    Generation/rewrite costs are preserved when already stored. If they are
+    missing or 0.0, this recomputes them from token counts and the model price.
+    """
+    generation_cost = resolve_llm_cost(
+        llm_model,
+        prompt_tokens,
+        completion_tokens,
+        pricing,
+        existing_cost=generation_cost_usd,
+        cached_tokens=cached_tokens,
+    )
+    rewrite_cost = resolve_llm_cost(
+        llm_model,
+        rewrite_prompt_tokens,
+        rewrite_completion_tokens,
+        pricing,
+        existing_cost=rewrite_cost_usd,
+        cached_tokens=rewrite_cached_tokens,
+    )
+    judge_cost = round(float(judge_cost_usd or 0.0), 6)
+    return {
+        "generation_cost_usd": generation_cost,
+        "rewrite_cost_usd": rewrite_cost,
+        "judge_cost_usd": judge_cost,
+        "total_cost_usd": round(generation_cost + rewrite_cost + judge_cost, 6),
+    }
+
+
 def calc_embedding_cost(
     model: str,
     total_tokens: int,
