@@ -6,6 +6,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>생성 품질 5지표 상세 + 에러 진화</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&amp;family=Black+Han+Sans&amp;display=swap" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
 </head>
@@ -43,9 +44,9 @@
 4지표 균형도 <span style="font-weight: 500; color: #64748B; font-size: 13px; margin-left: 6px;">Faithfulness · AR · CP · CR</span>
 </p>
 </div>
-<!-- Radar Image -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 240px; left: 100px; width: 500px; height: 340px; z-index: 10;">
-<img src="assets/gen-quality/radar-deck.png" alt="Radar chart of 4 key metrics" style="width: 100%; height: 100%; object-fit: contain;" />
+<!-- Radar Canvas -->
+<div data-object="true" data-object-type="chart" style="position: absolute; top: 245px; left: 100px; width: 500px; height: 335px; z-index: 10;">
+<canvas id="radarChart"></canvas>
 </div>
 
 <!-- ============ RIGHT: Stacked Bar Card ============ -->
@@ -55,9 +56,9 @@
 에러 유형 분포 변화 <span style="font-weight: 500; color: #64748B; font-size: 13px; margin-left: 6px;">환각 → 누락 → 논리 오류로 이동</span>
 </p>
 </div>
-<!-- Stacked Bar Image -->
-<div data-object="true" data-object-type="textbox" style="position: absolute; top: 240px; left: 680px; width: 500px; height: 340px; z-index: 10;">
-<img src="assets/gen-quality/stacked-deck.png" alt="Stacked bar of error type distribution" style="width: 100%; height: 100%; object-fit: contain;" />
+<!-- Stacked Bar Canvas -->
+<div data-object="true" data-object-type="chart" style="position: absolute; top: 245px; left: 680px; width: 500px; height: 335px; z-index: 10;">
+<canvas id="stackedChart"></canvas>
 </div>
 
 <!-- ============ Bottom Insight Banner ============ -->
@@ -78,6 +79,207 @@ Hallucination 20% → 0% · 프롬프트·검색 단계는 충분히 해결됨, 
 팀원 분석 노트북 · A-EXP01 baseline / A-P4_C2 최적화 / Scenario-B · 5지표: Faithfulness · Answer Relevance · Context Precision · Context Recall · (Groundedness / Completeness / Citation 추가)
 </p>
 </div>
+
+<script>
+const DECK_FONT = "'Pretendard', 'Noto Sans KR', sans-serif";
+const INK = '#1F2937';
+const MUTED = '#64748B';
+const HAIRLINE = '#E2E8F0';
+const NAVY = '#607196';
+const YELLOW = '#D49B25';
+const PINK = '#FF7B9C';
+const RED = '#DC2626';
+const YELLOW_BAR = '#FFC759';
+
+// ============ RADAR ============
+const radarCtx = document.getElementById('radarChart').getContext('2d');
+new Chart(radarCtx, {
+    type: 'radar',
+    data: {
+        labels: ['Faithfulness', 'Answer Relevance', 'Context Precision', 'Context Recall'],
+        datasets: [
+            {
+                label: 'A-EXP01 (Baseline)',
+                data: [0.80, 0.50, 0.90, 0.90],
+                borderColor: NAVY,
+                backgroundColor: 'rgba(96, 113, 150, 0.12)',
+                borderWidth: 2.5,
+                pointRadius: 4,
+                pointBackgroundColor: NAVY,
+                pointBorderColor: '#FFFFFF',
+                pointBorderWidth: 1.5
+            },
+            {
+                label: 'A-P4_C2 (Optimized)',
+                data: [0.95, 0.65, 1.00, 0.95],
+                borderColor: YELLOW,
+                backgroundColor: 'rgba(212, 155, 37, 0.12)',
+                borderWidth: 2.5,
+                pointRadius: 4,
+                pointBackgroundColor: YELLOW,
+                pointBorderColor: '#FFFFFF',
+                pointBorderWidth: 1.5
+            },
+            {
+                label: 'Scenario-B',
+                data: [1.00, 0.80, 0.93, 0.90],
+                borderColor: PINK,
+                backgroundColor: 'rgba(255, 123, 156, 0.12)',
+                borderWidth: 2.5,
+                pointRadius: 4,
+                pointBackgroundColor: PINK,
+                pointBorderColor: '#FFFFFF',
+                pointBorderWidth: 1.5
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 8, bottom: 8 } },
+        scales: {
+            r: {
+                min: 0,
+                max: 1.0,
+                ticks: {
+                    stepSize: 0.2,
+                    color: '#BABFD1',
+                    font: { family: DECK_FONT, size: 10 },
+                    backdropColor: 'rgba(0,0,0,0)'
+                },
+                grid: { color: HAIRLINE },
+                angleLines: { color: HAIRLINE },
+                pointLabels: {
+                    color: INK,
+                    font: { family: DECK_FONT, size: 12, weight: '700' }
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'bottom',
+                align: 'center',
+                labels: {
+                    color: INK,
+                    font: { family: DECK_FONT, size: 12, weight: '600' },
+                    padding: 12,
+                    boxWidth: 14,
+                    boxHeight: 14,
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                }
+            },
+            tooltip: {
+                backgroundColor: '#FFFFFF',
+                titleColor: INK,
+                bodyColor: MUTED,
+                borderColor: HAIRLINE,
+                borderWidth: 1,
+                padding: 10,
+                cornerRadius: 4,
+                titleFont: { family: DECK_FONT, size: 12, weight: 'bold' },
+                bodyFont: { family: DECK_FONT, size: 11 }
+            }
+        }
+    }
+});
+
+// ============ STACKED BAR ============
+const stackedCtx = document.getElementById('stackedChart').getContext('2d');
+new Chart(stackedCtx, {
+    type: 'bar',
+    data: {
+        labels: ['A-EXP01\n(Baseline)', 'A-P4_C2\n(Optimized)', 'Scenario-B'],
+        datasets: [
+            {
+                label: 'Hallucination (환각)',
+                data: [20, 5, 0],
+                backgroundColor: RED,
+                borderColor: '#FFFFFF',
+                borderWidth: 1.5
+            },
+            {
+                label: 'Missing Info (누락)',
+                data: [50, 20, 10],
+                backgroundColor: YELLOW_BAR,
+                borderColor: '#FFFFFF',
+                borderWidth: 1.5
+            },
+            {
+                label: 'Logic Error (논리)',
+                data: [30, 75, 90],
+                backgroundColor: NAVY,
+                borderColor: '#FFFFFF',
+                borderWidth: 1.5
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 8, bottom: 8 } },
+        scales: {
+            x: {
+                stacked: true,
+                grid: { display: false },
+                ticks: {
+                    color: INK,
+                    font: { family: DECK_FONT, size: 12, weight: '600' }
+                }
+            },
+            y: {
+                stacked: true,
+                min: 0,
+                max: 100,
+                ticks: {
+                    stepSize: 20,
+                    color: MUTED,
+                    font: { family: DECK_FONT, size: 10 },
+                    callback: function(value) { return value + '%'; }
+                },
+                grid: { color: HAIRLINE, drawBorder: false },
+                title: {
+                    display: true,
+                    text: 'Error Share (%)',
+                    color: INK,
+                    font: { family: DECK_FONT, size: 11, weight: '700' }
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'bottom',
+                align: 'center',
+                labels: {
+                    color: INK,
+                    font: { family: DECK_FONT, size: 12, weight: '600' },
+                    padding: 10,
+                    boxWidth: 14,
+                    boxHeight: 14,
+                    usePointStyle: true,
+                    pointStyle: 'rectRounded'
+                }
+            },
+            tooltip: {
+                backgroundColor: '#FFFFFF',
+                titleColor: INK,
+                bodyColor: MUTED,
+                borderColor: HAIRLINE,
+                borderWidth: 1,
+                padding: 10,
+                cornerRadius: 4,
+                titleFont: { family: DECK_FONT, size: 12, weight: 'bold' },
+                bodyFont: { family: DECK_FONT, size: 11 },
+                callbacks: {
+                    label: function(ctx) {
+                        return ctx.dataset.label + ': ' + ctx.parsed.y + '%';
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
 </div>
 </body>
 </html>
