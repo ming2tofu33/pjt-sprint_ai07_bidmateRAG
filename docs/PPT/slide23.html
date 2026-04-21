@@ -56,7 +56,7 @@
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 314px; left: 130px; width: 280px; height: 48px; z-index: 10;">
 <div style="display: flex; align-items: center; justify-content: space-between; height: 48px; padding: 0 16px;">
 <span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #FFFFFF; font-weight: 700;">② Dense</span>
-<span style="font-family: 'Pretendard', monospace; font-size: 16px; color: #FFFFFF; font-weight: 700;">15~20</span>
+<span style="font-family: 'Pretendard', monospace; font-size: 16px; color: #FFFFFF; font-weight: 700;">15</span>
 </div>
 </div>
 <!-- Funnel Stage 3: Sparse (BM25) -->
@@ -71,7 +71,7 @@
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 426px; left: 175px; width: 190px; height: 42px; z-index: 10;">
 <div style="display: flex; align-items: center; justify-content: space-between; height: 42px; padding: 0 12px;">
 <span style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 11px; color: #FFFFFF; font-weight: 700;">④ RRF 융합</span>
-<span style="font-family: 'Pretendard', monospace; font-size: 14px; color: #FFFFFF; font-weight: 700;">15~20</span>
+<span style="font-family: 'Pretendard', monospace; font-size: 14px; color: #FFFFFF; font-weight: 700;">15</span>
 </div>
 </div>
 <!-- Funnel Stage 5: Soft Boost -->
@@ -135,7 +135,7 @@
 <div style="display: flex; align-items: center; border-bottom: 1px solid #E8E9ED; padding: 10px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937;">
 <div style="flex: 2.2; font-weight: 700;">② Dense 검색</div>
 <div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">수천</div>
-<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">15~20</div>
+<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">15</div>
 <div style="flex: 4; color: #64748B; font-size: 11.5px;">bge-m3 코사인 유사도 (의미 매칭)</div>
 </div>
 </div>
@@ -152,16 +152,16 @@
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 417px; left: 500px; width: 680px; z-index: 10;">
 <div style="display: flex; align-items: center; border-bottom: 1px solid #E8E9ED; padding: 10px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937;">
 <div style="flex: 2.2; font-weight: 700;">④ RRF 융합</div>
-<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">30~35</div>
-<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">15~20</div>
-<div style="flex: 4; color: #64748B; font-size: 11.5px;">Reciprocal Rank Fusion (k=60)</div>
+<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">15 + 15</div>
+<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">15</div>
+<div style="flex: 4; color: #64748B; font-size: 11.5px;">Reciprocal Rank Fusion (k=60, 합집합 dedupe)</div>
 </div>
 </div>
 <!-- Row 5 -->
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 462px; left: 500px; width: 680px; z-index: 10;">
 <div style="display: flex; align-items: center; border-bottom: 1px solid #E8E9ED; padding: 10px 0; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 12px; color: #1F2937;">
 <div style="flex: 2.2; font-weight: 700;">⑤ Soft Boost</div>
-<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">15~20</div>
+<div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">15</div>
 <div style="flex: 1.5; text-align: center; font-family: 'Pretendard', monospace;">10</div>
 <div style="flex: 4; color: #64748B; font-size: 11.5px;">section · table · metadata · numeric 가산 (max 0.15)</div>
 </div>
