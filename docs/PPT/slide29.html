@@ -63,9 +63,9 @@
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 295px; left: 804px; width: 380px; height: 105px; z-index: 10;">
 <p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #64748B; margin: 0 0 12px 0;">시나리오 B (GPT-5-mini)</p>
 <p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; line-height: 1.5; margin: 0 0 8px 0;">
-        <span style="color: #607196;">속도</span>에서 우위
+        <span style="color: #607196;">품질·속도</span>에서 우위
     </p>
-<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 500; color: #94A3B8; margin: 0;">Latency 33.1s · $0.0146/query (A 대비 2.7배 빠름).</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 500; color: #94A3B8; margin: 0;">Faith 1.00 · 4지표 평균 0.95 · Latency 33.1s (A 대비 2.7배 빠름).</p>
 </div>
 <!-- Scenario A Callout Shape -->
 <div data-object="true" data-object-type="shape" style="position: absolute; top: 435px; left: 780px; width: 420px; height: 145px; background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 6px solid #FF7B9C; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); z-index: 1;"></div>
@@ -73,9 +73,9 @@
 <div data-object="true" data-object-type="textbox" style="position: absolute; top: 455px; left: 804px; width: 380px; height: 105px; z-index: 10;">
 <p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 14px; font-weight: 700; color: #FF7B9C; margin: 0 0 12px 0;">시나리오 A (Gemma-4-E4B + P4_C2)</p>
 <p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 16px; font-weight: 700; color: #1F2937; line-height: 1.5; margin: 0 0 8px 0;">
-        <span style="color: #FF7B9C;">품질 우위</span>가 관찰됨
+        <span style="color: #FF7B9C;">비용 우위</span>가 관찰됨
     </p>
-<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 500; color: #94A3B8; margin: 0;">4지표 평균 0.88 · Faithfulness 0.95 · $0.0009/query (B 대비 16.2× 저렴).</p>
+<p style="font-family: 'Pretendard', 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 500; color: #94A3B8; margin: 0;">$0.0009/query (B 대비 16.2× 저렴) · 로컬 인프라 · 보안 요건 대응.</p>
 </div>
 <!-- Core Message Banner Shape - Positioned lower to fill tail strip -->
 <div data-object="true" data-object-type="shape" style="position: absolute; top: 600px; left: 80px; width: 1120px; height: 75px; background: #F3F4F6; border: 1px solid #E2E8F0; border-left: 4px solid #FF7B9C; border-radius: 6px; z-index: 1;"></div>
@@ -84,7 +84,7 @@
 <div style="display: flex; justify-content: space-between; align-items: center; font-family: 'Pretendard', 'Noto Sans KR', sans-serif;">
 <div>
 <p style="font-size: 18px; font-weight: 900; color: #1F2937; margin: 0 0 4px 0;">시나리오별 강점이 다르게 나타났다 — 상호 보완</p>
-<p style="font-size: 14px; font-weight: 500; color: #64748B; margin: 0;">A는 품질·비용 우위(0.88, $0.0009/q), B는 속도 우위(33.1s, 2.7× 빠름). 동일 파이프라인 위에서 용도별 선택이 가능합니다.</p>
+<p style="font-size: 14px; font-weight: 500; color: #64748B; margin: 0;">A는 비용 우위($0.0009/q, 로컬), B는 품질·속도 우위(Faith 1.00, 33.1s). 동일 파이프라인 위에서 용도별 선택이 가능합니다.</p>
 </div>
 <div style="text-align: right;">
 <p style="font-size: 13px; font-weight: 500; color: #94A3B8; margin: 0 0 4px 0;">Top-K = 5 (채택)</p>
