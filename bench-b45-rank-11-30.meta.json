@@ -1,0 +1,97 @@
+{
+  "run_id": "bench-b45-rank-11-30",
+  "experiment_name": "ad-hoc",
+  "timestamp_utc": "2026-04-19T12:12:00.880930+00:00",
+  "timestamp_kst": "2026-04-19 21:12:00",
+  "git": {
+    "commit": "5f86d246062279a600652d7fa06999c1434e2bbf",
+    "commit_short": "5f86d24",
+    "branch": "feat/sm",
+    "dirty": true
+  },
+  "configs": {
+    "base": "configs/base.yaml",
+    "provider": "configs/providers/openai_gpt5mini.yaml"
+  },
+  "prompt_config": null,
+  "notes_path": null,
+  "config_snapshot": {
+    "project": {
+      "project_name": "bidmate-rag",
+      "default_retrieval_top_k": 5,
+      "default_chunk_size": 1000,
+      "default_chunk_overlap": 150
+    },
+    "provider": {
+      "provider": "openai",
+      "model": "gpt-5-mini",
+      "api_base": "https://api.openai.com/v1",
+      "scenario": "scenario_b",
+      "embedding_model": "text-embedding-3-small",
+      "collection_name": "bidmate-scenario-b-text-embedding-3-small",
+      "extra": {}
+    },
+    "experiment": {
+      "name": "ad-hoc",
+      "mode": "full_rag",
+      "notes_path": null,
+      "retrieval_top_k": 5,
+      "chunk_size": 1000,
+      "chunk_overlap": 150,
+      "provider_configs": [],
+      "matrix": {}
+    },
+    "retrieval": {
+      "reranker_model": null,
+      "enable_multiturn": true,
+      "boost": {
+        "section": 0.12,
+        "table": 0.08,
+        "metadata": 0.12,
+        "max_total": 0.15
+      },
+      "hybrid": {
+        "enabled": true,
+        "dense_pool_multiplier": 3,
+        "sparse_pool_multiplier": 3,
+        "rrf_k": 60
+      },
+      "rewrite": {
+        "mode": "rule_only",
+        "max_completion_tokens": 16000,
+        "timeout_seconds": 30
+      },
+      "memory": {
+        "enabled": true,
+        "summary_buffer": {
+          "max_recent_turns": 4,
+          "max_summary_chars": 400
+        },
+        "slot_memory": {
+          "enabled": true
+        }
+      },
+      "debug_trace": {
+        "enabled": true
+      }
+    }
+  },
+  "eval_path": "data/eval/eval_v1/eval_batch_45_rank_11-30.csv",
+  "collection_name": "bidmate-scenario-b-text-embedding-3-small",
+  "judge_skipped": false,
+  "actual_top_k": 5,
+  "judge_total_cost_usd": 0.014461,
+  "judge_total_tokens": 88192,
+  "judge_mode": "v1",
+  "generation_cost_usd": 0.086408,
+  "rewrite_cost_usd": 0.0,
+  "judge_cost_usd": 0.014461,
+  "total_cost_usd": 0.100869,
+  "prompt_tokens": 85014,
+  "completion_tokens": 36465,
+  "rewrite_prompt_tokens": 0,
+  "rewrite_completion_tokens": 0,
+  "rewrite_total_tokens": 0,
+  "total_tokens": 121479,
+  "avg_latency_ms": 17547.46
+}

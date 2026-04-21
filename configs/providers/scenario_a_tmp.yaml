@@ -1,0 +1,9 @@
+provider: huggingface
+scenario: scenario_a
+model: google/gemma-4-E4B-it
+embedding_model: BAAI/bge-m3
+collection_name: bidmate-scenario-a-bge-m3
+extra:
+  torch_dtype: bfloat16
+  device_map: auto
+  load_in_4bit: true

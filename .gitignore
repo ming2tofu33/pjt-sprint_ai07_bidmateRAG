@@ -264,7 +264,6 @@ reports/
 scripts/build_project_report.py
 scripts/prepare_sft_data.py
 skills-lock.json
-experiments/notebooks/
 
 # Scenario A research files
 research/scenario_a/
