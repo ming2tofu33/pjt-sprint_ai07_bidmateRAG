@@ -162,7 +162,7 @@ def main() -> None:
     args = parser.parse_args()
 
     # 실험 config 로드 + matrix 확인
-    base_cfg = yaml.safe_load(Path(args.experiment_config).read_text())
+    base_cfg = yaml.safe_load(Path(args.experiment_config).read_text(encoding="utf-8"))
     matrix = base_cfg.get("matrix") or {}
     cells = expand_matrix(matrix)
 

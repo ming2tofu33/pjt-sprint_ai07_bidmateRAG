@@ -93,13 +93,13 @@ def _render_streamlit_app() -> None:
         import yaml as _yaml
         def _get_scenario(path):
             try:
-                return _yaml.safe_load(path.read_text()).get("scenario", "")
+                return _yaml.safe_load(path.read_text(encoding="utf-8")).get("scenario", "")
             except Exception:
                 return ""
 
         def _get_model(path):
             try:
-                return _yaml.safe_load(path.read_text()).get("model", "")
+                return _yaml.safe_load(path.read_text(encoding="utf-8")).get("model", "")
             except Exception:
                 return ""
 
@@ -227,11 +227,11 @@ def _render_streamlit_app() -> None:
             selected_prompt_config = st.selectbox(
                 "프롬프트 선택",
                 [None] + prompt_configs,
-                format_func=lambda p: "직접 편집" if p is None else _yaml.safe_load(p.read_text()).get("description", p.stem),
+                format_func=lambda p: "직접 편집" if p is None else _yaml.safe_load(p.read_text(encoding="utf-8")).get("description", p.stem),
                 key="prompt_config_select",
             )
             if selected_prompt_config:
-                loaded_prompt = _yaml.safe_load(selected_prompt_config.read_text()).get("system_prompt", "")
+                loaded_prompt = _yaml.safe_load(selected_prompt_config.read_text(encoding="utf-8")).get("system_prompt", "")
                 if loaded_prompt:
                     st.session_state["custom_prompt"] = loaded_prompt
                     st.caption(f"✅ {selected_prompt_config.stem} 프롬프트 적용됨")
@@ -299,7 +299,7 @@ def _render_streamlit_app() -> None:
         st.subheader("📊 모델 정보")
         try:
             import yaml
-            config = yaml.safe_load(selected_provider.read_text())
+            config = yaml.safe_load(selected_provider.read_text(encoding="utf-8"))
             st.markdown(f"""
 - **Provider**: `{config.get('provider', '-')}`
 - **Model**: `{config.get('model', '-')}`
