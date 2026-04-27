@@ -65,8 +65,8 @@ def build_scenario_a_provider_config(
     import yaml
     import tempfile
 
-    embedding_config = yaml.safe_load(Path(embedding_config_path).read_text())
-    llm_config = yaml.safe_load(Path(llm_config_path).read_text())
+    embedding_config = yaml.safe_load(Path(embedding_config_path).read_text(encoding="utf-8"))
+    llm_config = yaml.safe_load(Path(llm_config_path).read_text(encoding="utf-8"))
 
     # 두 yaml 합쳐서 provider yaml 동적 생성
     provider_config = {

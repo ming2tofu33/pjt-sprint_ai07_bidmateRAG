@@ -7,7 +7,7 @@ import yaml
 
 def build_system_prompt_from_components(config_path: str | Path) -> str:
     """generated2 yaml의 컴포넌트들을 조합해서 system_prompt 생성."""
-    config = yaml.safe_load(Path(config_path).read_text())
+    config = yaml.safe_load(Path(config_path).read_text(encoding="utf-8"))
 
     parts = []
 
@@ -40,7 +40,7 @@ def build_system_prompt_from_components(config_path: str | Path) -> str:
 def is_component_config(config_path: str | Path) -> bool:
     """generated2 형식의 yaml인지 확인."""
     try:
-        config = yaml.safe_load(Path(config_path).read_text())
+        config = yaml.safe_load(Path(config_path).read_text(encoding="utf-8"))
         return "00_metadata" in config
     except Exception:
         return False

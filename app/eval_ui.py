@@ -26,7 +26,7 @@ B_ORDER = {"gpt-5": 0, "gpt-5-mini": 1, "gpt-5-nano": 2}
 
 def _get_provider_info(path):
     try:
-        cfg = _yaml.safe_load(path.read_text())
+        cfg = _yaml.safe_load(path.read_text(encoding="utf-8"))
         return cfg.get("scenario", ""), cfg.get("model", "")
     except Exception:
         return "", ""
@@ -301,11 +301,11 @@ def _render_run_tab(st, eval_set, run_live_query, list_provider_configs, list_ch
         selected_prompt_config = st.selectbox(
             "프롬프트 버전",
             [None] + prompt_configs,
-            format_func=lambda p: "기본값" if p is None else _yaml.safe_load(p.read_text()).get("description", p.stem),
+            format_func=lambda p: "기본값" if p is None else _yaml.safe_load(p.read_text(encoding="utf-8")).get("description", p.stem),
             key="run_prompt_config",
         )
         if selected_prompt_config:
-            selected_prompt = _yaml.safe_load(selected_prompt_config.read_text()).get("system_prompt")
+            selected_prompt = _yaml.safe_load(selected_prompt_config.read_text(encoding="utf-8")).get("system_prompt")
 
     opt_col1, opt_col2, opt_col3 = st.columns(3)
     with opt_col1:
@@ -545,11 +545,11 @@ def _render_debug_tab(st, eval_set, run_live_query, list_provider_configs, list_
         selected_prompt_config = st.selectbox(
             "프롬프트 버전",
             [None] + prompt_configs,
-            format_func=lambda p: "기본값" if p is None else _yaml.safe_load(p.read_text()).get("description", p.stem),
+            format_func=lambda p: "기본값" if p is None else _yaml.safe_load(p.read_text(encoding="utf-8")).get("description", p.stem),
             key="debug_prompt_config",
         )
         if selected_prompt_config:
-            selected_prompt = _yaml.safe_load(selected_prompt_config.read_text()).get("system_prompt")
+            selected_prompt = _yaml.safe_load(selected_prompt_config.read_text(encoding="utf-8")).get("system_prompt")
     chunking = _render_chunking_selector(
         st, list_chunking_configs, key_prefix="debug"
     )  # 청킹 선택 추가
@@ -668,7 +668,7 @@ def _render_compare_tab(st, load_benchmark_frames, load_run_records):
         all_sources[f"[세션] {run_id}"] = pd.DataFrame(results)
     for rf in run_files:
         try:
-            records = [json.loads(line) for line in rf.read_text().splitlines() if line.strip()]
+            records = [json.loads(line) for line in rf.read_text(encoding="utf-8").splitlines() if line.strip()]
             if records:
                 all_sources[f"[파일] {rf.stem}"] = pd.DataFrame(records)
         except Exception:
